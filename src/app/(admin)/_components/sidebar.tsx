@@ -109,8 +109,8 @@ const Sidebar = () => {
           <ul className="space-y-2">
             {routes.map((route) => {
               const isActive =
-                route.href === "/dashboard"
-                  ? pathname === "/dashboard"
+                route.href === "/"
+                  ? pathname === "/"
                   : pathname.startsWith(route.href);
 
               return (

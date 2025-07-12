@@ -1,17 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import {
-  BarChart3,
-  DollarSign,
-  FileText,
-  LayoutDashboard,
-  LogOut,
-  Settings,
-  ShoppingBag,
-  Users,
-  Video,
-} from "lucide-react";
+import { LogOut } from "lucide-react";
 import { signOut } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
@@ -33,50 +23,67 @@ const routes = [
   {
     id: 1,
     label: "Overview",
-    icon: LayoutDashboard,
-    href: "/dashboard",
+    href: "/",
   },
   {
     id: 2,
-    label: "Users",
-    icon: Users,
-    href: "/dashboard/users",
+    label: "Listing",
+    href: "/listing",
   },
   {
     id: 3,
-    label: "Content",
-    icon: FileText,
-    href: "/dashboard/content",
+    label: "Lenders",
+    href: "/lenders",
   },
   {
     id: 4,
-    label: "Job Board",
-    icon: ShoppingBag,
-    href: "/dashboard/job-board",
+    label: "Customers",
+    href: "/customers",
   },
   {
     id: 5,
-    label: "Coaching",
-    icon: Video,
-    href: "/dashboard/coaching",
+    label: "Bookings",
+    href: "/bookings",
   },
   {
     id: 6,
-    label: "Subscription",
-    icon: DollarSign,
-    href: "/dashboard/subscription",
+    label: "Disputes",
+    href: "/disputes",
   },
   {
     id: 7,
-    label: "Analytics",
-    icon: BarChart3,
-    href: "/dashboard/analytics",
+    label: "Finance",
+    href: "/finance",
   },
   {
     id: 8,
+    label: "Chats",
+    href: "/chats",
+  },
+  {
+    id: 9,
+    label: "Analytics",
+    href: "/analytics",
+  },
+  {
+    id: 10,
+    label: "Content & CMS",
+    href: "/content",
+  },
+  {
+    id: 11,
+    label: "Support",
+    href: "/support",
+  },
+  {
+    id: 12,
+    label: "Team",
+    href: "/team",
+  },
+  {
+    id: 13,
     label: "Settings",
-    icon: Settings,
-    href: "/dashboard/settings",
+    href: "/settings",
   },
 ];
 
@@ -89,7 +96,11 @@ const Sidebar = () => {
         {/* Logo */}
         <div className="border-none p-6 flex justify-center items-center">
           <div className="relative h-[80px] w-[80px]">
-            <Image src="/Logo.svg" alt="logo" fill />
+            <Image
+              src="https://files.edgestore.dev/2pgl62wxp0dbg019/Dev/_public/276405a7-8be0-4e32-b05c-4d6dfb02d288.svg"
+              alt="logo"
+              fill
+            />
           </div>
         </div>
 
@@ -106,11 +117,11 @@ const Sidebar = () => {
                 <li key={route.id}>
                   <Link
                     href={route.href}
-                    className={`flex text-white/80 items-center gap-3 rounded-md px-3 py-2
+                    className={`flex text-white/80 items-center gap-3 rounded-md px-3 font-light py-2
           ${
             isActive
               ? "bg-white/20 text-primary-foreground"
-              : " hover:bg-white/30 hover:text-white/70"
+              : " hover:bg-white/10 hover:text-white/70"
           }
         `}
                   >

@@ -2,6 +2,7 @@
 
 import { signIn } from "@/auth";
 import { loginformSchema, LoginFormValues } from "@/schemas/auth";
+import { LoginResponse } from "@/types/login";
 
 export async function loginAction(data: LoginFormValues) {
   const { success, data: parsedData, error } = loginformSchema.safeParse(data);
@@ -25,12 +26,23 @@ export async function loginAction(data: LoginFormValues) {
       }),
     });
 
-    const response = await res.json();
+    const response: LoginResponse = await res.json();
 
     if (!res.ok) {
       return {
         success: false,
         message: response.message || "Login failed",
+      };
+    }
+
+    const role = response.data.user.role;
+
+    console.log(role);
+
+    if (role !== "ADMIN") {
+      return {
+        success: false,
+        message: "You do not have permission to access this area.",
       };
     }
 

@@ -11,7 +11,12 @@ const AuthHeader = ({ title1, title2, desc }: Props) => {
     <div className="w-full flex flex-col items-center justify-center">
       {/* Logo */}
       <div className="mb-[35px] md:mb-[50px] lg:mb-[69px]">
-        <Image src="/images/auth-logo.png" alt="Logo" width={94} height={80} />
+        <Image
+          src="https://files.edgestore.dev/2pgl62wxp0dbg019/Dev/_public/c07daf32-7d8a-4490-994e-00f3431e3de4.png"
+          alt="Logo"
+          width={94}
+          height={80}
+        />
       </div>
 
       {/* Heading */}

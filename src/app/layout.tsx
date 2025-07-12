@@ -1,6 +1,7 @@
 import AppProvider from "@/provider/AppProvider";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import NextTopLoader from "nextjs-toploader";
 import { Toaster } from "sonner";
 import "./globals.css";
 
@@ -21,6 +22,7 @@ export default function RootLayout({
       <body className={`${inter.className}  antialiased`}>
         <AppProvider>{children} </AppProvider>
         <Toaster richColors position="bottom-right" />
+        <NextTopLoader showSpinner={false} color="#1E2A38" />
       </body>
     </html>
   );

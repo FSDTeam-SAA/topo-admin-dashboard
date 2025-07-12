@@ -1,3 +1,9 @@
+import Stats from "./_components/stats/stats";
+
 export default function Home() {
-  return <div>Home page</div>;
+  return (
+    <div>
+      <Stats />
+    </div>
+  );
 }

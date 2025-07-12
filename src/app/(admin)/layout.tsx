@@ -14,11 +14,11 @@ export default async function RootLayout({
     <div className="flex min-h-screen flex-col">
       <Sidebar />
       {/* Main Content */}
-      <div className="ml-64 flex flex-1 flex-col">
+      <div className="ml-64 flex flex-1 flex-col ">
         {/* Top Bar */}
         <Topbar name={"" as string} />
 
-        {children}
+        <div className="p-5">{children}</div>
 
         {/* Footer */}
         {/* <DashboardFooter /> */}

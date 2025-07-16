@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/select";
 import { useLenderSearchStore } from "./state";
 
-const LenderSearchContainer = () => {
+const LenderSearchHeader = () => {
   const { value, status, dateRange, setValue, setStatus, setDateRange } =
     useLenderSearchStore();
 
@@ -32,7 +32,7 @@ const LenderSearchContainer = () => {
             <SelectContent>
               <SelectItem value="active">Active</SelectItem>
               <SelectItem value="pending">Pending</SelectItem>
-              <SelectItem value="suspended">Suspended</SelectItem>
+              <SelectItem value="rejected">Rejected</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -49,4 +49,4 @@ const LenderSearchContainer = () => {
   );
 };
 
-export default LenderSearchContainer;
+export default LenderSearchHeader;

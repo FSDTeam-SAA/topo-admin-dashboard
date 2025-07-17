@@ -9,6 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import moment from "moment";
 import { useLenderSearchStore } from "./state";
 
 const LenderSearchHeader = () => {
@@ -30,7 +31,7 @@ const LenderSearchHeader = () => {
               <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="active">Active</SelectItem>
+              <SelectItem value="approved">Approved</SelectItem>
               <SelectItem value="pending">Pending</SelectItem>
               <SelectItem value="rejected">Rejected</SelectItem>
             </SelectContent>
@@ -41,7 +42,10 @@ const LenderSearchHeader = () => {
           initialDateFrom={dateRange.from}
           initialDateTo={dateRange.to}
           onUpdate={(values) =>
-            setDateRange({ from: values.range.from, to: values.range.to })
+            setDateRange({
+              from: moment(values.range.from).format("YYYY-MM-DD"),
+              to: moment(values.range.to).format("YYYY-MM-DD"),
+            })
           }
         />
       </CardContent>

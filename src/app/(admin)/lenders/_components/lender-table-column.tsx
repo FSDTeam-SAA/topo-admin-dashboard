@@ -2,6 +2,7 @@ import { cn } from "@/lib/utils";
 import { LenderProfile } from "@/types/lender";
 import { ColumnDef } from "@tanstack/react-table";
 import moment from "moment";
+import LenderAction from "./actions/lender-action";
 
 export const lenderTableColumns: ColumnDef<LenderProfile>[] = [
   {
@@ -13,7 +14,6 @@ export const lenderTableColumns: ColumnDef<LenderProfile>[] = [
     header: "Status",
     cell: ({ row }) => {
       const status = row.original.status;
-      console.log(status);
       return (
         <div
           className={cn(
@@ -45,8 +45,8 @@ export const lenderTableColumns: ColumnDef<LenderProfile>[] = [
   {
     header: "Actions",
     id: "actions",
-    cell: ({}) => {
-      return <div></div>;
+    cell: ({ row }) => {
+      return <LenderAction data={row.original} />;
     },
   },
 ];

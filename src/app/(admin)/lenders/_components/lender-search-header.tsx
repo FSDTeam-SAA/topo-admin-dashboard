@@ -9,9 +9,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import moment from "moment";
 import { useLenderSearchStore } from "./state";
 
-const LenderSearchContainer = () => {
+const LenderSearchHeader = () => {
   const { value, status, dateRange, setValue, setStatus, setDateRange } =
     useLenderSearchStore();
 
@@ -30,9 +31,10 @@ const LenderSearchContainer = () => {
               <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="active">Active</SelectItem>
+              <SelectItem value=" ">All</SelectItem>
+              <SelectItem value="approved">Approved</SelectItem>
               <SelectItem value="pending">Pending</SelectItem>
-              <SelectItem value="suspended">Suspended</SelectItem>
+              <SelectItem value="rejected">Rejected</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -41,7 +43,10 @@ const LenderSearchContainer = () => {
           initialDateFrom={dateRange.from}
           initialDateTo={dateRange.to}
           onUpdate={(values) =>
-            setDateRange({ from: values.range.from, to: values.range.to })
+            setDateRange({
+              from: moment(values.range.from).format("YYYY-MM-DD"),
+              to: moment(values.range.to).format("YYYY-MM-DD"),
+            })
           }
         />
       </CardContent>
@@ -49,4 +54,4 @@ const LenderSearchContainer = () => {
   );
 };
 
-export default LenderSearchContainer;
+export default LenderSearchHeader;

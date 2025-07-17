@@ -1,19 +1,33 @@
+import { AnimatedTabs } from "@/components/ui/animated-tabs";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { LenderProfile } from "@/types/lender";
+import ProfileTab from "./profile-tab";
+import StatusTab from "./status-tab";
 
 interface Props {
   data: LenderProfile;
 }
 
 const LenderAction = ({ data }: Props) => {
+  const tabs = [
+    {
+      id: "profile",
+      label: "Profile",
+      content: <ProfileTab data={data} />,
+    },
+    {
+      id: "Status",
+      label: "Status",
+      content: <StatusTab data={data} />,
+    },
+  ];
   return (
     <div>
       <Dialog>
@@ -23,24 +37,32 @@ const LenderAction = ({ data }: Props) => {
               View
             </Button>
           </DialogTrigger>
-          <DialogContent className="w-[800px]">
+          <DialogContent className="w-[800px] space-y-[20px]">
             <DialogHeader>
               <DialogTitle>
                 Lender Details: {data.fullName} (ID: {data.id})
               </DialogTitle>
 
-              <div></div>
+              <div>
+                <AnimatedTabs
+                  tabs={tabs}
+                  defaultTab="profile"
+                  className="bg-white rounded-[15px] shadow-sm "
+                  tabClassName="min-w-[80px]"
+                  contentClassName=""
+                />
+              </div>
             </DialogHeader>
 
-            <DialogFooter>
-              <div className="mr-auto">
+            {/* <DialogFooter>
+              <div className="mr-auto border p-5 w-full border-[#E6E6E6] rounded-[6px]">
                 <h1>Action:</h1>
-                <div className="space-x-5">
+                <div className="space-x-5 mt-2">
                   <Button variant="outline">Approved</Button>
                   <Button variant="outline">Reject</Button>
                 </div>
               </div>
-            </DialogFooter>
+            </DialogFooter> */}
           </DialogContent>
         </form>
       </Dialog>

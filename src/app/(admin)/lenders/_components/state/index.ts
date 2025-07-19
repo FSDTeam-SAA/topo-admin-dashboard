@@ -1,5 +1,4 @@
 // stores/lenderSearchStore.ts
-import moment from "moment";
 import { create } from "zustand";
 
 type DateRange = {
@@ -20,12 +19,12 @@ type LenderSearchState = {
 
 export const useLenderSearchStore = create<LenderSearchState>((set) => ({
   value: "",
-  status: "",
+  status: "all",
   page: 1,
   setPage: (page) => set({ page }),
   dateRange: {
-    from: moment().subtract(30, "days").format("YYYY-MM-DD"),
-    to: moment().format("YYYY-MM-DD"),
+    from: "",
+    to: "",
   },
   setValue: (value) => set({ value }),
   setStatus: (status) => set({ status }),

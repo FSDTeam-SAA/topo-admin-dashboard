@@ -10,30 +10,64 @@ export type Pagination = {
   totalPages: number;
 };
 
+type Address = {
+  country: string;
+  cityState: string;
+  roadArea: string;
+  postalCode: string;
+};
+
 export interface LenderProfile {
+  file: {
+    url: string;
+    type: string;
+  };
   reviewStockMethod: ReviewStockMethod;
-  deactivationReason: string;
-  deactivationFeedback: string;
-  deactivated: boolean;
-  businessName: string;
-  abnNumber: string;
+  _id: string;
   fullName: string;
   phoneNumber: string;
+  email: string;
+  password: string;
+  username: string;
+  dob: string | null;
+  gender: string;
+  role: "APPLICANT";
+  bio: string;
+  profileImage: string;
+  multiProfileImage: string[];
+  otp: string | null;
+  otpExpires: string | null;
+  refreshToken: string;
+  isActive: boolean;
+  hasActiveSubscription: boolean;
+  subscriptionExpireDate: string | null;
+  businessName: string;
+  abnNumber: string;
   businessAddress: string;
   instagramHandle: string;
   businessWebsite: string;
-  businessEmail: string;
   numberOfDresses: string;
   allowTryOn: boolean;
   allowLocalPickup: boolean;
   shipAustraliaWide: boolean;
   agreedTerms: boolean;
   agreedCurationPolicy: boolean;
-  status: "pending" | "approved" | "rejected"; // assuming possible statuses
+  totalbookings: number;
+  totalRatting: number;
+  totalListings: number;
+  totalReveneue: number;
+  status: "pending" | "approved" | "rejected";
+  applicationSubmittedAt: string;
+  applicationReviewedAt: string | null;
   notes: string;
-  createdAt: string; // ISO date string
-  updatedAt: string; // ISO date string
-  id: string;
+  reason: string;
+  deactivationReason: string;
+  deactivationFeedback: string;
+  deactivated: boolean;
+  address: Address;
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
 }
 
 export type LendersGetResponse = {

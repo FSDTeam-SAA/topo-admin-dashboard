@@ -23,8 +23,8 @@ export const useLenderSearchStore = create<LenderSearchState>((set) => ({
   page: 1,
   setPage: (page) => set({ page }),
   dateRange: {
-    from: "",
-    to: "",
+    from: undefined,
+    to: undefined,
   },
   setValue: (value) => set({ value }),
   setStatus: (status) => set({ status }),

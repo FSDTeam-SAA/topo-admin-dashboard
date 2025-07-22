@@ -46,10 +46,10 @@ const StatusTab = ({ data }: Props) => {
   const queryClient = useQueryClient();
 
   const { isPending, mutate } = useMutation({
-    mutationKey: ["status-update"],
+    mutationKey: ["status-update", data._id],
     mutationFn: (body: z.infer<typeof formSchema>) =>
       fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/application/${data.id}`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/application/${data._id}`,
         {
           method: "PATCH",
           headers: {

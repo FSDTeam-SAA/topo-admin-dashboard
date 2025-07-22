@@ -17,8 +17,8 @@ const ProfileTab = ({ data }: Props) => {
         <CardContent className="font-light text-[12px]">
           <div className="space-y-2">
             <p>Name: {data.fullName}</p>
-            <p>Lender ID: {data.id}</p>
-            <p>Email: {data.businessEmail}</p>
+            <p>Lender ID: {data._id}</p>
+            <p>Email: {data.email}</p>
             <p>Phone: {data.phoneNumber}</p>
             <p>
               Join Date: {moment(data.createdAt).format("MMMM DD, YYYY h:mm A")}

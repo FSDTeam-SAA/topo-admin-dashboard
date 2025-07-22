@@ -21,6 +21,7 @@ interface Props {
 }
 
 const LenderAction = ({ data }: Props) => {
+  console.log(data);
   const tabs = [
     {
       id: "profile",
@@ -70,7 +71,7 @@ const LenderAction = ({ data }: Props) => {
           <DialogContent className="w-[800px] space-y-[20px]">
             <DialogHeader>
               <DialogTitle>
-                Lender Details: {data.fullName} (ID: {data.id})
+                Lender Details: {data.fullName} (ID: {data._id})
               </DialogTitle>
 
               <div>

@@ -1,3 +1,4 @@
+import MapBoxView from "@/components/cards/map-view";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LenderProfile } from "@/types/lender";
 import moment from "moment";
@@ -24,9 +25,24 @@ const ProfileTab = ({ data }: Props) => {
               Join Date: {moment(data.createdAt).format("MMMM DD, YYYY h:mm A")}
             </p>
             <p>Address: {data.businessAddress}</p>
+            <p>Business Address: {data.address}</p>
+            <p>Post Code: {data.postcode}</p>
           </div>
         </CardContent>
       </Card>
+
+      {data.latitude && data.longitude && (
+        <Card className="shadow-none rounded-[6px] p-0">
+          <CardContent className="p-5 pb-0">
+            <MapBoxView
+              latitude={data.latitude}
+              longitude={data.longitude}
+              zoom={13}
+              className="w-full h-[400px] rounded-lg"
+            />
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };

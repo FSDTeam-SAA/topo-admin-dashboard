@@ -4,19 +4,6 @@ type ReviewStockMethod = {
   keyBrands: boolean;
 };
 
-export type Pagination = {
-  total: number;
-  page: number;
-  totalPages: number;
-};
-
-type Address = {
-  country: string;
-  cityState: string;
-  roadArea: string;
-  postalCode: string;
-};
-
 export interface LenderProfile {
   file: {
     url: string;
@@ -56,6 +43,15 @@ export interface LenderProfile {
   totalRatting: number;
   totalListings: number;
   totalReveneue: number;
+  city?: string;
+  state?: string;
+  country?: string;
+  postcode?: string;
+  suburb?: string;
+  placeName?: string;
+  latitude?: number;
+  longitude?: number;
+  address?: string;
   status: "pending" | "approved" | "rejected";
   applicationSubmittedAt: string;
   applicationReviewedAt: string | null;
@@ -64,11 +60,16 @@ export interface LenderProfile {
   deactivationReason: string;
   deactivationFeedback: string;
   deactivated: boolean;
-  address: Address;
   createdAt: string;
   updatedAt: string;
   __v: number;
 }
+
+export type Pagination = {
+  total: number;
+  page: number;
+  totalPages: number;
+};
 
 export type LendersGetResponse = {
   status: string;

@@ -8,6 +8,11 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { LenderProfile } from "@/types/lender";
+import DisputesTab from "./disputs-tab";
+import DocumentsTab from "./documen-tab";
+import ListingTab from "./listing-tab";
+import MatricsTab from "./matrics-tab";
+import NotesTab from "./notes-tab";
 import ProfileTab from "./profile-tab";
 import StatusTab from "./status-tab";
 
@@ -16,6 +21,7 @@ interface Props {
 }
 
 const LenderAction = ({ data }: Props) => {
+  console.log(data);
   const tabs = [
     {
       id: "profile",
@@ -26,6 +32,31 @@ const LenderAction = ({ data }: Props) => {
       id: "Status",
       label: "Status",
       content: <StatusTab data={data} />,
+    },
+    {
+      id: "matrics",
+      label: "Matrics",
+      content: <MatricsTab data={data} />,
+    },
+    {
+      id: "listing",
+      label: "Listing",
+      content: <ListingTab data={data} />,
+    },
+    {
+      id: "disputes",
+      label: "Disputes",
+      content: <DisputesTab data={data} />,
+    },
+    {
+      id: "documents",
+      label: "Documents",
+      content: <DocumentsTab data={data} />,
+    },
+    {
+      id: "notes",
+      label: "Notes",
+      content: <NotesTab data={data} />,
     },
   ];
   return (
@@ -40,7 +71,7 @@ const LenderAction = ({ data }: Props) => {
           <DialogContent className="w-[800px] space-y-[20px]">
             <DialogHeader>
               <DialogTitle>
-                Lender Details: {data.fullName} (ID: {data.id})
+                Lender Details: {data.fullName} (ID: {data._id})
               </DialogTitle>
 
               <div>

@@ -27,7 +27,11 @@ const LenderTableContainer = ({ accessToken }: LenderTableContainerProps) => {
     queryKey: ["lenders", page, debouncedValue, status, dateRange],
     queryFn: () =>
       fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/application?page=${page}&limit=5&search=${debouncedValue}&status=${status}&startDate=${dateRange.from}&endDate=${dateRange.to}`,
+        `${
+          process.env.NEXT_PUBLIC_BACKEND_URL
+        }/api/v1/application?page=${page}&limit=5&search=${debouncedValue}&status=${status}&startDate=${
+          dateRange.from ? dateRange.from : ""
+        }&endDate=${dateRange.to ? dateRange.to : ""}`,
         {
           headers: {
             "Content-Type": "application/json",

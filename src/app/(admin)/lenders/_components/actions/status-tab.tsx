@@ -19,6 +19,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { LenderProfile } from "@/types/lender";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import moment from "moment";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -42,18 +43,39 @@ const StatusTab = ({ data }: Props) => {
     },
   });
 
+  const queryClient = useQueryClient();
+
+  const { isPending, mutate } = useMutation({
+    mutationKey: ["status-update", data._id],
+    mutationFn: (body: z.infer<typeof formSchema>) =>
+      fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/application/${data._id}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-type": "application/json",
+          },
+          body: JSON.stringify(body),
+        }
+      ).then((res) => res.json()),
+    onSuccess: (res) => {
+      if (!res.status) {
+        toast.error(res.message);
+        return;
+      }
+
+      // success message
+      toast.success(res.message);
+      queryClient.invalidateQueries({ queryKey: ["lenders"] });
+      form.reset();
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
   function onSubmit(values: z.infer<typeof formSchema>) {
-    try {
-      console.log(values);
-      toast(
-        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-          <code className="text-white">{JSON.stringify(values, null, 2)}</code>
-        </pre>
-      );
-    } catch (error) {
-      console.error("Form submission error", error);
-      toast.error("Failed to submit the form. Please try again.");
-    }
+    mutate(values);
   }
 
   return (
@@ -118,7 +140,7 @@ const StatusTab = ({ data }: Props) => {
                     <FormControl>
                       <Textarea
                         placeholder="write reason..."
-                        className="resize-none text-[10px] font-light"
+                        className="resize-none text-[10px] font-light min-h-[150px]"
                         {...field}
                       />
                     </FormControl>
@@ -128,7 +150,9 @@ const StatusTab = ({ data }: Props) => {
                 )}
               />
               <div className="w-full flex justify-end">
-                <Button type="submit">Update</Button>
+                <Button type="submit" disabled={isPending}>
+                  Update
+                </Button>
               </div>
             </form>
           </Form>

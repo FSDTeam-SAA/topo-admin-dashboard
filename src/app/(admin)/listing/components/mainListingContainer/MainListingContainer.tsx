@@ -26,6 +26,11 @@ type Listing = {
   updated: string
 }
 
+// container props
+interface ListingContainerProps {
+  isSiteListings: boolean
+}
+
 const demoData: Listing[] = Array.from({ length: 42 }).map((_, i) => ({
   id: `#${String(i + 1).padStart(5, '0')}`,
   thumbnail: '/img1.jpg',
@@ -63,21 +68,23 @@ const columns: ColumnDef<Listing>[] = [
   { accessorKey: 'updated', header: 'Last Updated' },
 ]
 
-export default function MainListingContainer() {
+export default function MainListingContainer({
+  isSiteListings,
+}: ListingContainerProps) {
   const table = useReactTable({
     data: demoData,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     initialState: {
-      pagination: { pageIndex: 0, pageSize: 5 },
+      pagination: { pageIndex: 0, pageSize: 3 },
     },
   })
 
   return (
     <Card>
       <CardContent className="p-5 space-y-5">
-        <MainListingHeader />
+        <MainListingHeader isSiteListings={isSiteListings} />
         <DataTable table={table} columns={columns} />
         <DataTablePagination table={table} totalItems={demoData.length} />
       </CardContent>

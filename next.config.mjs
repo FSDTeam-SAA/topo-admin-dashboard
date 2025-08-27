@@ -3,11 +3,15 @@ const nextConfig = {
   images: {
     remotePatterns: [
       {
-        hostname: "files.edgestore.dev",
-        protocol: "https",
+        protocol: 'https',
+        hostname: 'files.edgestore.dev',
+      },
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
       },
     ],
   },
-};
+}
 
-export default nextConfig;
+export default nextConfig

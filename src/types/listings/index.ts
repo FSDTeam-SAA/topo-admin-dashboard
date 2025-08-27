@@ -45,6 +45,7 @@ export interface Pagination {
   totalPages: number
   totalItems: number
   itemsPerPage: number
+  currentPage: number
 }
 
 export interface ListingsGetResponse {

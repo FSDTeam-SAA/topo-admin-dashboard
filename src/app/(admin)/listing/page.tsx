@@ -1,15 +1,13 @@
-import React from 'react'
-import ListingHeader from './components/listingHeader/ListingHeader'
-import ListingBtnSection from './components/ButtonsSection/ListingBtnSection'
-import MainListingContainer from './components/mainListingContainer/MainListingContainer'
+import { auth } from '@/auth'
+import ListingsClient from './components/listingsClient/ListingsClient'
+import { redirect } from 'next/navigation'
 
-export default function page() {
-  return (
-    <div className="space-y-[30px]">
-      <ListingHeader />
-      <ListingBtnSection />
-      {/* Main Site Listings */}
-      <MainListingContainer />
-    </div>
-  )
+export default async function Page() {
+  // redirect user if not login
+  const cu = await auth()
+  if (!cu?.user) redirect('/sign-in')
+
+  const accessToken = cu.user.accessToken!
+
+  return <ListingsClient accessToken={accessToken} />
 }

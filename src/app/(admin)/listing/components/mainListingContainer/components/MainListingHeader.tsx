@@ -9,12 +9,18 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 
-export default function MainListingHeader() {
+interface ListingHeaderProps {
+  isSiteListings: boolean
+}
+
+export default function MainListingHeader({
+  isSiteListings,
+}: ListingHeaderProps) {
   return (
     <div>
       <div className="p-5 flex flex-col md:flex-row md:items-center justify-between">
         <h2 className="text-[24px] font-medium leading-[120%]">
-          Main Site Listings
+          {isSiteListings ? 'Main Site Listings' : 'Lender Listings'}
         </h2>
         <div className="flex items-center gap-7">
           <Select>

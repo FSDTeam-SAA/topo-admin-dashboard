@@ -10,13 +10,6 @@ import {
   flexRender,
 } from '@tanstack/react-table'
 import { Input } from '@/components/ui/input'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import { ListingsGetResponse, Dress } from '@/types/listings'
 import Image from 'next/image'
 import DataTablePagination from './../components/DataTablePagination'
@@ -29,7 +22,6 @@ export default function MainListingContainer({
   accessToken,
 }: ListingContainerProps) {
   const [search, setSearch] = useState('')
-  const [statusFilter, setStatusFilter] = useState<string>('')
 
   // TanStack pagination state
   const [pagination, setPagination] = useState({
@@ -37,26 +29,21 @@ export default function MainListingContainer({
     pageSize: 3,
   })
 
-  // Reset to first page when filters change
+  // Reset to first page when search changes
   useEffect(() => {
     setPagination((prev) => ({ ...prev, pageIndex: 0 }))
-  }, [search, statusFilter])
+  }, [search])
 
   // Fetch with react-query
   const { data, isLoading, isError } = useQuery<ListingsGetResponse, Error>({
-    queryKey: [
-      'listings',
-      pagination.pageIndex,
-      pagination.pageSize,
-      statusFilter,
-    ],
+    queryKey: ['listings', pagination.pageIndex, pagination.pageSize],
     queryFn: async (): Promise<ListingsGetResponse> => {
       const url = new URL(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/lender/admin`
       )
       url.searchParams.append('page', String(pagination.pageIndex + 1)) // API pages start at 1
       url.searchParams.append('limit', String(pagination.pageSize))
-      if (statusFilter) url.searchParams.append('status', statusFilter)
+      url.searchParams.append('status', 'approved') // ✅ hardcoded
 
       const res = await fetch(url.toString(), {
         headers: { Authorization: `Bearer ${accessToken}` },
@@ -96,9 +83,8 @@ export default function MainListingContainer({
                 alt={row.original.dressName}
                 fill
                 sizes="48px"
-                // quality={75}
                 className="object-cover"
-                priority={row.index === 0} // only first row as priority
+                priority={row.index === 0}
               />
             )}
           </div>
@@ -124,14 +110,10 @@ export default function MainListingContainer({
         accessorKey: 'approvalStatus',
         header: 'Status',
         cell: ({ row }) => {
-          const status = row.original.approvalStatus ?? 'pending'
+          const status = row.original.approvalStatus ?? 'approved'
           const statusColor =
-            status === 'pending'
-              ? 'bg-yellow-100 text-yellow-700'
-              : status === 'approved'
+            status === 'approved'
               ? 'bg-green-100 text-green-700'
-              : status === 'rejected'
-              ? 'bg-red-100 text-red-700'
               : 'bg-gray-100 text-gray-700'
 
           return (
@@ -171,7 +153,7 @@ export default function MainListingContainer({
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    manualPagination: true, //  controlled mode
+    manualPagination: true,
     pageCount: Math.max(1, Math.ceil(totalItems / pagination.pageSize)),
     state: { pagination },
     onPaginationChange: setPagination,
@@ -199,23 +181,6 @@ export default function MainListingContainer({
       <div className="flex flex-col md:flex-row justify-between items-center mb-4 gap-3 py-5">
         <h2 className="text-2xl font-semibold">Main Site Listings</h2>
         <div className="flex items-center gap-2">
-          <Select
-            value={statusFilter || 'all'}
-            onValueChange={(value) =>
-              setStatusFilter(value === 'all' ? '' : value)
-            }
-          >
-            <SelectTrigger className="w-[120px]">
-              <SelectValue placeholder="All" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All</SelectItem>
-              <SelectItem value="active">Active</SelectItem>
-              <SelectItem value="paused">Paused</SelectItem>
-              <SelectItem value="pending">Pending</SelectItem>
-            </SelectContent>
-          </Select>
-
           <Input
             type="text"
             placeholder="Search..."

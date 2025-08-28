@@ -63,12 +63,11 @@ export default function ListingHeader() {
       </div>
 
       <div className="mt-[30px] grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 text-lg">
-        <div>
-          <InfoCard
-            title="Total Listings"
-            value={isLoading ? '...' : String(stats?.totalListings ?? 0)}
-          />
-        </div>
+        <InfoCard
+          title="Total Listings"
+          value={isLoading ? '...' : String(stats?.totalListings ?? 0)}
+        />
+
         <InfoCard
           title="Pending Submissions"
           value={isLoading ? '...' : String(stats?.totalPending ?? 0)}

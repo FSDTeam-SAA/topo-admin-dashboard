@@ -18,6 +18,16 @@ interface ListingContainerProps {
   accessToken: string
 }
 
+//  generic debounce function
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function debounce<T extends (...args: any[]) => void>(fn: T, delay: number) {
+  let timer: ReturnType<typeof setTimeout>
+  return (...args: Parameters<T>) => {
+    clearTimeout(timer)
+    timer = setTimeout(() => fn(...args), delay)
+  }
+}
+
 export default function MainListingContainer({
   accessToken,
 }: ListingContainerProps) {
@@ -34,6 +44,15 @@ export default function MainListingContainer({
     setPagination((prev) => ({ ...prev, pageIndex: 0 }))
   }, [search])
 
+  //  stable debounced setter
+  const debouncedSetSearch = useMemo(
+    () =>
+      debounce((val: string) => {
+        setSearch(val)
+      }, 500),
+    []
+  )
+
   // Fetch with react-query
   const { data, isLoading, isError } = useQuery<ListingsGetResponse, Error>({
     queryKey: ['listings', pagination.pageIndex, pagination.pageSize],
@@ -43,7 +62,7 @@ export default function MainListingContainer({
       )
       url.searchParams.append('page', String(pagination.pageIndex + 1)) // API pages start at 1
       url.searchParams.append('limit', String(pagination.pageSize))
-      url.searchParams.append('status', 'approved') // ✅ hardcoded
+      url.searchParams.append('status', 'approved') // hardcoded
 
       const res = await fetch(url.toString(), {
         headers: { Authorization: `Bearer ${accessToken}` },
@@ -162,7 +181,7 @@ export default function MainListingContainer({
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-[300px] bg-gray-50 rounded-lg">
-        <p className="text-gray-500 text-lg">Loading listings...</p>
+        <p className="text-gray-500 text-lg">Loading main site listings...</p>
       </div>
     )
   }
@@ -184,8 +203,8 @@ export default function MainListingContainer({
           <Input
             type="text"
             placeholder="Search..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            defaultValue={search}
+            onChange={(e) => debouncedSetSearch(e.target.value)}
             className="w-[200px]"
           />
         </div>

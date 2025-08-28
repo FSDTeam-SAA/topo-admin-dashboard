@@ -33,12 +33,13 @@ export interface Dress {
   status?: 'pending' | 'active' | 'paused' // optional now
   insurance: boolean
   pickupOption: PickupOption
-  approvalStatus?: 'pending' | 'approved' | 'rejected' // optional now
+  // approvalStatus?: 'pending' | 'approved' | 'rejected' // optional now
   reasonsForRejection?: string
   isActive: boolean
   createdAt: string
   updatedAt: string
-  id: string
+  _id: string
+  approvalStatus?: string
 }
 
 export interface Pagination {

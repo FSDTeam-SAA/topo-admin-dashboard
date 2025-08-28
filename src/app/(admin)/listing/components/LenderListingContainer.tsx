@@ -18,8 +18,9 @@ import {
   SelectItem,
 } from '@/components/ui/select'
 import { ListingsGetResponse, Dress } from '@/types/listings'
-// import Image from 'next/image'
 import DataTablePagination from './../components/DataTablePagination'
+import { useRouter } from 'next/navigation'
+import debounce from 'lodash.debounce'
 
 interface ListingContainerProps {
   accessToken: string
@@ -29,7 +30,9 @@ export default function LenderListingContainer({
   accessToken,
 }: ListingContainerProps) {
   const [search, setSearch] = useState('')
-  const [status, setStatus] = useState('') //  dropdown-controlled
+  const [status, setStatus] = useState('') // dropdown-controlled
+
+  const router = useRouter()
 
   // TanStack pagination state
   const [pagination, setPagination] = useState({
@@ -37,10 +40,19 @@ export default function LenderListingContainer({
     pageSize: 3,
   })
 
-  // Reset to first page when search/status changes
+  // Reset page when filters change
   useEffect(() => {
     setPagination((prev) => ({ ...prev, pageIndex: 0 }))
   }, [search, status])
+
+  // Debounced search setter (memoized)
+  const debouncedSetSearch = useMemo(
+    () =>
+      debounce((val: string) => {
+        setSearch(val)
+      }, 500),
+    []
+  )
 
   // Fetch with react-query
   const { data, isLoading, isError } = useQuery<ListingsGetResponse, Error>({
@@ -49,9 +61,9 @@ export default function LenderListingContainer({
       const url = new URL(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/lender/admin`
       )
-      url.searchParams.append('page', String(pagination.pageIndex + 1)) // API pages start at 1
+      url.searchParams.append('page', String(pagination.pageIndex + 1))
       url.searchParams.append('limit', String(pagination.pageSize))
-      url.searchParams.append('status', status) // from dropdown
+      url.searchParams.append('status', status)
 
       const res = await fetch(url.toString(), {
         headers: { Authorization: `Bearer ${accessToken}` },
@@ -63,10 +75,9 @@ export default function LenderListingContainer({
     staleTime: 30_000,
   })
 
-  // Pagination info
   const totalItems = data?.pagination?.totalItems ?? 0
 
-  // Local search filter
+  // Local filtering
   const dresses =
     data?.data?.filter((d) =>
       d.dressName.toLowerCase().includes(search.toLowerCase())
@@ -80,24 +91,6 @@ export default function LenderListingContainer({
         header: 'Listing ID',
         cell: ({ row }) => row.original.dressId.slice(0, 6),
       },
-      // {
-      //   accessorKey: 'media',
-      //   header: 'Thumbnails',
-      //   cell: ({ row }) => (
-      //     <div className="w-12 h-16 relative rounded overflow-hidden">
-      //       {row.original.media?.[0] && (
-      //         <Image
-      //           src={row.original.media[0]}
-      //           alt={row.original.dressName}
-      //           fill
-      //           sizes="48px"
-      //           className="object-cover"
-      //           priority={row.index === 0}
-      //         />
-      //       )}
-      //     </div>
-      //   ),
-      // }
       {
         accessorKey: 'dressName',
         header: 'Dress Name',
@@ -149,14 +142,17 @@ export default function LenderListingContainer({
       {
         id: 'actions',
         header: 'Action',
-        cell: () => (
-          <button className="px-3 py-1 text-sm rounded bg-black text-white">
+        cell: ({ row }) => (
+          <button
+            className="px-3 py-1 text-sm rounded bg-black text-white"
+            onClick={() => router.push(`/listing/${row.original._id}`)}
+          >
             View
           </button>
         ),
       },
     ],
-    []
+    [router]
   )
 
   const table = useReactTable({
@@ -173,7 +169,7 @@ export default function LenderListingContainer({
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-[300px] bg-gray-50 rounded-lg">
-        <p className="text-gray-500 text-lg">Loading listings...</p>
+        <p className="text-gray-500 text-lg">Loading lender listings...</p>
       </div>
     )
   }
@@ -198,7 +194,7 @@ export default function LenderListingContainer({
               <SelectValue placeholder="Filter by status" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="All">All</SelectItem>
+              <SelectItem value="">All</SelectItem>
               <SelectItem value="approved">Approved</SelectItem>
               <SelectItem value="pending">Pending</SelectItem>
               <SelectItem value="rejected">Rejected</SelectItem>
@@ -209,8 +205,7 @@ export default function LenderListingContainer({
           <Input
             type="text"
             placeholder="Search..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => debouncedSetSearch(e.target.value)}
             className="w-[200px]"
           />
         </div>

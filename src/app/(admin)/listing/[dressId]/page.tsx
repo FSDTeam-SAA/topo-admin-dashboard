@@ -88,7 +88,7 @@ export default function DressDetailPage({ params }: PageProps) {
   const handleApprove = () => {
     mutation.mutate({
       approvalStatus: 'approved',
-      isActive: true,
+      // isActive: true,
     })
   }
 

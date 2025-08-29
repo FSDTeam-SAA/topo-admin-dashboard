@@ -4,16 +4,22 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from '@/components/ui/card'
 
 interface Props {
-  title: string;
-  value: string;
+  title: string
+  value: string
 }
 
 export const InfoCard = ({ title, value }: Props) => {
+  const isTotalListings = title.toLowerCase() === 'total listings'
+
   return (
-    <Card>
+    <Card
+      className={
+        isTotalListings ? 'bg-black text-white' : 'bg-white text-black'
+      }
+    >
       <CardHeader>
         <CardTitle className="font-light leading-[120%]">{title}</CardTitle>
       </CardHeader>
@@ -24,5 +30,5 @@ export const InfoCard = ({ title, value }: Props) => {
         </CardFooter>
       </CardContent>
     </Card>
-  );
-};
+  )
+}

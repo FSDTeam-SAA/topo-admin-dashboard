@@ -14,6 +14,7 @@ import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import Image from 'next/image'
+<<<<<<< HEAD
 // import { Dress } from '../types/listtingsResponseTypes'
 
 interface ListingFormProps {
@@ -21,6 +22,8 @@ interface ListingFormProps {
   open: boolean
   onOpenChange: (open: boolean) => void
 }
+=======
+>>>>>>> mamun
 
 export interface Location {
   _id: string
@@ -50,7 +53,11 @@ export interface ListingFormData {
   material: string
   careInstructions: string
   occasion: string[]
+<<<<<<< HEAD
   status: 'pending' | 'active' | 'paused'
+=======
+  status?: 'pending' | 'active' | 'paused' | 'booked'
+>>>>>>> mamun
   insurance: boolean
   pickupOption: 'Pickup' | 'Local' | 'Delivery'
   approvalStatus: 'pending' | 'approved' | 'rejected'
@@ -61,6 +68,15 @@ export interface ListingFormData {
   id: string
 }
 
+<<<<<<< HEAD
+=======
+interface ListingFormProps {
+  listing: ListingFormData
+  open: boolean
+  onOpenChange: (open: boolean) => void
+}
+
+>>>>>>> mamun
 export default function ListingForm({
   listing,
   open,
@@ -92,73 +108,109 @@ export default function ListingForm({
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+<<<<<<< HEAD
           {/* Status Toggle */}
+=======
+>>>>>>> mamun
           <div className="flex items-center justify-between">
             <Label>Status</Label>
             <Switch defaultChecked={listing.status === 'active'} />
           </div>
 
+<<<<<<< HEAD
           {/* Listing ID */}
+=======
+>>>>>>> mamun
           <div>
             <Label>Listing ID</Label>
             <Input {...register('id')} readOnly />
           </div>
 
+<<<<<<< HEAD
           {/* Dress ID */}
+=======
+>>>>>>> mamun
           <div>
             <Label>Dress ID</Label>
             <Input {...register('dressId')} readOnly />
           </div>
 
+<<<<<<< HEAD
           {/* Lender */}
+=======
+>>>>>>> mamun
           <div>
             <Label>Lenders ID</Label>
             <Input value={listing.lenderId || 'N/A'} readOnly />
           </div>
 
+<<<<<<< HEAD
           {/* Dress Name */}
+=======
+>>>>>>> mamun
           <div>
             <Label>Dress Name</Label>
             <Input {...register('dressName')} />
           </div>
 
+<<<<<<< HEAD
           {/* Brand */}
+=======
+>>>>>>> mamun
           <div>
             <Label>Brand</Label>
             <Input {...register('brand')} />
           </div>
 
+<<<<<<< HEAD
           {/* Size */}
+=======
+>>>>>>> mamun
           <div>
             <Label>Size Available</Label>
             <Input {...register('size')} />
           </div>
 
+<<<<<<< HEAD
           {/* Colour */}
+=======
+>>>>>>> mamun
           <div>
             <Label>Colour</Label>
             <Input {...register('colour')} />
           </div>
 
+<<<<<<< HEAD
           {/* Occation */}
+=======
+>>>>>>> mamun
           <div>
             <Label>Occasion</Label>
             <Input {...register('occasion')} />
           </div>
 
+<<<<<<< HEAD
           {/* Best Price */}
+=======
+>>>>>>> mamun
           <div>
             <Label>Best Price</Label>
             <Input value={listing?.rentalPrice.eightDays} readOnly />
           </div>
 
+<<<<<<< HEAD
           {/* Description */}
+=======
+>>>>>>> mamun
           <div>
             <Label>Description</Label>
             <Textarea {...register('description')} />
           </div>
 
+<<<<<<< HEAD
           {/* Thumbnail (first image) */}
+=======
+>>>>>>> mamun
           <div>
             <Label>Thumbnail</Label>
             <Image
@@ -170,7 +222,10 @@ export default function ListingForm({
             />
           </div>
 
+<<<<<<< HEAD
           {/* Last Updated */}
+=======
+>>>>>>> mamun
           <div>
             <Label>Last Updated</Label>
             <Input
@@ -183,7 +238,10 @@ export default function ListingForm({
             />
           </div>
 
+<<<<<<< HEAD
           {/* Pickup/Shipping Options */}
+=======
+>>>>>>> mamun
           <div>
             <Label>Pickup/Shipping Options</Label>
             <div className="flex flex-col space-y-1 mt-1">
@@ -201,7 +259,10 @@ export default function ListingForm({
             </div>
           </div>
 
+<<<<<<< HEAD
           {/* Buttons */}
+=======
+>>>>>>> mamun
           <div className="flex gap-2 justify-start">
             <Button type="submit">Save Changes</Button>
             <Button

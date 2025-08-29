@@ -21,6 +21,8 @@ import { ListingsGetResponse, Dress } from '@/types/listings'
 import DataTablePagination from './../components/DataTablePagination'
 import { useRouter } from 'next/navigation'
 import debounce from 'lodash.debounce'
+import SkeletonLoader from '@/components/loader/SkeletonLoader'
+import ErrorPage from '@/components/error/ErrorPage'
 
 interface ListingContainerProps {
   accessToken: string
@@ -168,17 +170,15 @@ export default function LenderListingContainer({
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-[300px] bg-gray-50 rounded-lg">
-        <p className="text-gray-500 text-lg">Loading lender listings...</p>
+      <div>
+        <SkeletonLoader title="Loading lender listings..." />
       </div>
     )
   }
 
   if (isError) {
     return (
-      <div className="flex items-center justify-center h-[300px] bg-red-50 rounded-lg">
-        <p className="text-red-500 text-lg">Failed to load listings</p>
-      </div>
+      <ErrorPage errorMessage="Failed to load listings. Please try again later." />
     )
   }
 

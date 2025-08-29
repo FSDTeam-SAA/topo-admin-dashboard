@@ -194,7 +194,7 @@ export default function LenderListingContainer({
               <SelectValue placeholder="Filter by status" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All</SelectItem>
+              <SelectItem value="All">All</SelectItem>
               <SelectItem value="approved">Approved</SelectItem>
               <SelectItem value="pending">Pending</SelectItem>
               <SelectItem value="rejected">Rejected</SelectItem>

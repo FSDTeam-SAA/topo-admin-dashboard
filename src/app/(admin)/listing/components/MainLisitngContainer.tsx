@@ -13,6 +13,8 @@ import { Input } from '@/components/ui/input'
 import { ListingsGetResponse, Dress } from '@/types/listings'
 import Image from 'next/image'
 import DataTablePagination from './../components/DataTablePagination'
+import SkeletonLoader from '@/components/loader/SkeletonLoader'
+import ErrorPage from '@/components/error/ErrorPage'
 
 interface ListingContainerProps {
   accessToken: string
@@ -180,17 +182,15 @@ export default function MainListingContainer({
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-[300px] bg-gray-50 rounded-lg">
-        <p className="text-gray-500 text-lg">Loading main site listings...</p>
+      <div>
+        <SkeletonLoader title="Loading main site listings..." />
       </div>
     )
   }
 
   if (isError) {
     return (
-      <div className="flex items-center justify-center h-[300px] bg-red-50 rounded-lg">
-        <p className="text-red-500 text-lg">Failed to load listings</p>
-      </div>
+      <ErrorPage errorMessage="Failed to load listings. Please try again later." />
     )
   }
 

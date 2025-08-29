@@ -10,6 +10,8 @@ import { Dress } from '@/types/listings'
 import { useSession } from 'next-auth/react'
 import { ArrowLeft } from 'lucide-react'
 import { toast } from 'sonner'
+import DressDetailSkeleton from './_components/DressDetailSkeleton'
+import ErrorPage from '@/components/error/ErrorPage'
 
 interface PageProps {
   params: { dressId: string }
@@ -101,16 +103,14 @@ export default function DressDetailPage({ params }: PageProps) {
 
   if (isLoading)
     return (
-      <div className="flex items-center justify-center h-[300px] bg-gray-50 rounded-lg">
-        <p className="text-gray-500 text-lg">Loading dress details...</p>
+      <div>
+        <DressDetailSkeleton />
       </div>
     )
 
   if (isError || !dress)
     return (
-      <div className="flex items-center justify-center h-[300px] bg-red-50 rounded-lg">
-        <p className="text-red-500 text-lg">Failed to load dress details</p>
-      </div>
+      <ErrorPage errorMessage="We were unable to load the dress details. Please try again later or contact support if the issue persists." />
     )
 
   const statusColor =
@@ -149,7 +149,7 @@ export default function DressDetailPage({ params }: PageProps) {
             <h1 className="text-2xl font-semibold text-gray-800">
               {dress.dressName}
             </h1>
-            <p className="text-gray-500">{dress.brand}</p>
+            <p className="text-gray-500 font-light">{dress.brand}</p>
           </div>
           <span
             className={`px-3 py-1 rounded-full text-sm font-medium ${statusColor}`}
@@ -159,7 +159,7 @@ export default function DressDetailPage({ params }: PageProps) {
         </div>
 
         {/* Two columns */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 font-light">
           {/* Left: Images + specs */}
           <div className="space-y-4">
             <DressMediaCarousel images={dress.media} />

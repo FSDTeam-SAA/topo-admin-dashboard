@@ -1,105 +1,106 @@
-'use client'
+"use client";
 
-import React, { useMemo, useState, useEffect } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import ErrorPage from "@/components/error/ErrorPage";
+import SkeletonLoader from "@/components/loader/SkeletonLoader";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Dress, ListingsGetResponse } from "@/types/listings";
+import { useQuery } from "@tanstack/react-query";
 import {
   ColumnDef,
+  flexRender,
   getCoreRowModel,
   getPaginationRowModel,
   useReactTable,
-  flexRender,
-} from '@tanstack/react-table'
-import { Input } from '@/components/ui/input'
-import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from '@/components/ui/select'
-import { ListingsGetResponse, Dress } from '@/types/listings'
-import DataTablePagination from './../components/DataTablePagination'
-import { useRouter } from 'next/navigation'
-import debounce from 'lodash.debounce'
-import SkeletonLoader from '@/components/loader/SkeletonLoader'
-import ErrorPage from '@/components/error/ErrorPage'
+} from "@tanstack/react-table";
+import debounce from "lodash.debounce";
+import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
+import DataTablePagination from "./../components/DataTablePagination";
 
 interface ListingContainerProps {
-  accessToken: string
+  accessToken: string;
 }
 
 export default function LenderListingContainer({
   accessToken,
 }: ListingContainerProps) {
-  const [search, setSearch] = useState('')
-  const [status, setStatus] = useState('') // dropdown-controlled
+  const [search, setSearch] = useState("");
+  const [status, setStatus] = useState(""); // dropdown-controlled
 
-  const router = useRouter()
+  const router = useRouter();
 
   // TanStack pagination state
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: 10,
-  })
+  });
 
   // Reset page when filters change
   useEffect(() => {
-    setPagination((prev) => ({ ...prev, pageIndex: 0 }))
-  }, [search, status])
+    setPagination((prev) => ({ ...prev, pageIndex: 0 }));
+  }, [search, status]);
 
   // Debounced search setter (memoized)
   const debouncedSetSearch = useMemo(
     () =>
       debounce((val: string) => {
-        setSearch(val)
+        setSearch(val);
       }, 500),
     []
-  )
+  );
 
   // Fetch with react-query
   const { data, isLoading, isError } = useQuery<ListingsGetResponse, Error>({
-    queryKey: ['listings', pagination.pageIndex, pagination.pageSize, status],
+    queryKey: ["listings", pagination.pageIndex, pagination.pageSize, status],
     queryFn: async (): Promise<ListingsGetResponse> => {
       const url = new URL(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/lender/admin`
-      )
-      url.searchParams.append('page', String(pagination.pageIndex + 1))
-      url.searchParams.append('limit', String(pagination.pageSize))
-      url.searchParams.append('status', status)
+      );
+      url.searchParams.append("page", String(pagination.pageIndex + 1));
+      url.searchParams.append("limit", String(pagination.pageSize));
+      url.searchParams.append("status", status);
 
       const res = await fetch(url.toString(), {
         headers: { Authorization: `Bearer ${accessToken}` },
-        cache: 'no-store',
-      })
-      if (!res.ok) throw new Error('Failed to fetch')
-      return (await res.json()) as ListingsGetResponse
+        cache: "no-store",
+      });
+      if (!res.ok) throw new Error("Failed to fetch");
+      return (await res.json()) as ListingsGetResponse;
     },
     staleTime: 30_000,
-  })
+  });
 
-  const totalItems = data?.pagination?.totalItems ?? 0
+  const totalItems = data?.pagination?.totalItems ?? 0;
 
   // Local filtering
   const dresses =
     data?.data?.filter((d) =>
       d.dressName.toLowerCase().includes(search.toLowerCase())
-    ) ?? []
+    ) ?? [];
 
   // Table columns
   const columns = useMemo<ColumnDef<Dress>[]>(
     () => [
       {
-        accessorKey: 'dressId',
-        header: 'Listing ID',
+        accessorKey: "dressId",
+        header: "Listing ID",
         cell: ({ row }) => row.original.dressId.slice(0, 6),
       },
       {
-        accessorKey: 'dressName',
-        header: 'Dress Name',
+        accessorKey: "dressName",
+        header: "Dress Name",
       },
       {
-        accessorKey: 'colour',
-        header: 'Colour',
+        accessorKey: "colour",
+        header: "Colour",
         cell: ({ row }) => (
           <div className="flex items-center gap-2">
             <span
@@ -111,16 +112,16 @@ export default function LenderListingContainer({
         ),
       },
       {
-        accessorKey: 'approvalStatus',
-        header: 'Status',
+        accessorKey: "approvalStatus",
+        header: "Status",
         cell: ({ row }) => {
-          const status = row.original.approvalStatus ?? 'approved'
+          const status = row.original.approvalStatus ?? "approved";
           const statusColor =
-            status === 'approved'
-              ? 'bg-green-100 text-green-700'
-              : status === 'pending'
-              ? 'bg-yellow-100 text-yellow-700'
-              : 'bg-red-100 text-red-700'
+            status === "approved"
+              ? "bg-green-100 text-green-700"
+              : status === "pending"
+              ? "bg-yellow-100 text-yellow-700"
+              : "bg-red-100 text-red-700";
 
           return (
             <span
@@ -128,34 +129,35 @@ export default function LenderListingContainer({
             >
               {status}
             </span>
-          )
+          );
         },
       },
       {
-        accessorKey: 'updatedAt',
-        header: 'Last Updated',
+        accessorKey: "updatedAt",
+        header: "Last Updated",
         cell: ({ row }) =>
-          new Date(row.original.updatedAt).toLocaleDateString('en-US', {
-            month: 'short',
-            day: '2-digit',
-            year: 'numeric',
+          new Date(row.original.updatedAt).toLocaleDateString("en-US", {
+            month: "short",
+            day: "2-digit",
+            year: "numeric",
           }),
       },
       {
-        id: 'actions',
-        header: 'Action',
+        id: "actions",
+        header: "Action",
         cell: ({ row }) => (
-          <button
+          <Button
+            size="sm"
             className="px-3 py-1 text-sm rounded bg-black text-white"
             onClick={() => router.push(`/listing/${row.original._id}`)}
           >
             View
-          </button>
+          </Button>
         ),
       },
     ],
     [router]
-  )
+  );
 
   const table = useReactTable({
     data: dresses,
@@ -166,20 +168,20 @@ export default function LenderListingContainer({
     pageCount: Math.max(1, Math.ceil(totalItems / pagination.pageSize)),
     state: { pagination },
     onPaginationChange: setPagination,
-  })
+  });
 
   if (isLoading) {
     return (
       <div>
         <SkeletonLoader title="Loading lender listings..." />
       </div>
-    )
+    );
   }
 
   if (isError) {
     return (
       <ErrorPage errorMessage="Failed to load listings. Please try again later." />
-    )
+    );
   }
 
   return (
@@ -259,5 +261,5 @@ export default function LenderListingContainer({
         <DataTablePagination table={table} totalItems={totalItems} />
       </div>
     </div>
-  )
+  );
 }

@@ -1,4 +1,5 @@
 import { auth } from "@/auth";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import AppProvider from "@/provider/AppProvider";
 import type { Metadata } from "next";
 import { SessionProvider } from "next-auth/react";
@@ -27,7 +28,9 @@ export default async function RootLayout({
     <html suppressHydrationWarning={true} lang="en">
       <body className={`${raleway.className}  antialiased`}>
         <AppProvider>
-          <SessionProvider session={session}>{children} </SessionProvider>
+          <SessionProvider session={session}>
+            <TooltipProvider>{children} </TooltipProvider>
+          </SessionProvider>
         </AppProvider>
         <Toaster richColors position="bottom-right" />
         <NextTopLoader showSpinner={false} color="#1E2A38" />

@@ -1,57 +1,71 @@
-export interface Location {
-  _id: string
-  addressLine: string
-  postalCode: string
-}
+export type RentalPrice = {
+  fourDays: number;
+  eightDays: number;
+};
 
-export interface RentalPrice {
-  _id: string
-  fourDays: number
-  eightDays: number
-}
+export type lenderId = {
+  email: string;
+  _id: string;
+};
 
-export type PickupOption = 'Pickup' | 'Local' | 'Delivery'
-
-export type DressStatus = 'pending' | 'active' | 'paused' | 'booked'
-
-export interface Dress {
-  lenderId: string
-  dressId: string
-  dressName: string
-  brand: string
-  size: string
-  colour: string
-  condition: string
-  category: string
-  locations: Location[]
-  media: string[]
-  description: string
-  rentalPrice: RentalPrice
-  material: string
-  careInstructions: string
-  occasion: string[]
-  status?: 'pending' | 'active' | 'paused' // optional now
-  insurance: boolean
-  pickupOption: PickupOption
-  // approvalStatus?: 'pending' | 'approved' | 'rejected' // optional now
-  reasonsForRejection?: string
-  isActive: boolean
-  createdAt: string
-  updatedAt: string
-  _id: string
-  approvalStatus?: string
-}
-
-export interface Pagination {
-  totalPages: number
-  totalItems: number
-  itemsPerPage: number
-  currentPage: number
-}
-
-export interface ListingsGetResponse {
-  status: boolean
-  message: string
-  data: Dress[]
-  pagination: Pagination
-}
+export type Listing = {
+  _id: string; // comes from transform in toJSON
+  lenderId: lenderId; // ObjectId serialized to string
+  dressId: string;
+  dressName: string;
+  brand?: string;
+  size:
+    | "XXS"
+    | "XS"
+    | "S"
+    | "M"
+    | "L"
+    | "XL"
+    | "XXL"
+    | "XXXL"
+    | "4XL"
+    | "5XL"
+    | "Custom";
+  status: "available" | "booked" | "not-available";
+  colour?: string;
+  condition:
+    | "Brand New"
+    | "Like New"
+    | "Gently Used"
+    | "Used"
+    | "Worn"
+    | "Damaged"
+    | "Altered"
+    | "Vintage";
+  category:
+    | "Formal"
+    | "Casual"
+    | "Cocktail"
+    | "Bridal"
+    | "Party"
+    | "Evening Gown"
+    | "Ball Gown"
+    | "Red Carpet"
+    | "Designer"
+    | "Haute Couture"
+    | "Luxury"
+    | "Other";
+  media: string[];
+  description?: string;
+  rentalPrice: RentalPrice;
+  material?: string;
+  careInstructions?:
+    | "Dry Clean Only"
+    | "Hand Wash"
+    | "Machine Wash"
+    | "Delicate Wash"
+    | "Other";
+  occasion: string[];
+  insurance: boolean;
+  pickupOption: "Local" | "Australia-wide" | "Both";
+  approvalStatus: "pending" | "approved" | "rejected";
+  reasonsForRejection?: string;
+  isActive: boolean;
+  createdAt: string; // ISO string from timestamps
+  updatedAt: string; // ISO string from timestamps
+};

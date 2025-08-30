@@ -1,262 +1,146 @@
-'use client'
-
-import React, { useMemo, useState, useEffect } from 'react'
-import { useQuery } from '@tanstack/react-query'
+"use client";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import EmptyContainer from "@/components/ui/custom/empty-container";
+import ErrorContainer from "@/components/ui/custom/error-container";
+import FancyLoader from "@/components/ui/custom/fancy-loader";
+import { DataTable } from "@/components/ui/data-table";
+import { Input } from "@/components/ui/input";
+import { PaginationControls } from "@/components/ui/pagination-controls";
 import {
-  ColumnDef,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import useDebounce from "@/hook/useDebounce";
+import { useMainSiteListingState } from "@/state/listing/use-search-listing-state";
+import { useQuery } from "@tanstack/react-query";
+import {
   getCoreRowModel,
   getPaginationRowModel,
   useReactTable,
-  flexRender,
-} from '@tanstack/react-table'
-import { Input } from '@/components/ui/input'
-import { ListingsGetResponse, Dress } from '@/types/listings'
-import Image from 'next/image'
-import DataTablePagination from './../components/DataTablePagination'
-import SkeletonLoader from '@/components/loader/SkeletonLoader'
-import ErrorPage from '@/components/error/ErrorPage'
+} from "@tanstack/react-table";
+import { Listing } from "../types/listingsTypes";
+import { listingColumn } from "./listing-column";
 
-interface ListingContainerProps {
-  accessToken: string
+interface Props {
+  accessToken: string;
 }
 
-//  generic debounce function
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function debounce<T extends (...args: any[]) => void>(fn: T, delay: number) {
-  let timer: ReturnType<typeof setTimeout>
-  return (...args: Parameters<T>) => {
-    clearTimeout(timer)
-    timer = setTimeout(() => fn(...args), delay)
-  }
+type Status = "All" | "approved" | "pending" | "rejected";
+
+interface APiProps {
+  status: boolean;
+  message: string;
+
+  data: Listing[];
+
+  pagination: {
+    currentPage: number;
+    itemsPerPage: number;
+    totalItems: number;
+    totalPages: number;
+  };
 }
 
-export default function MainListingContainer({
-  accessToken,
-}: ListingContainerProps) {
-  const [search, setSearch] = useState('')
-
-  // TanStack pagination state
-  const [pagination, setPagination] = useState({
-    pageIndex: 0,
-    pageSize: 10,
-  })
-
-  // Reset to first page when search changes
-  useEffect(() => {
-    setPagination((prev) => ({ ...prev, pageIndex: 0 }))
-  }, [search])
-
-  //  stable debounced setter
-  const debouncedSetSearch = useMemo(
-    () =>
-      debounce((val: string) => {
-        setSearch(val)
-      }, 500),
-    []
-  )
-
-  // Fetch with react-query
-  const { data, isLoading, isError } = useQuery<ListingsGetResponse, Error>({
-    queryKey: ['listings', pagination.pageIndex, pagination.pageSize],
-    queryFn: async (): Promise<ListingsGetResponse> => {
-      const url = new URL(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/lender/admin`
-      )
-      url.searchParams.append('page', String(pagination.pageIndex + 1)) // API pages start at 1
-      url.searchParams.append('limit', String(pagination.pageSize))
-      url.searchParams.append('status', 'approved') // hardcoded
-
-      const res = await fetch(url.toString(), {
-        headers: { Authorization: `Bearer ${accessToken}` },
-        cache: 'no-store',
-      })
-      if (!res.ok) throw new Error('Failed to fetch')
-      return (await res.json()) as ListingsGetResponse
-    },
-    staleTime: 30_000,
-  })
-
-  // Pagination info
-  const totalItems = data?.pagination?.totalItems ?? 0
-
-  // Local search filter (optional)
-  const dresses =
-    data?.data?.filter((d) =>
-      d.dressName.toLowerCase().includes(search.toLowerCase())
-    ) ?? []
-
-  // Table columns
-  const columns = useMemo<ColumnDef<Dress>[]>(
-    () => [
-      {
-        accessorKey: 'dressId',
-        header: 'Listing ID',
-        cell: ({ row }) => row.original.dressId.slice(0, 6),
-      },
-      {
-        accessorKey: 'media',
-        header: 'Thumbnails',
-        cell: ({ row }) => (
-          <div className="w-12 h-16 relative rounded overflow-hidden">
-            {row.original.media?.[0] && (
-              <Image
-                src={row.original.media[0]}
-                alt={row.original.dressName}
-                fill
-                sizes="48px"
-                className="object-cover"
-                priority={row.index === 0}
-              />
-            )}
-          </div>
-        ),
-      },
-      { accessorKey: 'dressName', header: 'Dress Name' },
-      { accessorKey: 'brand', header: 'Brand' },
-      { accessorKey: 'size', header: 'Size' },
-      {
-        accessorKey: 'colour',
-        header: 'Colour',
-        cell: ({ row }) => (
-          <div className="flex items-center gap-2">
-            <span
-              className="w-4 h-4 rounded-full border"
-              style={{ backgroundColor: row.original.colour }}
-            />
-            <span>{row.original?.colour}</span>
-          </div>
-        ),
-      },
-      {
-        accessorKey: 'approvalStatus',
-        header: 'Status',
-        cell: ({ row }) => {
-          const status = row.original.approvalStatus ?? 'approved'
-          const statusColor =
-            status === 'approved'
-              ? 'bg-green-100 text-green-700'
-              : 'bg-gray-100 text-gray-700'
-
-          return (
-            <span
-              className={`px-2 py-1 rounded-full text-xs font-medium ${statusColor}`}
-            >
-              {status}
-            </span>
-          )
-        },
-      },
-      {
-        accessorKey: 'updatedAt',
-        header: 'Last Updated',
-        cell: ({ row }) =>
-          new Date(row.original.updatedAt).toLocaleDateString('en-US', {
-            month: 'short',
-            day: '2-digit',
-            year: 'numeric',
-          }),
-      },
-      {
-        id: 'actions',
-        header: 'Action',
-        cell: () => (
-          <button className="px-3 py-1 text-sm rounded bg-black text-white">
-            View
-          </button>
-        ),
-      },
-    ],
-    []
-  )
+const MainLisitngContainer = ({ accessToken }: Props) => {
+  const { approvalStatus, searchQuery, setPage, page } =
+    useMainSiteListingState();
+  const debouncedValue = useDebounce(searchQuery, 500);
+  const { data, isLoading, isError, error } = useQuery<APiProps>({
+    queryKey: ["main-listing", approvalStatus, debouncedValue, page],
+    queryFn: () =>
+      fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/lender/admin?status=${approvalStatus}&limit=10&page=${page}`,
+        {
+          headers: {
+            "content-type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      ).then((res) => res.json()),
+  });
 
   const table = useReactTable({
-    data: dresses,
-    columns,
+    data: data?.data ?? [],
+    columns: listingColumn,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    manualPagination: true,
-    pageCount: Math.max(1, Math.ceil(totalItems / pagination.pageSize)),
-    state: { pagination },
-    onPaginationChange: setPagination,
-  })
+  });
+
+  let content;
 
   if (isLoading) {
-    return (
-      <div>
-        <SkeletonLoader title="Loading main site listings..." />
-      </div>
-    )
-  }
-
-  if (isError) {
-    return (
-      <ErrorPage errorMessage="Failed to load listings. Please try again later." />
-    )
+    content = <FancyLoader message="Fetching your listings, please wait..." />;
+  } else if (isError) {
+    content = <ErrorContainer message={error.message} />;
+  } else if (data && data.data.length === 0) {
+    content = <EmptyContainer message="No listings found for your search." />;
+  } else if (data && data.data && data.data.length > 0) {
+    content = (
+      <>
+        <div className="bg-white">
+          <DataTable table={table} columns={listingColumn} />
+        </div>
+      </>
+    );
   }
 
   return (
-    <div className="bg-white shadow rounded-lg p-4">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-center mb-4 gap-3 py-5">
-        <h2 className="text-2xl font-semibold">Main Site Listings</h2>
-        <div className="flex items-center gap-2">
+    <Card>
+      <MainListingHeader />
+      <CardContent>
+        {content}{" "}
+        <div>
+          {data?.pagination && data.pagination.totalPages > 1 && (
+            <div className="mt-4 w-full  flex justify-end">
+              <div>
+                <PaginationControls
+                  currentPage={data.pagination.currentPage}
+                  onPageChange={(page) => setPage(page)}
+                  totalPages={data.pagination.totalPages}
+                />
+              </div>
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
+export default MainLisitngContainer;
+
+const MainListingHeader = () => {
+  const { approvalStatus, setApprovalStatus, searchQuery, setSearchQuery } =
+    useMainSiteListingState();
+  return (
+    <CardHeader>
+      <div className="flex items-center justify-between">
+        <CardTitle>Main Site Listing</CardTitle>
+        <div className="flex items-center gap-x-5">
+          <Select
+            value={approvalStatus}
+            onValueChange={(val) => setApprovalStatus(val as Status)}
+          >
+            <SelectTrigger className="w-[150px]">
+              <SelectValue placeholder="Filter by status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="All">All</SelectItem>
+              <SelectItem value="approved">Approved</SelectItem>
+              <SelectItem value="pending">Pending</SelectItem>
+              <SelectItem value="rejected">Rejected</SelectItem>
+            </SelectContent>
+          </Select>
           <Input
-            type="text"
-            placeholder="Search..."
-            defaultValue={search}
-            onChange={(e) => debouncedSetSearch(e.target.value)}
-            className="w-[200px]"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search by dress name"
           />
         </div>
       </div>
-
-      {/* Table */}
-      <table className="w-full border-collapse text-sm">
-        <thead className="border-b">
-          {table.getHeaderGroups().map((hg) => (
-            <tr key={hg.id}>
-              {hg.headers.map((header) => (
-                <th
-                  key={header.id}
-                  className="text-left p-2 text-gray-600 font-medium"
-                >
-                  {flexRender(
-                    header.column.columnDef.header,
-                    header.getContext()
-                  )}
-                </th>
-              ))}
-            </tr>
-          ))}
-        </thead>
-        <tbody>
-          {table.getRowModel().rows.length > 0 ? (
-            table.getRowModel().rows.map((row) => (
-              <tr key={row.id} className="border-b hover:bg-gray-50">
-                {row.getVisibleCells().map((cell) => (
-                  <td key={cell.id} className="p-2">
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </td>
-                ))}
-              </tr>
-            ))
-          ) : (
-            <tr>
-              <td
-                colSpan={columns.length}
-                className="p-4 text-center text-gray-500"
-              >
-                No listings found
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
-
-      {/*  Pagination Component */}
-      <div className="mt-4">
-        <DataTablePagination table={table} totalItems={totalItems} />
-      </div>
-    </div>
-  )
-}
+    </CardHeader>
+  );
+};

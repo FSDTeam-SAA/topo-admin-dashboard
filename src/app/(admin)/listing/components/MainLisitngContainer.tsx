@@ -38,7 +38,7 @@ export default function MainListingContainer({
   // TanStack pagination state
   const [pagination, setPagination] = useState({
     pageIndex: 0,
-    pageSize: 3,
+    pageSize: 10,
   })
 
   // Reset to first page when search changes

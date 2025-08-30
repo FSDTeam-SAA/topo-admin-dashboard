@@ -39,7 +39,7 @@ export default function LenderListingContainer({
   // TanStack pagination state
   const [pagination, setPagination] = useState({
     pageIndex: 0,
-    pageSize: 3,
+    pageSize: 10,
   })
 
   // Reset page when filters change

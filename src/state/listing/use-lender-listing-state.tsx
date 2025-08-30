@@ -2,7 +2,7 @@ import { create } from "zustand";
 
 type Status = "All" | "approved" | "pending" | "rejected";
 
-interface MainListingState {
+interface LenderListingState {
   approvalStatus: Status;
   searchQuery: string;
   page: number;
@@ -14,8 +14,8 @@ interface MainListingState {
   resetFilters: () => void;
 }
 
-export const useMainSiteListingState = create<MainListingState>((set) => ({
-  approvalStatus: "approved",
+export const useLenderListingState = create<LenderListingState>((set) => ({
+  approvalStatus: "All",
   searchQuery: "",
   page: 1,
   perPage: 10,

@@ -3,10 +3,10 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import LenderListingContainer from "./LenderListingContainer";
+import LenderListingContainer from "./lender-listing-container/lender-listing-container";
 import ListingBtnSection from "./ListingBtnSection";
 import ListingHeader from "./ListingHeader";
-import MainListingContainer from "./MainLisitngContainer";
+import MainListingContainer from "./main-listing-container/MainLisitngContainer";
 
 interface ListingsClientProps {
   accessToken?: string;

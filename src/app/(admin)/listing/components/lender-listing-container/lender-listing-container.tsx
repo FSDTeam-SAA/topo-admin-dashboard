@@ -14,15 +14,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import useDebounce from "@/hook/useDebounce";
-import { useMainSiteListingState } from "@/state/listing/use-search-listing-state";
+import { useLenderListingState } from "@/state/listing/use-lender-listing-state";
 import { useQuery } from "@tanstack/react-query";
 import {
   getCoreRowModel,
   getPaginationRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { Listing } from "../types/listingsTypes";
-import { listingColumn } from "./listing-column";
+import { Listing } from "../../types/listingsTypes";
+import { listingColumn } from "../listing-column";
 
 interface Props {
   accessToken: string;
@@ -44,12 +44,12 @@ interface APiProps {
   };
 }
 
-const MainLisitngContainer = ({ accessToken }: Props) => {
+const LenderListingContainer = ({ accessToken }: Props) => {
   const { approvalStatus, searchQuery, setPage, page } =
-    useMainSiteListingState();
+    useLenderListingState();
   const debouncedValue = useDebounce(searchQuery, 500);
   const { data, isLoading, isError, error } = useQuery<APiProps>({
-    queryKey: ["main-listing", approvalStatus, debouncedValue, page],
+    queryKey: ["lender-listing", approvalStatus, debouncedValue, page],
     queryFn: () =>
       fetch(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/lender/admin?status=${approvalStatus}&limit=10&page=${page}`,
@@ -89,7 +89,7 @@ const MainLisitngContainer = ({ accessToken }: Props) => {
 
   return (
     <Card>
-      <MainListingHeader />
+      <LenderListingHeader />
       <CardContent>
         {content}{" "}
         <div>
@@ -110,11 +110,11 @@ const MainLisitngContainer = ({ accessToken }: Props) => {
   );
 };
 
-export default MainLisitngContainer;
+export default LenderListingContainer;
 
-const MainListingHeader = () => {
+const LenderListingHeader = () => {
   const { approvalStatus, setApprovalStatus, searchQuery, setSearchQuery } =
-    useMainSiteListingState();
+    useLenderListingState();
   return (
     <CardHeader>
       <div className="flex items-center justify-between">

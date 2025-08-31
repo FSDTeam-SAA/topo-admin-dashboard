@@ -52,7 +52,7 @@ const LenderListingContainer = ({ accessToken }: Props) => {
     queryKey: ["lender-listing", approvalStatus, debouncedValue, page],
     queryFn: () =>
       fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/lender/admin?status=${approvalStatus}&limit=10&page=${page}`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/lender/admin?status=${approvalStatus}&limit=10&page=${page}&search=${debouncedValue}`,
         {
           headers: {
             "content-type": "application/json",

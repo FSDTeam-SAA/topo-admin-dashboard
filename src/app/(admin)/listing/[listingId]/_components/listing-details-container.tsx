@@ -1,20 +1,12 @@
 "use client";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import AlertModal from "@/components/ui/custom/alert-modal";
 import SkeletonWrapper from "@/components/ui/custom/skeleton-wrapper";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { Listing } from "@/types/listings/index";
 import { useQuery } from "@tanstack/react-query";
-import { X } from "lucide-react";
-import moment from "moment";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import ListingDetailsOverview from "./listing-detials-first-three-component/listingDetails-overview";
 
 interface Props {
   listingId: string;
@@ -72,8 +64,6 @@ const ListingDetailsContainer = ({ listingId, token }: Props) => {
     );
   }
 
-  const isActive = data?.data.approvalStatus === "approved";
-
   return (
     <div className="p-5 bg-[#fefaf6] space-y-8">
       <h2 className="text-[20px] font-normal uppercase  ">LISTINGS DETAILS</h2>
@@ -87,111 +77,11 @@ const ListingDetailsContainer = ({ listingId, token }: Props) => {
         </Alert>
       )} */}
 
-      <SkeletonWrapper isLoading={isLoading || isRefetching}>
-        <Card className="grid grid-cols-1 lg:grid-cols-12 ">
-          <div className="lg:col-span-2">
-            <div className="relative w-full h-[400px] ">
-              <Image
-                src={
-                  data?.data.media[0] ??
-                  "https://files.edgestore.dev/vkpagg64z2y0yvdx/publicFiles/_public/4420c9d1-dd2e-4afa-9b54-8a85d396ecbc.jpeg"
-                }
-                alt={data?.data.dressName ?? ""}
-                fill
-                className="object-cover rounded-l-[6px]"
-                sizes="(max-width: 768px) 100vw, 300px"
-              />
-            </div>
-          </div>
-
-          <div className="lg:col-span-10 bg-white p-6 rounded-r-[15px] shadow-sm">
-            <div className="flex justify-between items-start mb-4">
-              <div>
-                <h3 className="text-xl font-bold">
-                  {data?.data.brand} - {data?.data.dressName}
-                </h3>
-                <p className="text-sm text-gray-500">
-                  Product ID: {data?.data.dressId}
-                </p>
-              </div>
-              <div className="flex space-x-3">
-                {/* <Link href={`/listings/${data?.data._id}/edit`}> */}
-                {!isActive ? (
-                  <Tooltip>
-                    <TooltipTrigger>
-                      <Button disabled={!isActive}>Edit Details</Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p className="max-w-[200px]">
-                        Your listing is under review and cannot be updated until
-                        approval / Rejection
-                      </p>
-                    </TooltipContent>
-                  </Tooltip>
-                ) : (
-                  <Button
-                    effect="ringHover"
-                    onClick={() => setEditAlertDialog((p) => !p)}
-                    disabled={!isActive}
-                  >
-                    Edit Details
-                  </Button>
-                )}
-
-                {/* </Link> */}
-              </div>
-            </div>
-
-            <div className="mb-6">
-              <p className="text-base mb-3">
-                <span className="font-medium">Size: </span>
-                {data?.data.size}
-              </p>
-              <div className="text-base mb-3 flex items-center">
-                <span className="font-medium">Color: </span>
-                <div
-                  style={{ backgroundColor: data?.data.colour }}
-                  className="h-5 w-5 rounded-full ml-3"
-                />
-              </div>
-              <p className="text-base mb-3">
-                <span className="font-medium">Condition:</span>{" "}
-                {data?.data.condition}
-              </p>
-              <p className="text-base mb-3">
-                <span className="font-medium mr-2">Rental Price:</span>$
-                {data?.data.rentalPrice.fourDays}/ 4 days
-              </p>
-              <p className="text-base mb-3">
-                <span className="font-medium">Last Updated:</span>{" "}
-                {moment(data?.data.updatedAt).format(
-                  "DD MMM, YYYY [at] hh:mm A"
-                )}
-              </p>
-              <div className="flex items-center gap-2">
-                <span className="font-medium">Status:</span>
-                <span
-                  className={`inline-flex items-center gap-1 px-4 py-1 rounded-2xl text-sm font-medium ${
-                    isActive
-                      ? "bg-green-100 text-green-700"
-                      : "bg-red-100 text-red-700"
-                  }`}
-                >
-                  {isActive ? "Active" : "Inactive"}
-                  {isActive ? (
-                    <div className="relative">
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                      <div className="absolute inset-0 w-2 h-2 bg-green-500 rounded-full animate-ping opacity-75"></div>
-                    </div>
-                  ) : (
-                    <X className="w-4 h-4" />
-                  )}
-                </span>
-              </div>
-            </div>
-          </div>
-        </Card>
-      </SkeletonWrapper>
+      <ListingDetailsOverview
+        isLoading={isLoading || isRefetching}
+        data={data?.data}
+        accessToken={token}
+      />
 
       <SkeletonWrapper isLoading={isLoading || isRefetching}>
         <Card className="bg-white p-6 rounded-[15px] ">

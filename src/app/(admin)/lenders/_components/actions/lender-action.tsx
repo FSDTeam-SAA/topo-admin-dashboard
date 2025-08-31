@@ -68,7 +68,7 @@ const LenderAction = ({ data }: Props) => {
               View
             </Button>
           </DialogTrigger>
-          <DialogContent className="w-[800px] space-y-[20px]">
+          <DialogContent className="w-[900px] space-y-[20px]">
             <DialogHeader>
               <DialogTitle>
                 Lender Details: {data.fullName} (ID: {data._id})

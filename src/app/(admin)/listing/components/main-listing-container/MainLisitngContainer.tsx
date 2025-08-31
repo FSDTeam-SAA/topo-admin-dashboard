@@ -21,8 +21,8 @@ import {
   getPaginationRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { Listing } from "../types/listingsTypes";
-import { listingColumn } from "./listing-column";
+import { Listing } from "../../types/listingsTypes";
+import { listingColumn } from "../listing-column";
 
 interface Props {
   accessToken: string;

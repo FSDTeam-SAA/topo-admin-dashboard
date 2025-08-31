@@ -1,5 +1,7 @@
+import { Button } from "@/components/ui/button";
 import { ColumnDef } from "@tanstack/react-table";
 import Image from "next/image";
+import Link from "next/link";
 import { Listing } from "../types/listingsTypes";
 
 export const listingColumn: ColumnDef<Listing>[] = [
@@ -74,10 +76,10 @@ export const listingColumn: ColumnDef<Listing>[] = [
   {
     id: "actions",
     header: "Action",
-    cell: () => (
-      <button className="px-3 py-1 text-sm rounded bg-black text-white">
-        View
-      </button>
+    cell: ({ row }) => (
+      <Button className="px-3 py-1 text-sm rounded bg-black text-white">
+        <Link href={`/listing/${row.original._id}`}>View</Link>
+      </Button>
     ),
   },
 ];

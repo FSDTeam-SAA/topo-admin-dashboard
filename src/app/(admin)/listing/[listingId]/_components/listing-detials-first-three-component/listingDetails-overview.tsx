@@ -7,10 +7,10 @@ import { Listing } from "@/types/listings";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Loader2, X } from "lucide-react";
 import moment from "moment";
-import Image from "next/image";
 import { useState } from "react";
 import { toast } from "sonner";
 import ListingRejectionForm from "./Rejection-form";
+import Slideshow from "./slide-show";
 
 interface Props {
   isLoading: boolean;
@@ -63,18 +63,9 @@ const ListingDetailsOverview = ({ isLoading, data, accessToken }: Props) => {
       <SkeletonWrapper isLoading={isLoading}>
         <Card className="grid grid-cols-1 lg:grid-cols-12 shadow-none">
           <div className="lg:col-span-2">
-            <div className="relative w-full h-[400px] ">
-              <Image
-                src={
-                  data?.media[0] ??
-                  "https://files.edgestore.dev/vkpagg64z2y0yvdx/publicFiles/_public/4420c9d1-dd2e-4afa-9b54-8a85d396ecbc.jpeg"
-                }
-                alt={data?.dressName ?? ""}
-                fill
-                className="object-cover rounded-l-[6px]"
-                sizes="(max-width: 768px) 100vw, 300px"
-              />
-            </div>
+            {data && (
+              <Slideshow data={data?.media} dressName={data?.dressName} />
+            )}
           </div>
 
           <div className="lg:col-span-10 bg-white p-6 rounded-r-[15px] shadow-sm">

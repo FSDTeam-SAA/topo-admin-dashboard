@@ -8,6 +8,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
+import BookingsModal from "./bookings-modal";
 
 const BookingsTable = () => {
   return (
@@ -19,7 +20,9 @@ const BookingsTable = () => {
             <TableHead className="w-[100px] text-center">Customer ID</TableHead>
             <TableHead className="w-[100px] text-center">Lender ID</TableHead>
             <TableHead className="w-[100px] text-center">Dress ID</TableHead>
-            <TableHead className="w-[100px] text-center">Booking Date</TableHead>
+            <TableHead className="w-[100px] text-center">
+              Booking Date
+            </TableHead>
             <TableHead className="w-[100px] text-center">Amount</TableHead>
             <TableHead className="w-[100px] text-center">Status</TableHead>
             <TableHead className="w-[100px] text-center">Action</TableHead>
@@ -32,7 +35,9 @@ const BookingsTable = () => {
             <TableCell className="text-center">#####</TableCell>
             <TableCell className="text-center">#####</TableCell>
             <TableCell className="text-center">#####</TableCell>
-            <TableCell className="text-center">{new Date().toLocaleDateString()}</TableCell>
+            <TableCell className="text-center">
+              {new Date().toLocaleDateString()}
+            </TableCell>
             <TableCell className="text-center">$###</TableCell>
             <TableCell className="text-center">
               <button className="bg-blue-200 px-2 rounded-3xl text-blue-600 font-semibold text-xs py-1">
@@ -41,7 +46,7 @@ const BookingsTable = () => {
             </TableCell>
 
             <TableCell className="text-center space-x-5">
-              <Button>View</Button>
+              <BookingsModal />
               <Button variant="outline">Escalate</Button>
             </TableCell>
           </TableRow>

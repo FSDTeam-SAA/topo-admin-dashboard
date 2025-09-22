@@ -11,6 +11,7 @@ import BookingCustomer from "./modals/booking-customer";
 import BookingLender from "./modals/booking-lender";
 import BookingPayment from "./modals/booking-payment";
 import BookingDisputes from "./modals/booking-disputes";
+import BookingNotes from "./modals/booking-notes";
 
 const BookingsModal = () => {
   const { isBookingModalOpen, setIsBookingModalOpen } = useModalStore();
@@ -68,6 +69,7 @@ const BookingsModal = () => {
             {isBookingModalOpen === "Lender" && <BookingLender />}
             {isBookingModalOpen === "Payment" && <BookingPayment />}
             {isBookingModalOpen === "Disputes" && <BookingDisputes />}
+            {isBookingModalOpen === "Notes" && <BookingNotes />}
           </div>
         </div>
       </DialogContent>

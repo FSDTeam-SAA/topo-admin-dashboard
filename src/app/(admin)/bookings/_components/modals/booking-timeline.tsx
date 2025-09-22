@@ -8,26 +8,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
 import React from "react";
 
-const BookingStatus = () => {
+const BookingTimeline = () => {
   return (
     <div className="mt-5">
-      <div className="border border-gray-200 p-5 rounded-lg shadow-sm">
-        <h1 className="text-xl mb-4">Booking Status</h1>
-
-        <div className="text-sm space-y-2">
-          <h3>Current Status: Active</h3>
-          <h3>Last Updated: Apr 15, 2025</h3>
-        </div>
-      </div>
-
-      <div className="mt-5">
-        <h1 className="mb-2">Update Status</h1>
+      <div>
+        <h1 className="mb-2 font-medium">Activity Timeline</h1>
         <Select>
           <SelectTrigger>
-            <SelectValue placeholder="Select a fruit" />
+            <SelectValue placeholder="All" />
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>
@@ -40,9 +30,18 @@ const BookingStatus = () => {
         </Select>
       </div>
 
-      <div className="mt-5">
-        <h1 className="mb-2">Reason for Change</h1>
-        <Textarea className="h-[150px]" />
+      <div className="border border-gray-200 p-5 rounded-lg shadow-sm mt-5">
+        <h1 className="text-xl mb-4">Time Line</h1>
+
+        <div className="text-sm space-y-2">
+          <h3>Apr 15, 2025: Booked ######</h3>
+          <h3>Apr 12, 2025: Submitted dispute ######</h3>
+          <h3>Apr 10, 2025: Status changed to Active</h3>
+
+          <div className="mt-5">
+            <Button>Load More</Button>
+          </div>
+        </div>
       </div>
 
       <div className="border border-gray-200 p-5 rounded-lg shadow-sm mt-10">
@@ -57,4 +56,4 @@ const BookingStatus = () => {
   );
 };
 
-export default BookingStatus;
+export default BookingTimeline;

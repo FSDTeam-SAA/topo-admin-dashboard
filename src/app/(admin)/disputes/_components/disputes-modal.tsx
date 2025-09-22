@@ -4,21 +4,14 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import Image from "next/image";
 import React from "react";
-import BookingSummery from "./modals/booking-summery";
-import BookingStatus from "./modals/booking-status";
 import { useModalStore } from "@/state/ModalState/useModalStore";
-import BookingCustomer from "./modals/booking-customer";
-import BookingLender from "./modals/booking-lender";
-import BookingPayment from "./modals/booking-payment";
-import BookingDisputes from "./modals/booking-disputes";
-import BookingNotes from "./modals/booking-notes";
-import BookingTimeline from "./modals/booking-timeline";
+import BookingSnapShot from "./modals/booking-snapshot";
 
 const DisputesModal = () => {
-  const { isBookingModalOpen, setIsBookingModalOpen } = useModalStore();
+  const { isDisputesModalOpen, setIsDisputesModalOpen } = useModalStore();
 
   const levels = [
-    { label: "Summary" },
+    { label: "Booking Snapshot" },
     { label: "Status" },
     { label: "Customer" },
     { label: "Lender" },
@@ -45,14 +38,14 @@ const DisputesModal = () => {
             />
           </div>
 
-          <h1 className="text-xl font-medium">Booking Details: ######</h1>
+          <h1 className="text-xl font-medium">Dispute Details: ########</h1>
 
           <div className="flex items-center justify-between mt-8 border-b border-black/25">
             {levels.map((item, index) => (
               <button
-                onClick={() => setIsBookingModalOpen(item.label)}
+                onClick={() => setIsDisputesModalOpen(item.label)}
                 className={`pb-1 px-5 ${
-                  isBookingModalOpen === item.label
+                  isDisputesModalOpen === item.label
                     ? "border-b-2 border-black"
                     : ""
                 }`}
@@ -64,14 +57,14 @@ const DisputesModal = () => {
           </div>
 
           <div>
-            {isBookingModalOpen === "Summary" && <BookingSummery />}
-            {isBookingModalOpen === "Status" && <BookingStatus />}
+            {isDisputesModalOpen === "Booking Snapshot" && <BookingSnapShot />}
+            {/* {isBookingModalOpen === "Status" && <BookingStatus />}
             {isBookingModalOpen === "Customer" && <BookingCustomer />}
             {isBookingModalOpen === "Lender" && <BookingLender />}
             {isBookingModalOpen === "Payment" && <BookingPayment />}
             {isBookingModalOpen === "Disputes" && <BookingDisputes />}
             {isBookingModalOpen === "Notes" && <BookingNotes />}
-            {isBookingModalOpen === "Timeline" && <BookingTimeline />}
+            {isBookingModalOpen === "Timeline" && <BookingTimeline />} */}
           </div>
         </div>
       </DialogContent>

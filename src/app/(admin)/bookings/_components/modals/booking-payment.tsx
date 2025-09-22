@@ -3,7 +3,7 @@ import React from "react";
 
 const BookingPayment = () => {
   return (
-    <div className="mt-2 space-y-5">
+    <div className="mt-5 space-y-5">
       <div className="border border-gray-200 p-5 rounded-lg shadow-sm">
         <h1 className="text-xl mb-4">Customer Payment</h1>
 

@@ -13,7 +13,7 @@ import React from "react";
 
 const BookingStatus = () => {
   return (
-    <div className="mt-2">
+    <div className="mt-5">
       <div className="border border-gray-200 p-5 rounded-lg shadow-sm">
         <h1 className="text-xl mb-4">Booking Status</h1>
 

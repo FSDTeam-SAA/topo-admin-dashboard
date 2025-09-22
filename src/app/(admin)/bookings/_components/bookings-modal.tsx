@@ -10,6 +10,7 @@ import { useModalStore } from "@/state/ModalState/useModalStore";
 import BookingCustomer from "./modals/booking-customer";
 import BookingLender from "./modals/booking-lender";
 import BookingPayment from "./modals/booking-payment";
+import BookingDisputes from "./modals/booking-disputes";
 
 const BookingsModal = () => {
   const { isBookingModalOpen, setIsBookingModalOpen } = useModalStore();
@@ -30,41 +31,44 @@ const BookingsModal = () => {
       <DialogTrigger asChild>
         <Button>View</Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-5xl p-10 h-[800px] overflow-auto">
-        <div>
-          <Image
-            src={"/logo.png"}
-            alt="logo.png"
-            width={1000}
-            height={1000}
-            className="w-12 h-12 mx-auto"
-          />
-        </div>
+      <DialogContent className="sm:max-w-5xl p-10">
+        <div className="h-[700px] overflow-auto scrollbar-hide">
+          <div>
+            <Image
+              src={"/logo.png"}
+              alt="logo.png"
+              width={1000}
+              height={1000}
+              className="w-12 h-12 mx-auto"
+            />
+          </div>
 
-        <h1 className="text-xl font-medium">Booking Details: ######</h1>
+          <h1 className="text-xl font-medium">Booking Details: ######</h1>
 
-        <div className="flex items-center justify-between mt-8 border-b border-black/25">
-          {levels.map((item, index) => (
-            <button
-              onClick={() => setIsBookingModalOpen(item.label)}
-              className={`pb-1 px-5 ${
-                isBookingModalOpen === item.label
-                  ? "border-b-2 border-black"
-                  : ""
-              }`}
-              key={index}
-            >
-              {item.label}
-            </button>
-          ))}
-        </div>
+          <div className="flex items-center justify-between mt-8 border-b border-black/25">
+            {levels.map((item, index) => (
+              <button
+                onClick={() => setIsBookingModalOpen(item.label)}
+                className={`pb-1 px-5 ${
+                  isBookingModalOpen === item.label
+                    ? "border-b-2 border-black"
+                    : ""
+                }`}
+                key={index}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
 
-        <div>
-          {isBookingModalOpen === "Summary" && <BookingSummery />}
-          {isBookingModalOpen === "Status" && <BookingStatus />}
-          {isBookingModalOpen === "Customer" && <BookingCustomer />}
-          {isBookingModalOpen === "Lender" && <BookingLender />}
-          {isBookingModalOpen === "Payment" && <BookingPayment />}
+          <div>
+            {isBookingModalOpen === "Summary" && <BookingSummery />}
+            {isBookingModalOpen === "Status" && <BookingStatus />}
+            {isBookingModalOpen === "Customer" && <BookingCustomer />}
+            {isBookingModalOpen === "Lender" && <BookingLender />}
+            {isBookingModalOpen === "Payment" && <BookingPayment />}
+            {isBookingModalOpen === "Disputes" && <BookingDisputes />}
+          </div>
         </div>
       </DialogContent>
     </Dialog>

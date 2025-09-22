@@ -7,6 +7,8 @@ import React from "react";
 import BookingSummery from "./modals/booking-summery";
 import BookingStatus from "./modals/booking-status";
 import { useModalStore } from "@/state/ModalState/useModalStore";
+import BookingCustomer from "./modals/booking-customer";
+import BookingLender from "./modals/booking-lender";
 
 const BookingsModal = () => {
   const { isBookingModalOpen, setIsBookingModalOpen } = useModalStore();
@@ -59,6 +61,8 @@ const BookingsModal = () => {
         <div>
           {isBookingModalOpen === "Summary" && <BookingSummery />}
           {isBookingModalOpen === "Status" && <BookingStatus />}
+          {isBookingModalOpen === "Customer" && <BookingCustomer />}
+          {isBookingModalOpen === "Lender" && <BookingLender />}
         </div>
       </DialogContent>
     </Dialog>

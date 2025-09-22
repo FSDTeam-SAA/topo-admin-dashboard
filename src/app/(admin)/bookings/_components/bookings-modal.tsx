@@ -9,6 +9,7 @@ import BookingStatus from "./modals/booking-status";
 import { useModalStore } from "@/state/ModalState/useModalStore";
 import BookingCustomer from "./modals/booking-customer";
 import BookingLender from "./modals/booking-lender";
+import BookingPayment from "./modals/booking-payment";
 
 const BookingsModal = () => {
   const { isBookingModalOpen, setIsBookingModalOpen } = useModalStore();
@@ -29,7 +30,7 @@ const BookingsModal = () => {
       <DialogTrigger asChild>
         <Button>View</Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-5xl p-10">
+      <DialogContent className="sm:max-w-5xl p-10 h-[800px] overflow-auto">
         <div>
           <Image
             src={"/logo.png"}
@@ -63,6 +64,7 @@ const BookingsModal = () => {
           {isBookingModalOpen === "Status" && <BookingStatus />}
           {isBookingModalOpen === "Customer" && <BookingCustomer />}
           {isBookingModalOpen === "Lender" && <BookingLender />}
+          {isBookingModalOpen === "Payment" && <BookingPayment />}
         </div>
       </DialogContent>
     </Dialog>

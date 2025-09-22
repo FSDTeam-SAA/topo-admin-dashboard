@@ -6,13 +6,14 @@ import Image from "next/image";
 import React from "react";
 import { useModalStore } from "@/state/ModalState/useModalStore";
 import BookingSnapShot from "./modals/booking-snapshot";
+import DisputesDetails from "./modals/disputes-details";
 
 const DisputesModal = () => {
   const { isDisputesModalOpen, setIsDisputesModalOpen } = useModalStore();
 
   const levels = [
     { label: "Booking Snapshot" },
-    { label: "Status" },
+    { label: "Dispute Details" },
     { label: "Customer" },
     { label: "Lender" },
     { label: "Payment" },
@@ -58,13 +59,7 @@ const DisputesModal = () => {
 
           <div>
             {isDisputesModalOpen === "Booking Snapshot" && <BookingSnapShot />}
-            {/* {isBookingModalOpen === "Status" && <BookingStatus />}
-            {isBookingModalOpen === "Customer" && <BookingCustomer />}
-            {isBookingModalOpen === "Lender" && <BookingLender />}
-            {isBookingModalOpen === "Payment" && <BookingPayment />}
-            {isBookingModalOpen === "Disputes" && <BookingDisputes />}
-            {isBookingModalOpen === "Notes" && <BookingNotes />}
-            {isBookingModalOpen === "Timeline" && <BookingTimeline />} */}
+            {isDisputesModalOpen === "Dispute Details" && <DisputesDetails />}
           </div>
         </div>
       </DialogContent>

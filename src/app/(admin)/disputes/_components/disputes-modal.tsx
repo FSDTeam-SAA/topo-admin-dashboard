@@ -7,6 +7,7 @@ import React from "react";
 import { useModalStore } from "@/state/ModalState/useModalStore";
 import BookingSnapShot from "./modals/booking-snapshot";
 import DisputesDetails from "./modals/disputes-details";
+import PlatformPolicyFlags from "./modals/platform-policy-flags";
 
 const DisputesModal = () => {
   const { isDisputesModalOpen, setIsDisputesModalOpen } = useModalStore();
@@ -14,12 +15,8 @@ const DisputesModal = () => {
   const levels = [
     { label: "Booking Snapshot" },
     { label: "Dispute Details" },
-    { label: "Customer" },
-    { label: "Lender" },
-    { label: "Payment" },
-    { label: "Disputes" },
-    { label: "Notes" },
-    { label: "Timeline" },
+    { label: "Platform Policy Flags" },
+    { label: "Resolution Panel" },
   ];
 
   return (
@@ -60,6 +57,9 @@ const DisputesModal = () => {
           <div>
             {isDisputesModalOpen === "Booking Snapshot" && <BookingSnapShot />}
             {isDisputesModalOpen === "Dispute Details" && <DisputesDetails />}
+            {isDisputesModalOpen === "Platform Policy Flags" && (
+              <PlatformPolicyFlags />
+            )}
           </div>
         </div>
       </DialogContent>

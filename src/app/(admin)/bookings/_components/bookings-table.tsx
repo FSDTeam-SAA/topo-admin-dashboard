@@ -103,7 +103,7 @@ const BookingsTable = ({ token }: Props) => {
                     ))}
                   </TableCell>
                   <TableCell className="text-center space-x-5">
-                    <BookingsModal />
+                    <BookingsModal id={item.id} token={token} />
                     <Button variant="outline">Escalate</Button>
                   </TableCell>
                 </TableRow>

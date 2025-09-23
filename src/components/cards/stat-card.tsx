@@ -12,12 +12,17 @@ interface Props {
 }
 
 export const InfoCard = ({ title, value }: Props) => {
-  const isTotalListings = title.toLowerCase() === 'total listings'
+  const isTotalListings =
+    title.toLowerCase() === 'total listings' ||
+    title.toLowerCase() === 'total admins' ||
+    title.toLowerCase() === 'active homepage sections'
 
   return (
     <Card
       className={
-        isTotalListings ? 'bg-black text-white' : 'bg-white text-black'
+        isTotalListings
+          ? 'bg-black text-white scale-105'
+          : 'bg-white text-black'
       }
     >
       <CardHeader>

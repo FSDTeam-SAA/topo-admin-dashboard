@@ -9,119 +9,97 @@ import {
   flexRender,
 } from '@tanstack/react-table'
 import { Input } from '@/components/ui/input'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import Image from 'next/image'
 import { PaginationControls } from '@/components/ui/pagination-controls'
-import { BannerSection } from './add_banner'
 
 // Type
-type Banner = {
-  bannerId: string
-  title: string
-  image: string
-  updatedAt: string
-  status: 'Active' | 'Draft'
+type Role = {
+  roleId: string
+  roleName: string
+  permissions: string[]
+  adminAssigned: string
+  lastActive: string
 }
 
 // Dummy Data
-const dummyBanners: Banner[] = [
+const dummyRoles: Role[] = [
   {
-    bannerId: 'ban-201',
-    title: 'Summer Sale',
-    image: '/default_image.jpg',
-    updatedAt: '2025-09-18',
-    status: 'Active',
+    roleId: 'role-101',
+    roleName: 'Super Admin',
+    permissions: ['Manage Users', 'Manage Roles', 'Full Access'],
+    adminAssigned: 'Alice Johnson',
+    lastActive: '2025-09-20',
   },
   {
-    bannerId: 'ban-202',
-    title: 'New Arrivals',
-    image: '/default_image.jpg',
-    updatedAt: '2025-09-12',
-    status: 'Draft',
+    roleId: 'role-102',
+    roleName: 'Editor',
+    permissions: ['Edit Content', 'Manage Banners'],
+    adminAssigned: 'Michael Smith',
+    lastActive: '2025-09-18',
   },
   {
-    bannerId: 'ban-203',
-    title: 'Holiday Discount',
-    image: '/default_image.jpg',
-    updatedAt: '2025-09-05',
-    status: 'Active',
+    roleId: 'role-103',
+    roleName: 'Viewer',
+    permissions: ['Read Only'],
+    adminAssigned: 'Sophia Lee',
+    lastActive: '2025-09-12',
   },
 ]
 
 // Columns
-const columns: ColumnDef<Banner>[] = [
-  { accessorKey: 'bannerId', header: 'Banner ID' },
-  { accessorKey: 'title', header: 'Title' },
+const columns: ColumnDef<Role>[] = [
+  { accessorKey: 'roleId', header: 'Role ID' },
+  { accessorKey: 'roleName', header: 'Role Name' },
   {
-    accessorKey: 'image',
-    header: 'Image Preview',
+    accessorKey: 'permissions',
+    header: 'Permissions',
     cell: ({ row }) => (
-      <div className="flex justify-center">
-        <Image
-          src={row.original.image}
-          alt={row.original.title}
-          width={80}
-          height={40}
-          className="rounded-md object-cover border"
-        />
+      <div className="flex flex-wrap gap-1 justify-center">
+        {row.original.permissions.map((perm, i) => (
+          <span
+            key={i}
+            className="px-2 py-1 bg-gray-100 text-gray-700 rounded-full text-xs"
+          >
+            {perm}
+          </span>
+        ))}
       </div>
     ),
   },
+  { accessorKey: 'adminAssigned', header: 'Admin Assigned' },
   {
-    accessorKey: 'updatedAt',
-    header: 'Last Updated',
+    accessorKey: 'lastActive',
+    header: 'Last Active',
     cell: ({ row }) =>
-      new Date(row.original.updatedAt).toLocaleDateString('en-US', {
+      new Date(row.original.lastActive).toLocaleDateString('en-US', {
         month: 'short',
         day: '2-digit',
         year: 'numeric',
       }),
   },
   {
-    accessorKey: 'status',
-    header: 'Status',
-    cell: ({ row }) => (
-      <span
-        className={`px-2 py-1 rounded-full text-xs font-medium ${
-          row.original.status === 'Active'
-            ? 'bg-green-100 text-green-700'
-            : 'bg-blue-100 text-blue-700'
-        }`}
-      >
-        {row.original.status}
-      </span>
-    ),
-  },
-  {
     id: 'actions',
     header: 'Action',
     cell: () => (
       <button className="px-3 py-1 text-[13px] rounded-lg bg-black text-white">
-        View Details
+        Manage
       </button>
     ),
   },
 ]
 
 // Main Component
-export default function BannerTable() {
+export default function RolesPermissionsTable() {
   const [search, setSearch] = useState('')
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 5 })
 
-  // reset to first page when search changes
+  // reset page on search
   useEffect(() => {
     setPagination((prev) => ({ ...prev, pageIndex: 0 }))
   }, [search])
 
   // filter locally
   const filteredData = useMemo(() => {
-    return dummyBanners.filter((item) =>
+    return dummyRoles.filter((item) =>
       JSON.stringify(item).toLowerCase().includes(search.toLowerCase())
     )
   }, [search])
@@ -143,33 +121,13 @@ export default function BannerTable() {
     <div className="bg-white shadow-md rounded-xl p-6">
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-center mb-4 gap-3 py-5">
-        <div className="space-y-5">
-          <h2 className="text-2xl font-semibold">Banners</h2>
-          <div className="flex items-center gap-8">
-            <Input
-              type="text"
-              placeholder="Search..."
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-[200px]"
-            />
-            <div>
-              {/* Status Dropdown */}
-              <Select defaultValue="all">
-                <SelectTrigger className="w-[150px]">
-                  <SelectValue placeholder="Filter by status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All</SelectItem>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="draft">Draft</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </div>
-
-        {/* Add Banner Button (optional) */}
-        <BannerSection />
+        <h2 className="text-2xl font-semibold">Roles & Permissions</h2>
+        <Input
+          type="text"
+          placeholder="Search..."
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-[200px]"
+        />
       </div>
 
       {/* Table */}

@@ -1,3 +1,5 @@
+'use client'
+
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -16,42 +18,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Textarea } from '@/components/ui/textarea'
-import { useMutation } from '@tanstack/react-query'
-import { useSession } from 'next-auth/react'
 import Image from 'next/image'
 import React, { useState } from 'react'
-import { toast } from 'sonner'
 
-function useAddSection() {
-  const session = useSession()
-  const accessToken = session?.data?.user.accessToken
-
-  return useMutation({
-    mutationFn: async (formData: FormData) => {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/homepageSections`,
-        {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-          body: formData,
-        }
-      )
-
-      if (!res.ok) {
-        throw new Error('Failed to create banner')
-      }
-
-      return res.json()
-    },
-  })
-}
-
-export const HomepageSection = () => {
+export const BannerSection = () => {
   const [status, setStatus] = useState('active')
-  const addBanner = useAddSection()
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -59,22 +30,14 @@ export const HomepageSection = () => {
 
     formData.set('status', status)
 
-    addBanner.mutate(formData, {
-      onSuccess: (data) => {
-        console.log('Homepage section added:', data)
-        toast.success('Homepage section created successfully!')
-      },
-      onError: (error) => {
-        console.error('Error adding homepage section:', error)
-        toast.error('Failed to create homepage section!')
-      },
-    })
+    // TODO: Add mutation function here later
+    console.log('Banner form submitted:', Object.fromEntries(formData))
   }
 
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant={'default'}>{'Add Section'}</Button>
+        <Button variant="default">{'Add Banner'}</Button>
       </DialogTrigger>
 
       <DialogContent className="p-8">
@@ -89,7 +52,7 @@ export const HomepageSection = () => {
             />
           </div>
           <DialogTitle className="text-3xl tracking-wide font-light py-6">
-            Add Homepage Section
+            Add Banner
           </DialogTitle>
         </DialogHeader>
 
@@ -100,21 +63,18 @@ export const HomepageSection = () => {
             <Label htmlFor="title" className="tracking-wide font-light">
               Title
             </Label>
-            <Input id="title" name="title" placeholder="Enter title" required />
-          </div>
-
-          {/* content description */}
-          <div className="space-y-2">
-            <Label htmlFor="content" className="tracking-wide font-light">
-              Content
-            </Label>
-            <Textarea id="content" placeholder="Enter content" required />
+            <Input
+              id="title"
+              name="title"
+              placeholder="Enter banner title"
+              required
+            />
           </div>
 
           {/* Image Upload */}
           <div className="space-y-2">
             <Label htmlFor="image" className="tracking-wide font-light">
-              Image (JPEG/PNG, Max 5MB)
+              Banner Image (JPEG/PNG, Max 5MB)
             </Label>
             <Input
               id="image"
@@ -144,9 +104,7 @@ export const HomepageSection = () => {
 
           <div className="flex justify-start">
             <DialogFooter className="pt-10 ">
-              <Button disabled={addBanner.isPending} type="submit">
-                {addBanner.isPending ? 'saving...' : 'Save Changes'}
-              </Button>
+              <Button type="submit">Save Banner</Button>
             </DialogFooter>
           </div>
         </form>

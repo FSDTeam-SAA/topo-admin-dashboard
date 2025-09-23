@@ -92,7 +92,7 @@ const BookingsModal = ({ id, token }: Props) => {
             {isBookingModalOpen === "Summary" && <BookingSummery bookingDetails={bookingDetails} />}
             {isBookingModalOpen === "Status" && <BookingStatus />}
             {isBookingModalOpen === "Customer" && <BookingCustomer bookingDetails={bookingDetails} />}
-            {isBookingModalOpen === "Lender" && <BookingLender />}
+            {isBookingModalOpen === "Lender" && <BookingLender bookingDetails={bookingDetails} />}
             {isBookingModalOpen === "Payment" && <BookingPayment />}
             {isBookingModalOpen === "Disputes" && <BookingDisputes />}
             {isBookingModalOpen === "Notes" && <BookingNotes />}

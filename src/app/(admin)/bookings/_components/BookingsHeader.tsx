@@ -17,8 +17,6 @@ const BookingsHeader = () => {
     },
   });
 
-  console.log("bookingStates : ", bookingStates);
-
   return (
     <div>
       <div className="flex justify-between items-center">

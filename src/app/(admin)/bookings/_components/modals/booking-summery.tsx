@@ -30,7 +30,6 @@ const BookingSummery = ({
 }: {
   bookingDetails?: BookingDetails;
 }) => {
-  console.log("summery : ", bookingDetails);
 
   return (
     <div className="mt-5">

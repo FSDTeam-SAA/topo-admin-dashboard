@@ -15,7 +15,7 @@ import {
 import { useFilterBooking } from "./states/useFilterBooking";
 
 const SearchBookings = () => {
-  const { setSearch } = useFilterBooking();
+  const { setSearch, setDate } = useFilterBooking();
 
   return (
     <div className="bg-white p-5 rounded-lg mt-8 shadow-[0px_4px_10px_0px_#0000001A] h-[100px] flex flex-col justify-center">
@@ -30,21 +30,13 @@ const SearchBookings = () => {
         </div>
 
         <div className="flex items-center gap-5">
-          <Select>
-            <SelectTrigger className="w-[180px] focus-visible:ring-0">
-              <SelectValue placeholder="Time" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectLabel>Times</SelectLabel>
-                <SelectItem value="apple">10.00 AM</SelectItem>
-                <SelectItem value="banana">11.00 AM</SelectItem>
-                <SelectItem value="blueberry">1.00 AM</SelectItem>
-                <SelectItem value="grapes">2.00 AM</SelectItem>
-                <SelectItem value="pineapple">3.00 AM</SelectItem>
-              </SelectGroup>
-            </SelectContent>
-          </Select>
+          <div>
+            <input
+              type="date"
+              className="w-[180px] focus-visible:ring-0 border border-input h-9 rounded-md text-base shadow-sm px-3 py-1"
+              onChange={(e) => setDate(e.target.value)}
+            />
+          </div>
 
           <Select>
             <SelectTrigger className="w-[180px] focus-visible:ring-0">

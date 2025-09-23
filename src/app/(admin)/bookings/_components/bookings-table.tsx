@@ -22,13 +22,13 @@ interface Props {
 
 const BookingsTable = ({ token }: Props) => {
   const [page, setPage] = React.useState(1);
-  const { search } = useFilterBooking();
+  const { search, date } = useFilterBooking();
 
   const { data, isLoading, isFetching } = useQuery<BookingsResponse>({
-    queryKey: ["all-bookings", page, search],
+    queryKey: ["all-bookings", page, search, date],
     queryFn: async () => {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/customer/bookings/all?page=${page}&search=${search}`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/customer/bookings/all?page=${page}&search=${search}&date=${date}`,
         {
           headers: {
             "Content-Type": "application/json",

@@ -21,7 +21,6 @@ export default function ContainerHeader() {
 
         <InfoCard title="Active Banners" value="##" />
         <InfoCard title="Published Testimonials" value="##" />
-        <InfoCard title="Active Referral Codes" value="##" />
       </div>
 
       {/* {isError && (

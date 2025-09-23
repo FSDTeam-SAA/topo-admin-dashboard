@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/select'
 
 import { PaginationControls } from '@/components/ui/pagination-controls'
+import { TestimonialSection } from './add_testimonial'
 
 // Type
 type Testimonial = {
@@ -165,9 +166,7 @@ export default function TestimonialTable() {
         </div>
 
         {/* Add Testimonial Button */}
-        <button className="px-4 py-2 bg-black text-white rounded-lg">
-          Add Testimonial
-        </button>
+        <TestimonialSection />
       </div>
 
       {/* Table */}

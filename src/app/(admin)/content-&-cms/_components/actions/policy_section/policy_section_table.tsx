@@ -17,6 +17,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { PaginationControls } from '@/components/ui/pagination-controls'
+import { PolicySection } from './add_policy'
 
 // Type
 type Policy = {
@@ -118,7 +119,9 @@ export default function PolicyTable() {
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-center mb-4 gap-3 py-5">
         <div className="space-y-5">
-          <h2 className="text-2xl font-semibold">Policies</h2>
+          <h2 className="text-2xl font-semibold">
+            Terms and Conditions/Policies
+          </h2>
           <div className="flex items-center gap-8">
             <Input
               type="text"
@@ -143,9 +146,7 @@ export default function PolicyTable() {
         </div>
 
         {/* Add Policy Button */}
-        <button className="px-4 py-2 bg-black text-white rounded-lg">
-          Add Policy
-        </button>
+        <PolicySection />
       </div>
 
       {/* Table */}

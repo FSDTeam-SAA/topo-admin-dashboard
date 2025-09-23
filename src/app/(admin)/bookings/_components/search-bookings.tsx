@@ -3,15 +3,6 @@
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 import React from "react";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useFilterBooking } from "./states/useFilterBooking";
 
 const SearchBookings = () => {
@@ -22,7 +13,7 @@ const SearchBookings = () => {
       <div className="flex items-center justify-between">
         <div className="relative">
           <Input
-            className="w-[264px] pl-6 focus-visible:ring-0"
+            className="w-[264px] pl-7 focus-visible:ring-0"
             placeholder="Search..."
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -37,22 +28,6 @@ const SearchBookings = () => {
               onChange={(e) => setDate(e.target.value)}
             />
           </div>
-
-          <Select>
-            <SelectTrigger className="w-[180px] focus-visible:ring-0">
-              <SelectValue placeholder="All" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectLabel>All</SelectLabel>
-                <SelectItem value="apple">10.00 AM</SelectItem>
-                <SelectItem value="banana">11.00 AM</SelectItem>
-                <SelectItem value="blueberry">1.00 AM</SelectItem>
-                <SelectItem value="grapes">2.00 AM</SelectItem>
-                <SelectItem value="pineapple">3.00 AM</SelectItem>
-              </SelectGroup>
-            </SelectContent>
-          </Select>
         </div>
       </div>
     </div>

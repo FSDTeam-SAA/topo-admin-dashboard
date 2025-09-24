@@ -4,7 +4,6 @@ import React from "react";
 import ContactInformation from "./contact-information";
 import PasswordSecurity from "./password-security";
 import NotificationPreference from "./notification-preference";
-import SettingsAction from "./settings-action";
 import { useQuery } from "@tanstack/react-query";
 
 interface Props {
@@ -33,9 +32,8 @@ const SettingContainer = ({ token, userID }: Props) => {
   return (
     <div className="mt-8 space-y-8">
       <ContactInformation userInfo={userInfo} token={token} userID={userID} />
-      <PasswordSecurity />
+      <PasswordSecurity token={token} userID={userID} />
       <NotificationPreference />
-      <SettingsAction />
     </div>
   );
 };

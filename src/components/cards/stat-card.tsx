@@ -12,16 +12,14 @@ interface Props {
 }
 
 export const InfoCard = ({ title, value }: Props) => {
-  const isTotalListings = title.toLowerCase() === 'total listings'
-
   return (
     <Card
       className={
-        isTotalListings ? 'bg-black text-white' : 'bg-white text-black'
+        'hover:bg-black hover:text-white hover:scale-105 transition-all duration-500 ease-in-out'
       }
     >
       <CardHeader>
-        <CardTitle className="font-light leading-[120%]">{title}</CardTitle>
+        <CardTitle className="font-normal leading-[120%]">{title}</CardTitle>
       </CardHeader>
 
       <CardContent className="p-0">

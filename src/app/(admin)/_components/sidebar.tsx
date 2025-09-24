@@ -1,11 +1,11 @@
-"use client";
+'use client'
 
-import { Button } from "@/components/ui/button";
-import { LogOut } from "lucide-react";
-import { signOut } from "next-auth/react";
-import Image from "next/image";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { Button } from '@/components/ui/button'
+import { LogOut } from 'lucide-react'
+import { signOut } from 'next-auth/react'
+import Image from 'next/image'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 
 import {
   AlertDialog,
@@ -17,78 +17,78 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+} from '@/components/ui/alert-dialog'
 
 const routes = [
   {
     id: 1,
-    label: "Overview",
-    href: "/",
+    label: 'Overview',
+    href: '/',
   },
   {
     id: 2,
-    label: "Listing",
-    href: "/listing",
+    label: 'Listing',
+    href: '/listing',
   },
   {
     id: 3,
-    label: "Lenders",
-    href: "/lenders",
+    label: 'Lenders',
+    href: '/lenders',
   },
   {
     id: 4,
-    label: "Customers",
-    href: "/customers",
+    label: 'Customers',
+    href: '/customers',
   },
   {
     id: 5,
-    label: "Bookings",
-    href: "/bookings",
+    label: 'Bookings',
+    href: '/bookings',
   },
   {
     id: 6,
-    label: "Disputes",
-    href: "/disputes",
+    label: 'Disputes',
+    href: '/disputes',
   },
   {
     id: 7,
-    label: "Finance",
-    href: "/finance",
+    label: 'Finance',
+    href: '/finance',
   },
   {
     id: 8,
-    label: "Chats",
-    href: "/chats",
+    label: 'Chats',
+    href: '/chats',
   },
   {
     id: 9,
-    label: "Analytics",
-    href: "/analytics",
+    label: 'Analytics',
+    href: '/analytics',
   },
   {
     id: 10,
-    label: "Content & CMS",
-    href: "/content",
+    label: 'Content & CMS',
+    href: '/content-&-cms',
   },
   {
     id: 11,
-    label: "Support",
-    href: "/support",
+    label: 'Support',
+    href: '/support',
   },
   {
     id: 12,
-    label: "Team",
-    href: "/team",
+    label: 'Team',
+    href: '/team',
   },
   {
     id: 13,
-    label: "Settings",
-    href: "/settings",
+    label: 'Settings',
+    href: '/settings',
   },
-];
+]
 
 const Sidebar = () => {
-  const pathname = usePathname();
+  const pathname = usePathname()
 
   return (
     <div className="fixed inset-y-0 left-0 z-50 w-64 border-r bg-primary">
@@ -109,9 +109,9 @@ const Sidebar = () => {
           <ul className="space-y-2">
             {routes.map((route) => {
               const isActive =
-                route.href === "/"
-                  ? pathname === "/"
-                  : pathname.startsWith(route.href);
+                route.href === '/'
+                  ? pathname === '/'
+                  : pathname.startsWith(route.href)
 
               return (
                 <li key={route.id}>
@@ -120,8 +120,8 @@ const Sidebar = () => {
                     className={`flex text-white/80 items-center gap-3 rounded-md px-3 font-light py-2
           ${
             isActive
-              ? "bg-white/20 text-primary-foreground"
-              : " hover:bg-white/10 hover:text-white/70"
+              ? 'bg-white/20 text-primary-foreground'
+              : ' hover:bg-white/10 hover:text-white/70'
           }
         `}
                   >
@@ -129,7 +129,7 @@ const Sidebar = () => {
                     <span>{route.label}</span>
                   </Link>
                 </li>
-              );
+              )
             })}
           </ul>
         </nav>
@@ -157,7 +157,7 @@ const Sidebar = () => {
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
                 <AlertDialogAction
                   onClick={async () => {
-                    await signOut({ redirectTo: "/", redirect: true });
+                    await signOut({ redirectTo: '/', redirect: true })
                   }}
                 >
                   Sign Out
@@ -168,7 +168,7 @@ const Sidebar = () => {
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default Sidebar;
+export default Sidebar

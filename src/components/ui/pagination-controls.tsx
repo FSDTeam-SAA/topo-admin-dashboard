@@ -1,4 +1,4 @@
-"use client";
+'use client'
 
 import {
   Pagination,
@@ -8,105 +8,121 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from "@/components/ui/pagination";
+} from '@/components/ui/pagination'
 
 interface PaginationControlsProps {
-  currentPage: number;
-  totalPages: number;
-  onPageChange: (page: number) => void;
+  currentPage: number
+  totalPages: number
+  totalItems: number
+  itemsPerPage: number
+  onPageChange: (page: number) => void
 }
 
 export function PaginationControls({
   currentPage,
   totalPages,
+  totalItems,
+  itemsPerPage,
   onPageChange,
 }: PaginationControlsProps) {
   const getPageNumbers = () => {
-    const pages: (number | "...")[] = [];
+    const pages: (number | '...')[] = []
 
     if (totalPages <= 5) {
-      for (let i = 1; i <= totalPages; i++) pages.push(i);
+      for (let i = 1; i <= totalPages; i++) pages.push(i)
     } else {
       if (currentPage <= 3) {
-        pages.push(1, 2, 3, 4, "...", totalPages);
+        pages.push(1, 2, 3, 4, '...', totalPages)
       } else if (currentPage >= totalPages - 2) {
         pages.push(
           1,
-          "...",
+          '...',
           totalPages - 3,
           totalPages - 2,
           totalPages - 1,
           totalPages
-        );
+        )
       } else {
         pages.push(
           1,
-          "...",
+          '...',
           currentPage - 1,
           currentPage,
           currentPage + 1,
-          "...",
+          '...',
           totalPages
-        );
+        )
       }
     }
 
-    return pages;
-  };
+    return pages
+  }
 
   const handleChange = (page: number) => {
     if (page !== currentPage && page >= 1 && page <= totalPages) {
-      onPageChange(page);
+      onPageChange(page)
     }
-  };
+  }
 
-  if (totalPages <= 1) return null;
+  // start & end index calculate
+  const startIndex = (currentPage - 1) * itemsPerPage + 1
+  const endIndex = Math.min(currentPage * itemsPerPage, totalItems)
 
   return (
-    <Pagination>
-      <PaginationContent>
-        <PaginationItem>
-          <PaginationPrevious
-            href="#"
-            onClick={(e) => {
-              e.preventDefault();
-              handleChange(currentPage - 1);
-            }}
-            aria-disabled={currentPage === 1}
-          />
-        </PaginationItem>
+    <div className="flex  items-center justify-between w-full mt-4">
+      {/* Left side: results info */}
+      <p className="text-base text-muted-foreground px-6">
+        Showing <span className="font-medium">{startIndex}</span> to{' '}
+        <span className="font-medium">{endIndex}</span> of{' '}
+        <span className="font-medium">{totalItems}</span> results
+      </p>
 
-        {getPageNumbers().map((page, i) => (
-          <PaginationItem key={i}>
-            {page === "..." ? (
-              <PaginationEllipsis />
-            ) : (
-              <PaginationLink
-                href="#"
-                isActive={page === currentPage}
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleChange(page);
-                }}
-                className="text-primary hover:text-primary/80"
-              >
-                {page}
-              </PaginationLink>
-            )}
+      {/* Right side: pagination */}
+      <Pagination className="justify-end px-5">
+        <PaginationContent>
+          <PaginationItem>
+            <PaginationPrevious
+              href="#"
+              onClick={(e) => {
+                e.preventDefault()
+                handleChange(currentPage - 1)
+              }}
+              aria-disabled={currentPage === 1}
+            />
           </PaginationItem>
-        ))}
 
-        <PaginationItem>
-          <PaginationNext
-            href="#"
-            onClick={(e) => {
-              e.preventDefault();
-              handleChange(currentPage + 1);
-            }}
-            aria-disabled={currentPage === totalPages}
-          />
-        </PaginationItem>
-      </PaginationContent>
-    </Pagination>
-  );
+          {getPageNumbers().map((page, i) => (
+            <PaginationItem key={i}>
+              {page === '...' ? (
+                <PaginationEllipsis />
+              ) : (
+                <PaginationLink
+                  href="#"
+                  isActive={page === currentPage}
+                  onClick={(e) => {
+                    e.preventDefault()
+                    handleChange(page)
+                  }}
+                  className="text-primary hover:text-primary/80"
+                >
+                  {page}
+                </PaginationLink>
+              )}
+            </PaginationItem>
+          ))}
+
+          <PaginationItem>
+            <PaginationNext
+              href="#"
+              onClick={(e) => {
+                e.preventDefault()
+                handleChange(currentPage + 1)
+              }}
+              aria-disabled={currentPage === totalPages}
+            />
+          </PaginationItem>
+        </PaginationContent>
+      </Pagination>
+    </div>
+  )
 }

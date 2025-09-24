@@ -30,20 +30,28 @@ function useAddPolicy() {
   const accessToken = session?.data?.user.accessToken
 
   return useMutation({
-    mutationFn: async (formData: FormData) => {
+    mutationFn: async (payload: {
+      name: string
+      details: string
+      status: string
+    }) => {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/policies`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/termsAndConditions`,
         {
           method: 'POST',
           headers: {
+            'Content-Type': 'application/json',
             Authorization: `Bearer ${accessToken}`,
           },
-          body: formData,
+          body: JSON.stringify(payload),
         }
       )
 
+      console.log('payload', payload)
+
       if (!res.ok) {
-        throw new Error('Failed to create policy')
+        const errorData = await res.json()
+        throw new Error(errorData?.message || 'Failed to create policy')
       }
 
       return res.json()
@@ -59,16 +67,20 @@ export const PolicySection = () => {
     e.preventDefault()
     const formData = new FormData(e.currentTarget)
 
-    formData.set('status', status)
+    const payload = {
+      name: formData.get('name') as string,
+      details: formData.get('details') as string,
+      status,
+    }
 
-    addPolicy.mutate(formData, {
+    addPolicy.mutate(payload, {
       onSuccess: (data) => {
         console.log('Policy added:', data)
         toast.success('Policy created successfully!')
       },
       onError: (error) => {
         console.error('Error adding policy:', error)
-        toast.error('Failed to create policy!')
+        toast.error(error.message || 'Failed to create policy!')
       },
     })
   }
@@ -95,26 +107,19 @@ export const PolicySection = () => {
           </DialogTitle>
         </DialogHeader>
 
-        {/* FORM START */}
         <form onSubmit={handleSubmit} className="space-y-8">
-          {/* Policy Name */}
           <div className="space-y-2">
-            <Label htmlFor="policyName" className="tracking-wide font-light">
-              Policy Name
-            </Label>
+            <Label htmlFor="policyName">Policy Name</Label>
             <Input
               id="policyName"
-              name="policyName"
+              name="name"
               placeholder="Enter policy name"
               required
             />
           </div>
 
-          {/* Details */}
           <div className="space-y-2">
-            <Label htmlFor="details" className="tracking-wide font-light">
-              Details
-            </Label>
+            <Label htmlFor="details">Details</Label>
             <Textarea
               id="details"
               name="details"
@@ -123,11 +128,8 @@ export const PolicySection = () => {
             />
           </div>
 
-          {/* Status Dropdown */}
           <div className="space-y-2">
-            <Label htmlFor="status" className="tracking-wide font-light">
-              Status
-            </Label>
+            <Label>Status</Label>
             <Select value={status} onValueChange={setStatus}>
               <SelectTrigger>
                 <SelectValue placeholder="Select status" />
@@ -140,15 +142,12 @@ export const PolicySection = () => {
             </Select>
           </div>
 
-          <div className="flex justify-start">
-            <DialogFooter className="pt-10 ">
-              <Button disabled={addPolicy.isPending} type="submit">
-                {addPolicy.isPending ? 'Saving...' : 'Save Policy'}
-              </Button>
-            </DialogFooter>
-          </div>
+          <DialogFooter className="pt-10">
+            <Button disabled={addPolicy.isPending} type="submit">
+              {addPolicy.isPending ? 'Saving...' : 'Save Policy'}
+            </Button>
+          </DialogFooter>
         </form>
-        {/* FORM END */}
       </DialogContent>
     </Dialog>
   )

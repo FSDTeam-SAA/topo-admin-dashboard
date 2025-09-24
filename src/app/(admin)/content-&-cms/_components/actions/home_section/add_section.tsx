@@ -100,7 +100,12 @@ export const HomepageSection = () => {
             <Label htmlFor="title" className="tracking-wide font-light">
               Title
             </Label>
-            <Input id="title" name="title" placeholder="Enter title" required />
+            <Input
+              id="title"
+              name="sectionName"
+              placeholder="Enter title"
+              required
+            />
           </div>
 
           {/* content description */}
@@ -108,7 +113,12 @@ export const HomepageSection = () => {
             <Label htmlFor="content" className="tracking-wide font-light">
               Content
             </Label>
-            <Textarea id="content" placeholder="Enter content" required />
+            <Textarea
+              id="content"
+              name="content"
+              placeholder="Enter content"
+              required
+            />
           </div>
 
           {/* Image Upload */}

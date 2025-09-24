@@ -18,11 +18,41 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { useMutation } from '@tanstack/react-query'
+import { useSession } from 'next-auth/react'
 import Image from 'next/image'
 import React, { useState } from 'react'
+import { toast } from 'sonner'
+
+function useAddBanner() {
+  const session = useSession()
+  const accessToken = session?.data?.user.accessToken
+
+  return useMutation({
+    mutationFn: async (formData: FormData) => {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/banner`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: formData,
+        }
+      )
+
+      if (!res.ok) {
+        throw new Error('Failed to create banner')
+      }
+
+      return res.json()
+    },
+  })
+}
 
 export const BannerSection = () => {
   const [status, setStatus] = useState('active')
+  const addBanner = useAddBanner()
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -30,8 +60,16 @@ export const BannerSection = () => {
 
     formData.set('status', status)
 
-    // TODO: Add mutation function here later
-    console.log('Banner form submitted:', Object.fromEntries(formData))
+    addBanner.mutate(formData, {
+      onSuccess: (data) => {
+        console.log('Banner added successfully', data)
+        toast.success('Banner added successfully')
+      },
+      onError: (error) => {
+        console.error('Error adding banner:', error)
+        toast.error('Failed to add banner')
+      },
+    })
   }
 
   return (

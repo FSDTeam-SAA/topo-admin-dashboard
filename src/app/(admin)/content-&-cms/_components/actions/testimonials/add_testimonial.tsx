@@ -21,20 +21,71 @@ import {
 import React, { useState } from 'react'
 import { Textarea } from '@/components/ui/textarea'
 import Image from 'next/image'
+import { useSession } from 'next-auth/react'
+import { useMutation } from '@tanstack/react-query'
+import { toast } from 'sonner'
+
+function useAddTestimonial() {
+  const session = useSession()
+  const accessToken = session?.data?.user.accessToken
+
+  return useMutation({
+    mutationFn: async (payload: {
+      customerName: string
+      content: string
+      rating: string
+      status: string
+    }) => {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/testimonoal`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify(payload),
+        }
+      )
+
+      console.log('payload', payload)
+
+      if (!res.ok) {
+        const errorData = await res.json()
+        throw new Error(errorData?.message || 'Failed to create policy')
+      }
+
+      return res.json()
+    },
+  })
+}
 
 export const TestimonialSection = () => {
   const [status, setStatus] = useState('active')
   const [rating, setRating] = useState('5')
+  const add = useAddTestimonial()
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const formData = new FormData(e.currentTarget)
 
-    formData.set('status', status)
-    formData.set('rating', rating)
+    const payload = {
+      customerName: formData.get('customerName') as string,
+      content: formData.get('content') as string,
+      rating,
+      status,
+    }
 
-    // TODO: Add mutation function here later
-    console.log('Testimonial form submitted:', Object.fromEntries(formData))
+    add.mutate(payload, {
+      onSuccess: (data) => {
+        console.log('Testimonial added:', data)
+        toast.success('Testimonial created successfully!')
+      },
+      onError: (error) => {
+        console.error('Error adding testimonial:', error)
+        toast.error(error.message || 'Failed to create testimonial!')
+      },
+    })
   }
 
   return (

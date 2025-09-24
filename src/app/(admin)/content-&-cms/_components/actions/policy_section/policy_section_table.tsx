@@ -20,7 +20,7 @@ import { PaginationControls } from '@/components/ui/pagination-controls'
 import { useQuery } from '@tanstack/react-query'
 import { Skeleton } from '@/components/ui/custom/skeleton'
 import { useSession } from 'next-auth/react'
-import { PolicySection } from './add_policy'
+import { PolicySectionAdd, PolicySectionEdit } from './add_policy'
 
 // ---- Types ----
 export type Policy = {
@@ -79,12 +79,11 @@ const columns: ColumnDef<Policy>[] = [
     id: 'actions',
     header: 'Action',
     cell: ({ row }) => (
-      <button
-        onClick={() => alert(`View details of ${row.original.name}`)}
-        className="px-3 py-1 text-[13px] rounded-lg bg-black text-white"
-      >
-        View Details
-      </button>
+      <PolicySectionEdit id={row.original._id}>
+        <button className="px-3 py-1 text-[13px] rounded-lg bg-black text-white hover:bg-gray-800 transition-colors">
+          View Details
+        </button>
+      </PolicySectionEdit>
     ),
   },
 ]
@@ -175,7 +174,7 @@ export default function PolicyTable() {
         </div>
 
         {/* Add Policy Button */}
-        <PolicySection />
+        <PolicySectionAdd />
       </div>
 
       {/* Loading State */}

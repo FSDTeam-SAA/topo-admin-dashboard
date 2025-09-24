@@ -20,6 +20,7 @@ import { PaginationControls } from '@/components/ui/pagination-controls'
 import { useQuery } from '@tanstack/react-query'
 import { Skeleton } from '@/components/ui/custom/skeleton'
 import { useSession } from 'next-auth/react'
+import { HomepageSectionAdd, HomepageSectionEdit } from './add_section'
 
 // ---- Types ----
 export type HomepageSection = {
@@ -53,7 +54,15 @@ async function fetchHomepageSections(
 // ---- Columns ----
 const columns: ColumnDef<HomepageSection>[] = [
   { accessorKey: 'sectionName', header: 'Section Name' },
-  { accessorKey: 'content', header: 'Content Summary' },
+  {
+    accessorKey: 'content',
+    header: 'Content Summary',
+    cell: ({ row }) => (
+      <div className="max-w-xs truncate" title={row.original.content}>
+        {row.original.content}
+      </div>
+    ),
+  },
   {
     accessorKey: 'updatedAt',
     header: 'Last Updated',
@@ -83,12 +92,11 @@ const columns: ColumnDef<HomepageSection>[] = [
     id: 'actions',
     header: 'Action',
     cell: ({ row }) => (
-      <button
-        onClick={() => alert(`View details of ${row.original.sectionName}`)}
-        className="px-3 py-1 text-[13px] rounded-lg bg-black text-white"
-      >
-        View Details
-      </button>
+      <HomepageSectionEdit sectionId={row.original._id}>
+        <button className="px-3 py-1 text-[13px] rounded-lg bg-black text-white hover:bg-gray-800 transition-colors">
+          View Details
+        </button>
+      </HomepageSectionEdit>
     ),
   },
 ]
@@ -101,7 +109,7 @@ export default function HomePageSectionTable() {
   >('all')
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 5 })
 
-  // Replace this with real session if you’re using next-auth
+  // Get session for access token
   const session = useSession()
   const accessToken = session.data?.user?.accessToken || ''
 
@@ -175,6 +183,9 @@ export default function HomePageSectionTable() {
             </div>
           </div>
         </div>
+
+        {/* Add Section Button */}
+        <HomepageSectionAdd />
       </div>
 
       {/* Loading State */}

@@ -37,7 +37,7 @@ export default function ContainerHeader() {
   })
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 font-sans">
       {/* Header */}
       <div className="flex items-center justify-between">
         <h1 className="text-2xl md:text-[32px] font-light tracking-[0.2em]">

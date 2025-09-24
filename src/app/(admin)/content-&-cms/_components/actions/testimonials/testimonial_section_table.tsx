@@ -20,7 +20,10 @@ import { PaginationControls } from '@/components/ui/pagination-controls'
 import { useQuery } from '@tanstack/react-query'
 import { Skeleton } from '@/components/ui/custom/skeleton'
 import { useSession } from 'next-auth/react'
-import { TestimonialSection } from './add_testimonial'
+import {
+  TestimonialSectionAdd,
+  TestimonialSectionEdit,
+} from './add_testimonial'
 
 // ---- Types ----
 export type Testimonial = {
@@ -108,14 +111,11 @@ const columns: ColumnDef<Testimonial>[] = [
     id: 'actions',
     header: 'Action',
     cell: ({ row }) => (
-      <button
-        onClick={() =>
-          alert(`View details of testimonial from ${row.original.customerName}`)
-        }
-        className="px-3 py-1 text-[13px] rounded-lg bg-black text-white"
-      >
-        View Details
-      </button>
+      <TestimonialSectionEdit id={row.original._id}>
+        <button className="px-3 py-1 text-[13px] rounded-lg bg-black text-white hover:bg-gray-800 transition-colors">
+          View Details
+        </button>
+      </TestimonialSectionEdit>
     ),
   },
 ]
@@ -204,7 +204,7 @@ export default function TestimonialTable() {
         </div>
 
         {/* Add Testimonial Button */}
-        <TestimonialSection />
+        <TestimonialSectionAdd />
       </div>
 
       {/* Loading State */}

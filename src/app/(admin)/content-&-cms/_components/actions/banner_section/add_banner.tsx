@@ -18,12 +18,23 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useSession } from 'next-auth/react'
 import Image from 'next/image'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
+// Types
+type Banner = {
+  _id: string
+  title: string
+  image: { filename: string; url: string }[]
+  status: 'active' | 'inactive' | 'draft'
+  createdAt: string
+  updatedAt: string
+}
+
+// -------------------- ADD HOOK --------------------
 function useAddBanner() {
   const session = useSession()
   const accessToken = session?.data?.user.accessToken
@@ -50,23 +61,81 @@ function useAddBanner() {
   })
 }
 
-export const BannerSection = () => {
+// -------------------- EDIT HOOK --------------------
+function useEditBanner(bannerId: string) {
+  const session = useSession()
+  const accessToken = session?.data?.user.accessToken
+
+  return useMutation({
+    mutationFn: async (formData: FormData) => {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/banner/${bannerId}`,
+        {
+          method: 'PUT',
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: formData,
+        }
+      )
+
+      if (!res.ok) {
+        throw new Error('Failed to update banner')
+      }
+
+      return res.json()
+    },
+  })
+}
+
+// -------------------- GET SINGLE BANNER --------------------
+function useGetBanner(bannerId: string, enabled: boolean) {
+  const session = useSession()
+  const accessToken = session?.data?.user.accessToken
+
+  return useQuery({
+    queryKey: ['banner', bannerId],
+    queryFn: async () => {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/banner/${bannerId}`,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      )
+
+      if (!res.ok) {
+        throw new Error('Failed to fetch banner')
+      }
+
+      const json = await res.json()
+      return json.data as Banner
+    },
+    enabled,
+  })
+}
+
+// -------------------- ADD COMPONENT --------------------
+export const BannerAdd = () => {
   const [status, setStatus] = useState('active')
   const addBanner = useAddBanner()
+  const queryClient = useQueryClient()
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const formData = new FormData(e.currentTarget)
-
     formData.set('status', status)
 
     addBanner.mutate(formData, {
-      onSuccess: (data) => {
-        console.log('Banner added successfully', data)
+      onSuccess: () => {
         toast.success('Banner added successfully')
+        queryClient.invalidateQueries({ queryKey: ['banners'] })
+        ;(e.target as HTMLFormElement).reset()
+        setStatus('active')
       },
-      onError: (error) => {
-        console.error('Error adding banner:', error)
+      onError: () => {
         toast.error('Failed to add banner')
       },
     })
@@ -78,29 +147,20 @@ export const BannerSection = () => {
         <Button variant="default">{'Add Banner'}</Button>
       </DialogTrigger>
 
-      <DialogContent className="p-8">
+      <DialogContent className="p-8 max-w-2xl font-sans">
         <DialogHeader>
           <div className="flex justify-center my-8">
-            <Image
-              src={'/logo.png'}
-              alt="modal-Alert"
-              width={70}
-              height={60}
-              className="object-cover"
-            />
+            <Image src={'/logo.png'} alt="modal-Alert" width={70} height={60} />
           </div>
           <DialogTitle className="text-3xl tracking-wide font-light py-6">
             Add Banner
           </DialogTitle>
         </DialogHeader>
 
-        {/* FORM START */}
         <form onSubmit={handleSubmit} className="space-y-8">
           {/* Title */}
           <div className="space-y-2">
-            <Label htmlFor="title" className="tracking-wide font-light">
-              Title
-            </Label>
+            <Label htmlFor="title">Title</Label>
             <Input
               id="title"
               name="title"
@@ -111,9 +171,7 @@ export const BannerSection = () => {
 
           {/* Image Upload */}
           <div className="space-y-2">
-            <Label htmlFor="image" className="tracking-wide font-light">
-              Banner Image (JPEG/PNG, Max 5MB)
-            </Label>
+            <Label htmlFor="image">Banner Image (JPEG/PNG, Max 10MB)</Label>
             <Input
               id="image"
               name="filename"
@@ -125,9 +183,7 @@ export const BannerSection = () => {
 
           {/* Status Dropdown */}
           <div className="space-y-2">
-            <Label htmlFor="status" className="tracking-wide font-light">
-              Status
-            </Label>
+            <Label>Status</Label>
             <Select value={status} onValueChange={setStatus}>
               <SelectTrigger>
                 <SelectValue placeholder="Select status" />
@@ -140,13 +196,139 @@ export const BannerSection = () => {
             </Select>
           </div>
 
-          <div className="flex justify-start">
-            <DialogFooter className="pt-10 ">
-              <Button type="submit">Save Banner</Button>
-            </DialogFooter>
-          </div>
+          <DialogFooter>
+            <Button type="submit" disabled={addBanner.isPending}>
+              {addBanner.isPending ? 'Saving...' : 'Save Banner'}
+            </Button>
+          </DialogFooter>
         </form>
-        {/* FORM END */}
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+// -------------------- EDIT COMPONENT --------------------
+export const BannerEdit = ({
+  bannerId,
+  children,
+}: {
+  bannerId: string
+  children: React.ReactNode
+}) => {
+  const [open, setOpen] = useState(false)
+  const [status, setStatus] = useState<string>('active')
+  const [isInitialized, setIsInitialized] = useState(false)
+
+  const editBanner = useEditBanner(bannerId)
+  const queryClient = useQueryClient()
+
+  const { data: bannerData, isLoading } = useGetBanner(bannerId, open)
+
+  useEffect(() => {
+    if (bannerData && !isInitialized) {
+      setStatus(bannerData.status)
+      setIsInitialized(true)
+    }
+  }, [bannerData, isInitialized])
+
+  useEffect(() => {
+    if (!open) setIsInitialized(false)
+  }, [open])
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    const formData = new FormData(e.currentTarget)
+    formData.set('status', status)
+
+    editBanner.mutate(formData, {
+      onSuccess: () => {
+        toast.success('Banner updated successfully')
+        queryClient.invalidateQueries({ queryKey: ['banners'] })
+        setOpen(false)
+      },
+      onError: () => {
+        toast.error('Failed to update banner')
+      },
+    })
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>{children}</DialogTrigger>
+
+      <DialogContent className="p-8 max-w-2xl font-sans">
+        <DialogHeader>
+          <div className="flex justify-center my-8">
+            <Image src={'/logo.png'} alt="modal-Alert" width={70} height={60} />
+          </div>
+          <DialogTitle className="text-3xl tracking-wide font-light py-6">
+            Edit Banner
+          </DialogTitle>
+        </DialogHeader>
+
+        {isLoading ? (
+          <div className="space-y-4">
+            <div className="h-10 bg-gray-200 rounded animate-pulse" />
+            <div className="h-32 bg-gray-200 rounded animate-pulse" />
+            <div className="h-10 bg-gray-200 rounded animate-pulse" />
+          </div>
+        ) : bannerData ? (
+          <form onSubmit={handleSubmit} className="space-y-8">
+            {/* Title */}
+            <div className="space-y-2">
+              <Label htmlFor="title">Title</Label>
+              <Input
+                id="title"
+                name="title"
+                defaultValue={bannerData.title}
+                required
+              />
+            </div>
+
+            {/* Current Image */}
+            {bannerData.image && bannerData.image.length > 0 && (
+              <div className="space-y-2">
+                <Label>Current Image</Label>
+                <div className="flex justify-start">
+                  <Image
+                    src={bannerData.image[0].url}
+                    alt={bannerData.title}
+                    width={150}
+                    height={80}
+                    className="rounded-md border object-cover"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Replace Image */}
+            <div className="space-y-2">
+              <Label htmlFor="image">Replace Image (optional)</Label>
+              <Input id="image" name="filename" type="file" accept="image/*" />
+            </div>
+
+            {/* Status Dropdown */}
+            <div className="space-y-2">
+              <Label>Status</Label>
+              <Select value={status} onValueChange={setStatus}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="inactive">Inactive</SelectItem>
+                  <SelectItem value="draft">Draft</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <DialogFooter>
+              <Button type="submit" disabled={editBanner.isPending}>
+                {editBanner.isPending ? 'Updating...' : 'Update Banner'}
+              </Button>
+            </DialogFooter>
+          </form>
+        ) : null}
       </DialogContent>
     </Dialog>
   )

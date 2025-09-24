@@ -21,7 +21,7 @@ import { PaginationControls } from '@/components/ui/pagination-controls'
 import { useQuery } from '@tanstack/react-query'
 import { Skeleton } from '@/components/ui/custom/skeleton'
 import { useSession } from 'next-auth/react'
-import { BannerSection } from './add_banner'
+import { BannerAdd, BannerEdit } from './add_banner'
 
 // ---- Types ----
 export type Banner = {
@@ -102,12 +102,11 @@ const columns: ColumnDef<Banner>[] = [
     id: 'actions',
     header: 'Action',
     cell: ({ row }) => (
-      <button
-        onClick={() => alert(`View details of ${row.original.title}`)}
-        className="px-3 py-1 text-[13px] rounded-lg bg-black text-white"
-      >
-        View Details
-      </button>
+      <BannerEdit bannerId={row.original._id}>
+        <button className="px-3 py-1 text-[13px] rounded-lg bg-black text-white hover:bg-gray-800 transition-colors">
+          View Details
+        </button>
+      </BannerEdit>
     ),
   },
 ]
@@ -196,7 +195,7 @@ export default function BannerTable() {
         </div>
 
         {/* Add Banner Button */}
-        <BannerSection />
+        <BannerAdd />
       </div>
 
       {/* Loading State */}

@@ -1,31 +1,39 @@
-import { Button } from "@/components/ui/button";
-import React from "react";
+interface Customer {
+  _id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber: string;
+}
 
-const BookingCustomer = () => {
+interface Listing {
+  dressName: string;
+}
+
+interface BookingDetails {
+  customer?: Customer;
+  listing?: Listing;
+}
+
+interface Props {
+  bookingDetails?: BookingDetails;
+}
+
+const BookingCustomer = ({ bookingDetails = {} }: Props) => {
   return (
     <div className="mt-5">
       <div className="border border-gray-200 p-5 rounded-lg shadow-sm">
         <h1 className="text-xl mb-4">Customer Details</h1>
 
         <div className="text-sm space-y-2">
-          <h3>Customer ID: ####</h3>
-          <h3>Name: Sarah K.</h3>
-          <h3>Email: sarah@example.com</h3>
-          <h3>Dress Name: Zimmermann Silk Gown</h3>
-          <h3>Phone: +1 555-123-4567</h3>
-
-          <div className="mt-5">
-            <Button>View Profile</Button>
-          </div>
-        </div>
-      </div>
-
-      <div className="border border-gray-200 p-5 rounded-lg shadow-sm mt-10">
-        <h1 className="text-xl font-semibold mb-4">Actions</h1>
-
-        <div className="text-sm flex items-center gap-5">
-          <Button>Save Changes</Button>
-          <Button variant="outline">Download Report</Button>
+          <h3>Customer ID: {bookingDetails.customer?._id}</h3>
+          <h3>
+            Name: {bookingDetails.customer?.firstName}{" "}
+            {bookingDetails.customer?.lastName}
+          </h3>
+          <h3>Email: {bookingDetails.customer?.email}</h3>
+          <h3>Dress Name: {bookingDetails.listing?.dressName}</h3>
+          <h3>Phone: {bookingDetails.customer?.phoneNumber}</h3>
         </div>
       </div>
     </div>

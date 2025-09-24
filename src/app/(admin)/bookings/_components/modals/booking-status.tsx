@@ -4,22 +4,45 @@ import {
   SelectContent,
   SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import React from "react";
 
-const BookingStatus = () => {
+type Status = {
+  _id: string;
+  status: string;
+};
+
+type BookingDetails = {
+  statusHistory: Status[];
+  updatedAt?: string;
+};
+
+const BookingStatus = ({ bookingDetails = { statusHistory: [] } }: { bookingDetails?: BookingDetails }) => {
   return (
     <div className="mt-5">
       <div className="border border-gray-200 p-5 rounded-lg shadow-sm">
         <h1 className="text-xl mb-4">Booking Status</h1>
 
         <div className="text-sm space-y-2">
-          <h3>Current Status: Active</h3>
-          <h3>Last Updated: Apr 15, 2025</h3>
+          <h3 className="flex items-center gap-1">
+            <span>Current Status: </span>
+            <h3>
+              {bookingDetails.statusHistory.map((status) => (
+                <span
+                  key={status._id}
+                  className={`${
+                    status.status === "Pending" && "text-orange-600"
+                  }`}
+                >
+                  {status.status}
+                </span>
+              ))}
+            </h3>
+          </h3>
+          <h3>Last Updated: {new Date(bookingDetails?.updatedAt ?? "").toLocaleDateString()}</h3>
         </div>
       </div>
 
@@ -27,13 +50,12 @@ const BookingStatus = () => {
         <h1 className="mb-2">Update Status</h1>
         <Select>
           <SelectTrigger>
-            <SelectValue placeholder="Select a fruit" />
+            <SelectValue placeholder="update status" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="">
             <SelectGroup>
-              <SelectLabel>Fruits</SelectLabel>
-              <SelectItem value="active">Active</SelectItem>
-              <SelectItem value="dispute">Dispute</SelectItem>
+              <SelectItem value="active">Pending</SelectItem>
+              <SelectItem value="dispute">Disputed</SelectItem>
               <SelectItem value="completed">Completed</SelectItem>
             </SelectGroup>
           </SelectContent>
@@ -48,9 +70,8 @@ const BookingStatus = () => {
       <div className="border border-gray-200 p-5 rounded-lg shadow-sm mt-10">
         <h1 className="text-xl font-semibold mb-4">Actions</h1>
 
-        <div className="text-sm flex items-center gap-5">
+        <div className="text-sm">
           <Button>Save Changes</Button>
-          <Button variant="outline">Download Report</Button>
         </div>
       </div>
     </div>

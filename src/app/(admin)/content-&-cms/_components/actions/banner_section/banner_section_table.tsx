@@ -18,58 +18,58 @@ import {
 } from '@/components/ui/select'
 import Image from 'next/image'
 import { PaginationControls } from '@/components/ui/pagination-controls'
+import { useQuery } from '@tanstack/react-query'
+import { Skeleton } from '@/components/ui/custom/skeleton'
+import { useSession } from 'next-auth/react'
 import { BannerSection } from './add_banner'
 
-// Type
-type Banner = {
-  bannerId: string
+// ---- Types ----
+export type Banner = {
+  _id: string
   title: string
-  image: string
+  image: { filename: string; url: string }[]
+  status: 'active' | 'inactive'
+  createdAt: string
   updatedAt: string
-  status: 'Active' | 'Draft'
 }
 
-// Dummy Data
-const dummyBanners: Banner[] = [
-  {
-    bannerId: 'ban-201',
-    title: 'Summer Sale',
-    image: '/default_image.jpg',
-    updatedAt: '2025-09-18',
-    status: 'Active',
-  },
-  {
-    bannerId: 'ban-202',
-    title: 'New Arrivals',
-    image: '/default_image.jpg',
-    updatedAt: '2025-09-12',
-    status: 'Draft',
-  },
-  {
-    bannerId: 'ban-203',
-    title: 'Holiday Discount',
-    image: '/default_image.jpg',
-    updatedAt: '2025-09-05',
-    status: 'Active',
-  },
-]
+// ---- Fetcher ----
+async function fetchBanners(accessToken: string): Promise<Banner[]> {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/banner`,
+    {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    }
+  )
+  if (!res.ok) throw new Error('Failed to fetch banners')
+  const json = await res.json()
+  return json.data
+}
 
-// Columns
+// ---- Columns ----
 const columns: ColumnDef<Banner>[] = [
-  { accessorKey: 'bannerId', header: 'Banner ID' },
   { accessorKey: 'title', header: 'Title' },
   {
     accessorKey: 'image',
     header: 'Image Preview',
     cell: ({ row }) => (
       <div className="flex justify-center">
-        <Image
-          src={row.original.image}
-          alt={row.original.title}
-          width={80}
-          height={40}
-          className="rounded-md object-cover border"
-        />
+        {row.original.image && row.original.image.length > 0 ? (
+          <Image
+            src={row.original.image[0].url}
+            alt={row.original.title}
+            width={80}
+            height={40}
+            className="rounded-md object-cover border"
+          />
+        ) : (
+          <div className="w-20 h-10 bg-gray-200 rounded-md flex items-center justify-center text-xs text-gray-500">
+            No Image
+          </div>
+        )}
       </div>
     ),
   },
@@ -88,8 +88,8 @@ const columns: ColumnDef<Banner>[] = [
     header: 'Status',
     cell: ({ row }) => (
       <span
-        className={`px-2 py-1 rounded-full text-xs font-medium ${
-          row.original.status === 'Active'
+        className={`px-2 py-1 rounded-full text-xs font-medium capitalize ${
+          row.original.status === 'active'
             ? 'bg-green-100 text-green-700'
             : 'bg-blue-100 text-blue-700'
         }`}
@@ -101,31 +101,54 @@ const columns: ColumnDef<Banner>[] = [
   {
     id: 'actions',
     header: 'Action',
-    cell: () => (
-      <button className="px-3 py-1 text-[13px] rounded-lg bg-black text-white">
+    cell: ({ row }) => (
+      <button
+        onClick={() => alert(`View details of ${row.original.title}`)}
+        className="px-3 py-1 text-[13px] rounded-lg bg-black text-white"
+      >
         View Details
       </button>
     ),
   },
 ]
 
-// Main Component
+// ---- Main Component ----
 export default function BannerTable() {
   const [search, setSearch] = useState('')
+  const [statusFilter, setStatusFilter] = useState<
+    'all' | 'active' | 'inactive'
+  >('all')
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 5 })
 
-  // reset to first page when search changes
+  // Get session for access token
+  const session = useSession()
+  const accessToken = session.data?.user?.accessToken || ''
+
+  // ---- Fetch Data ----
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ['banners'],
+    queryFn: () => fetchBanners(accessToken),
+  })
+
+  // reset to first page when search/filter changes
   useEffect(() => {
     setPagination((prev) => ({ ...prev, pageIndex: 0 }))
-  }, [search])
+  }, [search, statusFilter])
 
-  // filter locally
+  // ---- Filtering ----
   const filteredData = useMemo(() => {
-    return dummyBanners.filter((item) =>
-      JSON.stringify(item).toLowerCase().includes(search.toLowerCase())
-    )
-  }, [search])
+    if (!data) return []
+    return data.filter((item) => {
+      const matchesSearch = JSON.stringify(item)
+        .toLowerCase()
+        .includes(search.toLowerCase())
+      const matchesStatus =
+        statusFilter === 'all' ? true : item.status === statusFilter
+      return matchesSearch && matchesStatus
+    })
+  }, [data, search, statusFilter])
 
+  // ---- Table ----
   const table = useReactTable({
     data: filteredData,
     columns,
@@ -153,90 +176,132 @@ export default function BannerTable() {
               className="w-[200px]"
             />
             <div>
-              {/* Status Dropdown */}
-              <Select defaultValue="all">
+              <Select
+                defaultValue="all"
+                onValueChange={(val) =>
+                  setStatusFilter(val as 'all' | 'active' | 'inactive')
+                }
+              >
                 <SelectTrigger className="w-[150px]">
                   <SelectValue placeholder="Filter by status" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All</SelectItem>
                   <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="draft">Draft</SelectItem>
+                  <SelectItem value="inactive">Inactive</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
         </div>
 
-        {/* Add Banner Button (optional) */}
+        {/* Add Banner Button */}
         <BannerSection />
       </div>
 
-      {/* Table */}
-      <div className="w-full border rounded-2xl overflow-hidden">
-        <table className="w-full rounded-xl text-sm">
-          <thead>
-            {table.getHeaderGroups().map((hg) => (
-              <tr key={hg.id}>
-                {hg.headers.map((header) => (
-                  <th
-                    key={header.id}
-                    className="text-center p-2 text-gray-500 font-medium"
-                  >
-                    {flexRender(
-                      header.column.columnDef.header,
-                      header.getContext()
-                    )}
-                  </th>
-                ))}
+      {/* Loading State */}
+      {isLoading && (
+        <div className="w-full border rounded-2xl overflow-hidden">
+          <table className="w-full rounded-xl text-sm">
+            <thead>
+              <tr>
+                <th className="p-2 text-center text-gray-500">Banner ID</th>
+                <th className="p-2 text-center text-gray-500">Title</th>
+                <th className="p-2 text-center text-gray-500">Image Preview</th>
+                <th className="p-2 text-center text-gray-500">Last Updated</th>
+                <th className="p-2 text-center text-gray-500">Status</th>
+                <th className="p-2 text-center text-gray-500">Action</th>
               </tr>
-            ))}
-          </thead>
-          <tbody>
-            {table.getRowModel().rows.length > 0 ? (
-              table.getRowModel().rows.map((row) => (
-                <tr
-                  key={row.id}
-                  className="hover:bg-gray-50 text-gray-900 text-base"
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <td key={cell.id} className="p-2 text-center">
-                      <div className="flex justify-center">
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </div>
+            </thead>
+            <tbody>
+              {[...Array(5)].map((_, i) => (
+                <tr key={i} className="border-t">
+                  {[...Array(6)].map((_, j) => (
+                    <td key={j} className="p-2 text-center">
+                      <Skeleton className="h-5 w-24 mx-auto" />
                     </td>
                   ))}
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td
-                  colSpan={columns.length}
-                  className="p-4 text-center text-gray-500"
-                >
-                  No data found
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
 
-      {/* Pagination */}
-      <div className="mt-4">
-        <PaginationControls
-          currentPage={table.getState().pagination.pageIndex + 1}
-          totalPages={table.getPageCount()}
-          totalItems={filteredData.length}
-          itemsPerPage={table.getState().pagination.pageSize}
-          onPageChange={(page) => {
-            table.setPageIndex(page - 1)
-          }}
-        />
-      </div>
+      {/* Error State */}
+      {isError && (
+        <p className="text-red-500 mt-3 text-center">Failed to load banners</p>
+      )}
+
+      {/* Table */}
+      {!isLoading && !isError && (
+        <>
+          <div className="w-full border rounded-2xl overflow-hidden">
+            <table className="w-full rounded-xl text-sm">
+              <thead>
+                {table.getHeaderGroups().map((hg) => (
+                  <tr key={hg.id}>
+                    {hg.headers.map((header) => (
+                      <th
+                        key={header.id}
+                        className="text-center p-2 text-gray-500 font-medium"
+                      >
+                        {flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                      </th>
+                    ))}
+                  </tr>
+                ))}
+              </thead>
+              <tbody>
+                {table.getRowModel().rows.length > 0 ? (
+                  table.getRowModel().rows.map((row) => (
+                    <tr
+                      key={row.id}
+                      className="hover:bg-gray-50 text-gray-900 text-base"
+                    >
+                      {row.getVisibleCells().map((cell) => (
+                        <td key={cell.id} className="p-2 text-center">
+                          <div className="flex justify-center">
+                            {flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext()
+                            )}
+                          </div>
+                        </td>
+                      ))}
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td
+                      colSpan={columns.length}
+                      className="p-4 text-center text-gray-500"
+                    >
+                      No data found
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Pagination */}
+          <div className="mt-4">
+            <PaginationControls
+              currentPage={table.getState().pagination.pageIndex + 1}
+              totalPages={table.getPageCount()}
+              totalItems={filteredData.length}
+              itemsPerPage={table.getState().pagination.pageSize}
+              onPageChange={(page) => {
+                table.setPageIndex(page - 1)
+              }}
+            />
+          </div>
+        </>
+      )}
     </div>
   )
 }

@@ -16,58 +16,67 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-
 import { PaginationControls } from '@/components/ui/pagination-controls'
+import { useQuery } from '@tanstack/react-query'
+import { Skeleton } from '@/components/ui/custom/skeleton'
+import { useSession } from 'next-auth/react'
 import { TestimonialSection } from './add_testimonial'
 
-// Type
-type Testimonial = {
-  testimonialId: string
-  customer: string
+// ---- Types ----
+export type Testimonial = {
+  _id: string
+  customerName: string
   content: string
   rating: number
+  status: 'active' | 'inactive'
+  createdAt: string
   updatedAt: string
-  status: 'Active' | 'Draft'
 }
 
-// Dummy Data
-const dummyTestimonials: Testimonial[] = [
-  {
-    testimonialId: 't-301',
-    customer: 'John Doe',
-    content: 'Great service and amazing experience!',
-    rating: 5,
-    updatedAt: '2025-09-20',
-    status: 'Active',
-  },
-  {
-    testimonialId: 't-302',
-    customer: 'Jane Smith',
-    content: 'The product quality is really good.',
-    rating: 4,
-    updatedAt: '2025-09-14',
-    status: 'Active',
-  },
-  {
-    testimonialId: 't-303',
-    customer: 'Ali Khan',
-    content: 'Delivery was a bit late but overall nice.',
-    rating: 3,
-    updatedAt: '2025-09-10',
-    status: 'Draft',
-  },
-]
+// ---- Fetcher ----
+async function fetchTestimonials(accessToken: string): Promise<Testimonial[]> {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/testimonoal`,
+    {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    }
+  )
+  if (!res.ok) throw new Error('Failed to fetch testimonials')
+  const json = await res.json()
+  return json.data
+}
 
-// Columns
+// ---- Columns ----
 const columns: ColumnDef<Testimonial>[] = [
-  { accessorKey: 'testimonialId', header: 'Testimonial ID' },
-  { accessorKey: 'customer', header: 'Customer' },
-  { accessorKey: 'content', header: 'Content' },
+  {
+    accessorKey: 'customer',
+    header: 'Customer Name',
+    cell: ({ row }) => (
+      <div className="max-w-xs truncate" title={row.original.customerName}>
+        {row.original.customerName}
+      </div>
+    ),
+  },
+  {
+    accessorKey: 'content',
+    header: 'Content',
+    cell: ({ row }) => (
+      <div className="max-w-xs truncate" title={row.original.content}>
+        {row.original.content}
+      </div>
+    ),
+  },
   {
     accessorKey: 'rating',
     header: 'Rating',
     cell: ({ row }) => (
-      <div className="flex justify-center gap-1">{row.original.rating}</div>
+      <div className="flex justify-center items-center gap-1">
+        <span className="font-medium">{row.original.rating}</span>
+        <span className="text-yellow-500">★</span>
+      </div>
     ),
   },
   {
@@ -85,8 +94,8 @@ const columns: ColumnDef<Testimonial>[] = [
     header: 'Status',
     cell: ({ row }) => (
       <span
-        className={`px-2 py-1 rounded-full text-xs font-medium ${
-          row.original.status === 'Active'
+        className={`px-2 py-1 rounded-full text-xs font-medium capitalize ${
+          row.original.status === 'active'
             ? 'bg-green-100 text-green-700'
             : 'bg-blue-100 text-blue-700'
         }`}
@@ -98,31 +107,56 @@ const columns: ColumnDef<Testimonial>[] = [
   {
     id: 'actions',
     header: 'Action',
-    cell: () => (
-      <button className="px-3 py-1 text-[13px] rounded-lg bg-black text-white">
+    cell: ({ row }) => (
+      <button
+        onClick={() =>
+          alert(`View details of testimonial from ${row.original.customerName}`)
+        }
+        className="px-3 py-1 text-[13px] rounded-lg bg-black text-white"
+      >
         View Details
       </button>
     ),
   },
 ]
 
-// Main Component
+// ---- Main Component ----
 export default function TestimonialTable() {
   const [search, setSearch] = useState('')
+  const [statusFilter, setStatusFilter] = useState<
+    'all' | 'active' | 'inactive'
+  >('all')
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 5 })
 
-  // reset to first page when search changes
+  // Get session for access token
+  const session = useSession()
+  const accessToken = session.data?.user?.accessToken || ''
+
+  // ---- Fetch Data ----
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ['testimonials'],
+    queryFn: () => fetchTestimonials(accessToken),
+  })
+
+  // reset to first page when search/filter changes
   useEffect(() => {
     setPagination((prev) => ({ ...prev, pageIndex: 0 }))
-  }, [search])
+  }, [search, statusFilter])
 
-  // filter locally
+  // ---- Filtering ----
   const filteredData = useMemo(() => {
-    return dummyTestimonials.filter((item) =>
-      JSON.stringify(item).toLowerCase().includes(search.toLowerCase())
-    )
-  }, [search])
+    if (!data) return []
+    return data.filter((item) => {
+      const matchesSearch = JSON.stringify(item)
+        .toLowerCase()
+        .includes(search.toLowerCase())
+      const matchesStatus =
+        statusFilter === 'all' ? true : item.status === statusFilter
+      return matchesSearch && matchesStatus
+    })
+  }, [data, search, statusFilter])
 
+  // ---- Table ----
   const table = useReactTable({
     data: filteredData,
     columns,
@@ -150,15 +184,19 @@ export default function TestimonialTable() {
               className="w-[200px]"
             />
             <div>
-              {/* Status Dropdown */}
-              <Select defaultValue="all">
+              <Select
+                defaultValue="all"
+                onValueChange={(val) =>
+                  setStatusFilter(val as 'all' | 'active' | 'inactive')
+                }
+              >
                 <SelectTrigger className="w-[150px]">
                   <SelectValue placeholder="Filter by status" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All</SelectItem>
                   <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="draft">Draft</SelectItem>
+                  <SelectItem value="inactive">Inactive</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -169,71 +207,114 @@ export default function TestimonialTable() {
         <TestimonialSection />
       </div>
 
-      {/* Table */}
-      <div className="w-full border rounded-2xl overflow-hidden">
-        <table className="w-full rounded-xl text-sm">
-          <thead>
-            {table.getHeaderGroups().map((hg) => (
-              <tr key={hg.id}>
-                {hg.headers.map((header) => (
-                  <th
-                    key={header.id}
-                    className="text-center p-2 text-gray-500 font-medium"
-                  >
-                    {flexRender(
-                      header.column.columnDef.header,
-                      header.getContext()
-                    )}
-                  </th>
-                ))}
+      {/* Loading State */}
+      {isLoading && (
+        <div className="w-full border rounded-2xl overflow-hidden">
+          <table className="w-full rounded-xl text-sm">
+            <thead>
+              <tr>
+                <th className="p-2 text-center text-gray-500">
+                  Testimonial ID
+                </th>
+                <th className="p-2 text-center text-gray-500">Customer</th>
+                <th className="p-2 text-center text-gray-500">Content</th>
+                <th className="p-2 text-center text-gray-500">Rating</th>
+                <th className="p-2 text-center text-gray-500">Last Updated</th>
+                <th className="p-2 text-center text-gray-500">Status</th>
+                <th className="p-2 text-center text-gray-500">Action</th>
               </tr>
-            ))}
-          </thead>
-          <tbody>
-            {table.getRowModel().rows.length > 0 ? (
-              table.getRowModel().rows.map((row) => (
-                <tr
-                  key={row.id}
-                  className="hover:bg-gray-50 text-gray-900 text-base"
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <td key={cell.id} className="p-2 text-center">
-                      <div className="flex justify-center">
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </div>
+            </thead>
+            <tbody>
+              {[...Array(5)].map((_, i) => (
+                <tr key={i} className="border-t">
+                  {[...Array(7)].map((_, j) => (
+                    <td key={j} className="p-2 text-center">
+                      <Skeleton className="h-5 w-24 mx-auto" />
                     </td>
                   ))}
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td
-                  colSpan={columns.length}
-                  className="p-4 text-center text-gray-500"
-                >
-                  No data found
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
 
-      {/* Pagination */}
-      <div className="mt-4">
-        <PaginationControls
-          currentPage={table.getState().pagination.pageIndex + 1}
-          totalPages={table.getPageCount()}
-          totalItems={filteredData.length}
-          itemsPerPage={table.getState().pagination.pageSize}
-          onPageChange={(page) => {
-            table.setPageIndex(page - 1)
-          }}
-        />
-      </div>
+      {/* Error State */}
+      {isError && (
+        <p className="text-red-500 mt-3 text-center">
+          Failed to load testimonials
+        </p>
+      )}
+
+      {/* Table */}
+      {!isLoading && !isError && (
+        <>
+          <div className="w-full border rounded-2xl overflow-hidden">
+            <table className="w-full rounded-xl text-sm">
+              <thead>
+                {table.getHeaderGroups().map((hg) => (
+                  <tr key={hg.id}>
+                    {hg.headers.map((header) => (
+                      <th
+                        key={header.id}
+                        className="text-center p-2 text-gray-500 font-medium"
+                      >
+                        {flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                      </th>
+                    ))}
+                  </tr>
+                ))}
+              </thead>
+              <tbody>
+                {table.getRowModel().rows.length > 0 ? (
+                  table.getRowModel().rows.map((row) => (
+                    <tr
+                      key={row.id}
+                      className="hover:bg-gray-50 text-gray-900 text-base"
+                    >
+                      {row.getVisibleCells().map((cell) => (
+                        <td key={cell.id} className="p-2 text-center">
+                          <div className="flex justify-center">
+                            {flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext()
+                            )}
+                          </div>
+                        </td>
+                      ))}
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td
+                      colSpan={columns.length}
+                      className="p-4 text-center text-gray-500"
+                    >
+                      No data found
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Pagination */}
+          <div className="mt-4">
+            <PaginationControls
+              currentPage={table.getState().pagination.pageIndex + 1}
+              totalPages={table.getPageCount()}
+              totalItems={filteredData.length}
+              itemsPerPage={table.getState().pagination.pageSize}
+              onPageChange={(page) => {
+                table.setPageIndex(page - 1)
+              }}
+            />
+          </div>
+        </>
+      )}
     </div>
   )
 }

@@ -17,35 +17,37 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { PaginationControls } from '@/components/ui/pagination-controls'
+import { useQuery } from '@tanstack/react-query'
+import { Skeleton } from '@/components/ui/custom/skeleton'
+import { useSession } from 'next-auth/react'
 import { PolicySection } from './add_policy'
 
-// Type
-type Policy = {
+// ---- Types ----
+export type Policy = {
+  _id: string
   name: string
+  status: 'active' | 'inactive'
+  createdAt: string
   updatedAt: string
-  status: 'Active' | 'Draft'
 }
 
-// Dummy Data
-const dummyPolicies: Policy[] = [
-  {
-    name: 'Terms and Conditions',
-    updatedAt: '2025-09-20',
-    status: 'Active',
-  },
-  {
-    name: 'Privacy Policy',
-    updatedAt: '2025-09-15',
-    status: 'Active',
-  },
-  {
-    name: 'Refund Policy',
-    updatedAt: '2025-09-05',
-    status: 'Draft',
-  },
-]
+// ---- Fetcher ----
+async function fetchPolicies(accessToken: string): Promise<Policy[]> {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/termsAndConditions`,
+    {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    }
+  )
+  if (!res.ok) throw new Error('Failed to fetch policies')
+  const json = await res.json()
+  return json.data
+}
 
-// Columns
+// ---- Columns ----
 const columns: ColumnDef<Policy>[] = [
   { accessorKey: 'name', header: 'Policy Name' },
   {
@@ -63,8 +65,8 @@ const columns: ColumnDef<Policy>[] = [
     header: 'Status',
     cell: ({ row }) => (
       <span
-        className={`px-2 py-1 rounded-full text-xs font-medium ${
-          row.original.status === 'Active'
+        className={`px-2 py-1 rounded-full text-xs font-medium capitalize ${
+          row.original.status === 'active'
             ? 'bg-green-100 text-green-700'
             : 'bg-blue-100 text-blue-700'
         }`}
@@ -76,31 +78,54 @@ const columns: ColumnDef<Policy>[] = [
   {
     id: 'actions',
     header: 'Action',
-    cell: () => (
-      <button className="px-3 py-1 text-[13px] rounded-lg bg-black text-white">
+    cell: ({ row }) => (
+      <button
+        onClick={() => alert(`View details of ${row.original.name}`)}
+        className="px-3 py-1 text-[13px] rounded-lg bg-black text-white"
+      >
         View Details
       </button>
     ),
   },
 ]
 
-// Main Component
+// ---- Main Component ----
 export default function PolicyTable() {
   const [search, setSearch] = useState('')
+  const [statusFilter, setStatusFilter] = useState<
+    'all' | 'active' | 'inactive'
+  >('all')
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 5 })
 
-  // reset to first page when search changes
+  // Get session for access token
+  const session = useSession()
+  const accessToken = session.data?.user?.accessToken || ''
+
+  // ---- Fetch Data ----
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ['policies'],
+    queryFn: () => fetchPolicies(accessToken),
+  })
+
+  // reset to first page when search/filter changes
   useEffect(() => {
     setPagination((prev) => ({ ...prev, pageIndex: 0 }))
-  }, [search])
+  }, [search, statusFilter])
 
-  // filter locally
+  // ---- Filtering ----
   const filteredData = useMemo(() => {
-    return dummyPolicies.filter((item) =>
-      JSON.stringify(item).toLowerCase().includes(search.toLowerCase())
-    )
-  }, [search])
+    if (!data) return []
+    return data.filter((item) => {
+      const matchesSearch = JSON.stringify(item)
+        .toLowerCase()
+        .includes(search.toLowerCase())
+      const matchesStatus =
+        statusFilter === 'all' ? true : item.status === statusFilter
+      return matchesSearch && matchesStatus
+    })
+  }, [data, search, statusFilter])
 
+  // ---- Table ----
   const table = useReactTable({
     data: filteredData,
     columns,
@@ -130,15 +155,19 @@ export default function PolicyTable() {
               className="w-[200px]"
             />
             <div>
-              {/* Status Dropdown */}
-              <Select defaultValue="all">
+              <Select
+                defaultValue="all"
+                onValueChange={(val) =>
+                  setStatusFilter(val as 'all' | 'active' | 'inactive')
+                }
+              >
                 <SelectTrigger className="w-[150px]">
                   <SelectValue placeholder="Filter by status" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All</SelectItem>
                   <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="draft">Draft</SelectItem>
+                  <SelectItem value="inactive">Inactive</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -149,71 +178,108 @@ export default function PolicyTable() {
         <PolicySection />
       </div>
 
-      {/* Table */}
-      <div className="w-full border rounded-2xl overflow-hidden">
-        <table className="w-full rounded-xl text-sm">
-          <thead>
-            {table.getHeaderGroups().map((hg) => (
-              <tr key={hg.id}>
-                {hg.headers.map((header) => (
-                  <th
-                    key={header.id}
-                    className="text-center p-2 text-gray-500 font-medium"
-                  >
-                    {flexRender(
-                      header.column.columnDef.header,
-                      header.getContext()
-                    )}
-                  </th>
-                ))}
+      {/* Loading State */}
+      {isLoading && (
+        <div className="w-full border rounded-2xl overflow-hidden">
+          <table className="w-full rounded-xl text-sm">
+            <thead>
+              <tr>
+                <th className="p-2 text-center text-gray-500">Policy ID</th>
+                <th className="p-2 text-center text-gray-500">Policy Name</th>
+                <th className="p-2 text-center text-gray-500">Last Updated</th>
+                <th className="p-2 text-center text-gray-500">Status</th>
+                <th className="p-2 text-center text-gray-500">Action</th>
               </tr>
-            ))}
-          </thead>
-          <tbody>
-            {table.getRowModel().rows.length > 0 ? (
-              table.getRowModel().rows.map((row) => (
-                <tr
-                  key={row.id}
-                  className="hover:bg-gray-50 text-gray-900 text-base"
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <td key={cell.id} className="p-2 text-center">
-                      <div className="flex justify-center">
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </div>
+            </thead>
+            <tbody>
+              {[...Array(5)].map((_, i) => (
+                <tr key={i} className="border-t">
+                  {[...Array(5)].map((_, j) => (
+                    <td key={j} className="p-2 text-center">
+                      <Skeleton className="h-5 w-24 mx-auto" />
                     </td>
                   ))}
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td
-                  colSpan={columns.length}
-                  className="p-4 text-center text-gray-500"
-                >
-                  No data found
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
 
-      {/* Pagination */}
-      <div className="mt-4">
-        <PaginationControls
-          currentPage={table.getState().pagination.pageIndex + 1}
-          totalPages={table.getPageCount()}
-          totalItems={filteredData.length}
-          itemsPerPage={table.getState().pagination.pageSize}
-          onPageChange={(page) => {
-            table.setPageIndex(page - 1)
-          }}
-        />
-      </div>
+      {/* Error State */}
+      {isError && (
+        <p className="text-red-500 mt-3 text-center">Failed to load policies</p>
+      )}
+
+      {/* Table */}
+      {!isLoading && !isError && (
+        <>
+          <div className="w-full border rounded-2xl overflow-hidden">
+            <table className="w-full rounded-xl text-sm">
+              <thead>
+                {table.getHeaderGroups().map((hg) => (
+                  <tr key={hg.id}>
+                    {hg.headers.map((header) => (
+                      <th
+                        key={header.id}
+                        className="text-center p-2 text-gray-500 font-medium"
+                      >
+                        {flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                      </th>
+                    ))}
+                  </tr>
+                ))}
+              </thead>
+              <tbody>
+                {table.getRowModel().rows.length > 0 ? (
+                  table.getRowModel().rows.map((row) => (
+                    <tr
+                      key={row.id}
+                      className="hover:bg-gray-50 text-gray-900 text-base"
+                    >
+                      {row.getVisibleCells().map((cell) => (
+                        <td key={cell.id} className="p-2 text-center">
+                          <div className="flex justify-center">
+                            {flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext()
+                            )}
+                          </div>
+                        </td>
+                      ))}
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td
+                      colSpan={columns.length}
+                      className="p-4 text-center text-gray-500"
+                    >
+                      No data found
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Pagination */}
+          <div className="mt-4">
+            <PaginationControls
+              currentPage={table.getState().pagination.pageIndex + 1}
+              totalPages={table.getPageCount()}
+              totalItems={filteredData.length}
+              itemsPerPage={table.getState().pagination.pageSize}
+              onPageChange={(page) => {
+                table.setPageIndex(page - 1)
+              }}
+            />
+          </div>
+        </>
+      )}
     </div>
   )
 }

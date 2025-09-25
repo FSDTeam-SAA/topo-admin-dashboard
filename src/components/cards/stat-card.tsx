@@ -24,7 +24,7 @@ export const InfoCard = ({ title, value }: Props) => {
 
       <CardContent className="p-0">
         <CardFooter>
-          <h1 className="text-[28px]">{value}</h1>
+          <h1 className="text-[25px]">{value}</h1>
         </CardFooter>
       </CardContent>
     </Card>

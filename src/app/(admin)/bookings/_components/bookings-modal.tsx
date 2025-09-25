@@ -13,8 +13,14 @@ import BookingPayment from "./modals/booking-payment";
 import BookingDisputes from "./modals/booking-disputes";
 import BookingNotes from "./modals/booking-notes";
 import BookingTimeline from "./modals/booking-timeline";
+import { useQuery } from "@tanstack/react-query";
 
-const BookingsModal = () => {
+interface Props {
+  id: string;
+  token: string;
+}
+
+const BookingsModal = ({ id, token }: Props) => {
   const { isBookingModalOpen, setIsBookingModalOpen } = useModalStore();
 
   const levels = [
@@ -28,13 +34,32 @@ const BookingsModal = () => {
     { label: "Timeline" },
   ];
 
+  const { data: bookingDetails = {} } = useQuery({
+    queryKey: ["booking-details"],
+    queryFn: async () => {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/customer/bookings/${id}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      const data = await res.json();
+
+      return data.data;
+    },
+  });
+
+
   return (
     <Dialog>
       <DialogTrigger asChild>
         <Button>View</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-5xl p-10">
-        <div className="h-[700px] overflow-auto scrollbar-hide">
+        <div className="overflow-auto scrollbar-hide">
           <div>
             <Image
               src={"/logo.png"}
@@ -45,7 +70,7 @@ const BookingsModal = () => {
             />
           </div>
 
-          <h1 className="text-xl font-medium">Booking Details: ######</h1>
+          <h1 className="text-xl font-medium">Booking Details</h1>
 
           <div className="flex items-center justify-between mt-8 border-b border-black/25">
             {levels.map((item, index) => (
@@ -64,10 +89,10 @@ const BookingsModal = () => {
           </div>
 
           <div>
-            {isBookingModalOpen === "Summary" && <BookingSummery />}
-            {isBookingModalOpen === "Status" && <BookingStatus />}
-            {isBookingModalOpen === "Customer" && <BookingCustomer />}
-            {isBookingModalOpen === "Lender" && <BookingLender />}
+            {isBookingModalOpen === "Summary" && <BookingSummery bookingDetails={bookingDetails} />}
+            {isBookingModalOpen === "Status" && <BookingStatus bookingDetails={bookingDetails} />}
+            {isBookingModalOpen === "Customer" && <BookingCustomer bookingDetails={bookingDetails} />}
+            {isBookingModalOpen === "Lender" && <BookingLender bookingDetails={bookingDetails} />}
             {isBookingModalOpen === "Payment" && <BookingPayment />}
             {isBookingModalOpen === "Disputes" && <BookingDisputes />}
             {isBookingModalOpen === "Notes" && <BookingNotes />}

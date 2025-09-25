@@ -1,9 +1,11 @@
-'use client'
-import { DataTable } from '@/components/ui/data-table'
+
+"use client";
+import { DataTable } from "@/components/ui/data-table";
 // import { PaginationControls } from "@/components/ui/pagination-controls";
-import useDebounce from '@/hook/useDebounce'
-import { LenderProfile, LendersGetResponse } from '@/types/lender'
-import { useQuery } from '@tanstack/react-query'
+import useDebounce from "@/hook/useDebounce";
+import { LenderProfile, LendersGetResponse } from "@/types/lender";
+import { useQuery } from "@tanstack/react-query";
+
 import {
   ColumnDef,
   getCoreRowModel,

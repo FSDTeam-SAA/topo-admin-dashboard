@@ -1,47 +1,49 @@
+
 "use client";
 import { DataTable } from "@/components/ui/data-table";
 // import { PaginationControls } from "@/components/ui/pagination-controls";
 import useDebounce from "@/hook/useDebounce";
 import { LenderProfile, LendersGetResponse } from "@/types/lender";
 import { useQuery } from "@tanstack/react-query";
+
 import {
   ColumnDef,
   getCoreRowModel,
   getPaginationRowModel,
   useReactTable,
-} from "@tanstack/react-table";
-import { AlertTriangle, Loader2 } from "lucide-react";
-import { lenderTableColumns } from "./lender-table-column";
-import { useLenderSearchStore } from "./state";
+} from '@tanstack/react-table'
+import { AlertTriangle, Loader2 } from 'lucide-react'
+import { lenderTableColumns } from './lender-table-column'
+import { useLenderSearchStore } from './state'
 
 interface LenderTableContainerProps {
-  accessToken: string;
+  accessToken: string
 }
 
 const LenderTableContainer = ({ accessToken }: LenderTableContainerProps) => {
-  const { page, value, status, dateRange } = useLenderSearchStore();
+  const { page, value, status, dateRange } = useLenderSearchStore()
 
-  const debouncedValue = useDebounce(value, 500);
+  const debouncedValue = useDebounce(value, 500)
 
   const { data, isLoading, isError, error } = useQuery<LendersGetResponse>({
-    queryKey: ["lenders", page, debouncedValue, status, dateRange],
+    queryKey: ['lenders', page, debouncedValue, status, dateRange],
     queryFn: () =>
       fetch(
         `${
           process.env.NEXT_PUBLIC_BACKEND_URL
         }/api/v1/application?page=${page}&limit=5&search=${debouncedValue}&status=${status}&startDate=${
-          dateRange.from ? dateRange.from : ""
-        }&endDate=${dateRange.to ? dateRange.to : ""}`,
+          dateRange.from ? dateRange.from : ''
+        }&endDate=${dateRange.to ? dateRange.to : ''}`,
         {
           headers: {
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
             Authorization: `Bearer ${accessToken}`,
           },
         }
       ).then((res) => res.json()),
-  });
+  })
 
-  let content;
+  let content
 
   if (isLoading) {
     content = (
@@ -49,17 +51,17 @@ const LenderTableContainer = ({ accessToken }: LenderTableContainerProps) => {
         <Loader2 className="animate-spin opacity-80" />
         <p>Please wait...</p>
       </div>
-    );
+    )
   } else if (isError) {
     content = (
       <div className="min-h-[300px] flex flex-col items-center justify-center text-red-600 dark:text-red-400 text-center space-y-2">
         <AlertTriangle size={32} />
         <p className="text-lg font-medium">Failed to load documents</p>
         <p className="text-sm text-gray-500 dark:text-gray-400">
-          {error?.message || "Something went wrong. Please try again later."}
+          {error?.message || 'Something went wrong. Please try again later.'}
         </p>
       </div>
-    );
+    )
   } else if (data?.data) {
     content = (
       <TableContainer
@@ -67,18 +69,18 @@ const LenderTableContainer = ({ accessToken }: LenderTableContainerProps) => {
         columns={lenderTableColumns}
         totalPages={data.data.pagination.totalPages}
       />
-    );
+    )
   }
 
-  return <div>{content}</div>;
-};
+  return <div>{content}</div>
+}
 
-export default LenderTableContainer;
+export default LenderTableContainer
 
 interface TableProps {
-  data: LenderProfile[];
-  columns: ColumnDef<LenderProfile>[];
-  totalPages: number;
+  data: LenderProfile[]
+  columns: ColumnDef<LenderProfile>[]
+  totalPages: number
 }
 
 const TableContainer = ({ data, columns, totalPages }: TableProps) => {
@@ -88,7 +90,7 @@ const TableContainer = ({ data, columns, totalPages }: TableProps) => {
     columns: columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-  });
+  })
   return (
     <>
       <div className="bg-white">
@@ -106,5 +108,5 @@ const TableContainer = ({ data, columns, totalPages }: TableProps) => {
         </div>
       )}
     </>
-  );
-};
+  )
+}

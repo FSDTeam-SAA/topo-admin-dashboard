@@ -69,12 +69,10 @@ export function PaginationControls({
   const endIndex = Math.min(currentPage * itemsPerPage, totalItems)
 
   return (
-    <div className="flex  items-center justify-between w-full mt-4">
+    <div className="flex  items-center justify-between w-full mt-4 font-sans">
       {/* Left side: results info */}
-      <p className="text-base text-muted-foreground px-6">
-        Showing <span className="font-medium">{startIndex}</span> to{' '}
-        <span className="font-medium">{endIndex}</span> of{' '}
-        <span className="font-medium">{totalItems}</span> results
+      <p className="text-base text-muted-foreground px-6 min-w-[300px]">
+        Showing {startIndex} to {endIndex} of {totalItems} results
       </p>
 
       {/* Right side: pagination */}

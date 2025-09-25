@@ -1,54 +1,54 @@
-"use client";
-import { loginAction } from "@/actions/auth/login";
-import { Button } from "@/components/ui/button";
+'use client'
+import { loginAction } from '@/actions/auth/login'
+import { Button } from '@/components/ui/button'
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { loginformSchema, LoginFormValues } from "@/schemas/auth";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Eye, EyeOff, Lock, Mail } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import AuthHeader from "./AUthHeader";
+} from '@/components/ui/form'
+import { Input } from '@/components/ui/input'
+import { loginformSchema, LoginFormValues } from '@/schemas/auth'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { Eye, EyeOff, Lock, Mail } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { useState, useTransition } from 'react'
+import { useForm } from 'react-hook-form'
+import { toast } from 'sonner'
+import AuthHeader from './AUthHeader'
 
 export default function SignInForm() {
-  const router = useRouter();
-  const [showPassword, setShowPassword] = useState(false);
-  const [isPending, startTransition] = useTransition();
+  const router = useRouter()
+  const [showPassword, setShowPassword] = useState(false)
+  const [isPending, startTransition] = useTransition()
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginformSchema),
     defaultValues: {
-      email: "",
-      password: "",
+      email: '',
+      password: '',
     },
-  });
+  })
 
   // Form submission handler
   async function onSubmit(values: LoginFormValues) {
     startTransition(() => {
       loginAction(values).then((res) => {
-        console.log(res);
+        console.log(res)
         if (!res.success) {
-          toast.error(res.message || "Login failed. Please try again.");
-          return;
+          toast.error(res.message || 'Login failed. Please try again.')
+          return
         }
 
-        router.push("/");
-        toast.success(res.message || "Login successful");
-      });
-    });
+        router.push('/')
+        toast.success(res.message || 'Login successful')
+      })
+    })
   }
 
   return (
-    <div className="w-full max-w-md mx-auto flex flex-col items-center">
+    <div className="w-full max-w-md mx-auto flex flex-col items-center font-sans">
       <AuthHeader
         title1="Welcome"
         title2="Back"
@@ -97,7 +97,7 @@ export default function SignInForm() {
                         <Lock className="h-4 w-4 text-gray-400" />
                       </div>
                       <Input
-                        type={showPassword ? "text" : "password"}
+                        type={showPassword ? 'text' : 'password'}
                         placeholder="Enter your Password"
                         className="font-poppins w-full md:w-[400px] h-[40px] bg-white border border-black text-base placeholder:text-base placeholder:text-[#999999] placeholder:leading-[120%] placeholder:font-normal pl-[42px] pr-4 py-[15px] rounded-[8px]"
                         {...field}
@@ -145,5 +145,5 @@ export default function SignInForm() {
         </form>
       </Form>
     </div>
-  );
+  )
 }

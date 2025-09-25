@@ -1,6 +1,6 @@
 "use client";
 import { DataTable } from "@/components/ui/data-table";
-import { PaginationControls } from "@/components/ui/pagination-controls";
+// import { PaginationControls } from "@/components/ui/pagination-controls";
 import useDebounce from "@/hook/useDebounce";
 import { LenderProfile, LendersGetResponse } from "@/types/lender";
 import { useQuery } from "@tanstack/react-query";
@@ -82,7 +82,7 @@ interface TableProps {
 }
 
 const TableContainer = ({ data, columns, totalPages }: TableProps) => {
-  const { page, setPage } = useLenderSearchStore();
+  // const { page, setPage } = useLenderSearchStore();
   const table = useReactTable({
     data,
     columns: columns,
@@ -96,13 +96,13 @@ const TableContainer = ({ data, columns, totalPages }: TableProps) => {
       </div>
       {totalPages > 1 && (
         <div className="mt-4 w-full  flex justify-end">
-          <div>
+          {/* <div>
             <PaginationControls
               currentPage={page}
               onPageChange={(page) => setPage(page)}
               totalPages={totalPages}
             />
-          </div>
+          </div> */}
         </div>
       )}
     </>

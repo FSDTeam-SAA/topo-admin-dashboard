@@ -9,7 +9,6 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
-import { Input } from '@/components/ui/input'
 import {
   Select,
   SelectContent,
@@ -20,16 +19,75 @@ import {
 import { Textarea } from '@/components/ui/textarea'
 import { useState } from 'react'
 import Image from 'next/image'
+import { Ticket } from './supportTable'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useSession } from 'next-auth/react'
+import { toast } from 'sonner'
+
+// ---- PATCH API ----
+async function updateSupportTicket(
+  id: string,
+  accessToken: string,
+  payload: { response: string; status: string; priority: string }
+) {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/support/${id}`,
+    {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify(payload),
+    }
+  )
+
+  if (!res.ok) throw new Error('Failed to update ticket')
+  return res.json()
+}
 
 export function SupportDetailsPopup({
   id,
   children,
+  data,
 }: {
   id: string
   children: React.ReactNode
+  data: Ticket
 }) {
-  const [status, setStatus] = useState('open')
-  const [priority, setPriority] = useState('high')
+  const session = useSession()
+  const accessToken = session.data?.user?.accessToken || ''
+  const queryClient = useQueryClient()
+
+  const [status, setStatus] = useState(data.status)
+  const [priority, setPriority] = useState(data.priority)
+  const [response, setResponse] = useState('')
+
+  // --- useMutation ---
+  const mutation = useMutation({
+    mutationFn: (payload: {
+      response: string
+      status: string
+      priority: string
+    }) => updateSupportTicket(id, accessToken, payload),
+    onSuccess: () => {
+      // cache refresh
+      queryClient.invalidateQueries({
+        queryKey: ['support-stats', accessToken],
+      })
+      queryClient.invalidateQueries({ queryKey: ['support-ticket', id] })
+      queryClient.invalidateQueries({ queryKey: ['tickets', accessToken] })
+
+      toast.success(' Ticket updated successfully!')
+    },
+    onError: () => {
+      toast.error(' Failed to update ticket')
+    },
+  })
+
+  const handleSave = () => {
+    mutation.mutate({ response, status, priority })
+  }
 
   return (
     <Dialog>
@@ -63,15 +121,17 @@ export function SupportDetailsPopup({
               Ticket Summary
             </CardTitle>
           </CardHeader>
-          <CardContent className="text-sm space-y-1 font-light tracking-wider">
+          <CardContent className="text-sm space-y-2 font-light tracking-wider">
             <p>
               <strong className="font-medium">Ticket ID:</strong> {id}
             </p>
             <p>
-              <strong className="font-medium">User ID:</strong> U98765
+              <strong className="font-medium">User ID:</strong>{' '}
+              {data?.user?._id || 'Guest'}
             </p>
             <p>
-              <strong className="font-medium">Issue Type:</strong> Payment Issue
+              <strong className="font-medium">Issue Type:</strong>{' '}
+              {data?.issueType || 'N/A'}
             </p>
             <p>
               <strong className="font-medium">Status:</strong> {status}
@@ -80,16 +140,16 @@ export function SupportDetailsPopup({
               <strong className="font-medium">Priority:</strong> {priority}
             </p>
             <p>
-              <strong className="font-medium">Created Date:</strong> Apr 15,
-              2025
+              <strong className="font-medium">Created Date:</strong>{' '}
+              {new Date(data?.createdAt).toLocaleDateString('en-US', {
+                month: 'short',
+                day: '2-digit',
+                year: 'numeric',
+              })}
             </p>
             <p>
-              <strong className="font-medium">Description:</strong> Payment
-              failed due to invalid card.
-            </p>
-            <p>
-              <strong className="font-medium">Related Entities:</strong> Booking
-              ID #99999, Customer ID #88888
+              <strong className="font-medium">Description:</strong>{' '}
+              {data?.message || 'N/A'}
             </p>
           </CardContent>
         </Card>
@@ -100,30 +160,12 @@ export function SupportDetailsPopup({
             <CardTitle className="text-lg">Communication</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label>Response Template</Label>
-              <Select>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select Note Template" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="template1">Template 1</SelectItem>
-                  <SelectItem value="template2">Template 2</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label>Admin Note</Label>
-              <Textarea placeholder="Write note..." rows={10} />
-            </div>
-
-            <div className="flex items-center gap-2">
-              <Input type="file" className="flex-1" />
-              <Button variant="secondary">Upload File</Button>
-            </div>
-
-            <Button>Send</Button>
+            <Textarea
+              value={response}
+              onChange={(e) => setResponse(e.target.value)}
+              placeholder="Write response text..."
+              rows={10}
+            />
           </CardContent>
         </Card>
 
@@ -135,7 +177,12 @@ export function SupportDetailsPopup({
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label>Update Status</Label>
-              <Select value={status} onValueChange={setStatus}>
+              <Select
+                value={status}
+                onValueChange={(value) =>
+                  setStatus(value as 'pending' | 'in-progress' | 'resolved')
+                }
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Select Status" />
                 </SelectTrigger>
@@ -149,7 +196,12 @@ export function SupportDetailsPopup({
 
             <div className="space-y-2">
               <Label>Update Priority</Label>
-              <Select value={priority} onValueChange={setPriority}>
+              <Select
+                value={priority}
+                onValueChange={(value) =>
+                  setPriority(value as 'low' | 'medium' | 'high')
+                }
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Select Priority" />
                 </SelectTrigger>
@@ -169,7 +221,9 @@ export function SupportDetailsPopup({
             <CardTitle className="text-lg">Actions</CardTitle>
           </CardHeader>
           <CardContent className="flex gap-4">
-            <Button>Save Changes</Button>
+            <Button onClick={handleSave} disabled={mutation.isPending}>
+              {mutation.isPending ? 'Saving...' : 'Save Changes'}
+            </Button>
             <Button variant="secondary">Download Report</Button>
           </CardContent>
         </Card>

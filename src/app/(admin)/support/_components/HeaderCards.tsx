@@ -16,7 +16,7 @@ interface StatsResponse {
     issueTypeStats: {
       payment?: number
       booking?: number
-      [key: string]: number | undefined
+      unknown?: number | undefined
     }
     open: number
     resolved: number
@@ -100,14 +100,14 @@ export default function HeaderCards() {
             </CardHeader>
             <CardContent>
               <ul className="space-y-1 text-sm text-gray-600 hover:text-white">
-                {Object.entries(stats.issueTypeStats)
-                  .filter(([key]) => key !== 'unknown')
-                  .map(([key, value]) => (
-                    <li key={key} className="flex justify-between">
-                      <span className="capitalize">{key}</span>
-                      <span className="font-medium">{value}</span>
-                    </li>
-                  ))}
+                {Object.entries(stats.issueTypeStats).map(([key, value]) => (
+                  <li key={key} className="flex justify-between">
+                    <span className="font-medium">
+                      {key === 'unknown' ? 'Guest' : key}
+                    </span>
+                    <span className="font-medium">{value}</span>
+                  </li>
+                ))}
               </ul>
             </CardContent>
           </Card>

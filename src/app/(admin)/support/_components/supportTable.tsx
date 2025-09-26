@@ -17,11 +17,12 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { PaginationControls } from '@/components/ui/pagination-controls'
-import { useQuery } from '@tanstack/react-query'
+
 import { Skeleton } from '@/components/ui/custom/skeleton'
 import { useSession } from 'next-auth/react'
 import { SupportDetailsPopup } from './supportDetailsModal'
 import { Button } from '@/components/ui/button'
+import { useQuery } from '@tanstack/react-query'
 
 // ---- Types ----
 export type Ticket = {
@@ -32,6 +33,7 @@ export type Ticket = {
   createdAt: string
   status: 'pending' | 'resolved' | 'in-progress'
   priority: 'low' | 'medium' | 'high'
+  message?: string
 }
 
 // ---- Fetcher ----
@@ -63,7 +65,7 @@ const columns: ColumnDef<Ticket>[] = [
     cell: ({ row }) =>
       row.original.user?._id.slice(0, 8) ||
       row.original.lender?._id.slice(0, 8) || (
-        <span className="text-gray-400">N/A</span>
+        <span className="text-gray-400">Guest</span>
       ),
   },
   {
@@ -121,7 +123,7 @@ const columns: ColumnDef<Ticket>[] = [
     cell: ({ row }) => {
       const id = row.original?._id
       return (
-        <SupportDetailsPopup id={id}>
+        <SupportDetailsPopup id={id} data={row.original}>
           <Button
             variant="default"
             className="px-3 py-1 text-[13px] rounded-lg bg-black text-white hover:bg-gray-800 transition-colors"
@@ -146,8 +148,9 @@ export default function SupportTable() {
 
   // ---- Fetch Data ----
   const { data, isLoading, isError } = useQuery({
-    queryKey: ['tickets'],
+    queryKey: ['tickets', accessToken],
     queryFn: () => fetchTickets(accessToken),
+    enabled: !!accessToken,
   })
 
   // reset to first page when search/filter changes
@@ -192,7 +195,7 @@ export default function SupportTable() {
             type="text"
             placeholder="Search via id, type, status or priority..."
             onChange={(e) => setSearch(e.target.value)}
-            className="w-[400px]"
+            className="w-[300px]"
           />
 
           {/* Filter */}

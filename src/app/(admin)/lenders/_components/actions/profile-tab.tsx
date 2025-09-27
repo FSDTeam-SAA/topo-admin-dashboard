@@ -1,16 +1,15 @@
-import MapBoxView from "@/components/cards/map-view";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { LenderProfile } from "@/types/lender";
-import moment from "moment";
-
+import MapBoxView from '@/components/cards/map-view'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { LenderProfile } from '@/types/lender'
+import moment from 'moment'
 interface Props {
-  data: LenderProfile;
+  data: LenderProfile
 }
 
 const ProfileTab = ({ data }: Props) => {
   return (
-    <div className="space-y-6">
-      <Card className="shadow-none rounded-[6px]">
+    <div className="space-y-6 w-full">
+      <Card className="shadow-none rounded-[6px] w-full">
         <CardHeader>
           <CardTitle className="font-light">Profile Summary</CardTitle>
         </CardHeader>
@@ -22,7 +21,7 @@ const ProfileTab = ({ data }: Props) => {
             <p>Email: {data.email}</p>
             <p>Phone: {data.phoneNumber}</p>
             <p>
-              Join Date: {moment(data.createdAt).format("MMMM DD, YYYY h:mm A")}
+              Join Date: {moment(data.createdAt).format('MMMM DD, YYYY h:mm A')}
             </p>
             <p>Address: {data.businessAddress}</p>
             <p>Business Address: {data.address}</p>
@@ -32,7 +31,7 @@ const ProfileTab = ({ data }: Props) => {
       </Card>
 
       {data.latitude && data.longitude && (
-        <Card className="shadow-none rounded-[6px] p-0">
+        <Card className="shadow-none rounded-[6px] p-0 ">
           <CardContent className="p-5 pb-0">
             <MapBoxView
               latitude={data.latitude}
@@ -44,7 +43,7 @@ const ProfileTab = ({ data }: Props) => {
         </Card>
       )}
     </div>
-  );
-};
+  )
+}
 
-export default ProfileTab;
+export default ProfileTab

@@ -15,6 +15,7 @@ import MatricsTab from './matrics-tab'
 import NotesTab from './notes-tab'
 import ProfileTab from './profile-tab'
 import StatusTab from './status-tab'
+// import Image from 'next/image'
 
 interface Props {
   data: LenderProfile
@@ -50,7 +51,7 @@ const LenderAction = ({ data }: Props) => {
             !max-w-[95vw]    /* override shadcn default */
             md:!max-w-[80vw] /* desktop এ 80% */
             lg:!max-w-[70vw] /* বড়ো স্ক্রিনে 70% */
-            h-[90vh] 
+            h-auto 
             px-4 
             py-2 
             space-y-5 
@@ -59,6 +60,15 @@ const LenderAction = ({ data }: Props) => {
         >
           <DialogHeader>
             <DialogTitle>
+              {/* <div className="flex justify-center py-4">
+                <Image
+                  src={'/logo.png'}
+                  alt={data.fullName || 'Lender Profile Image'}
+                  width={90}
+                  height={90}
+                  className="rounded-full object-cover"
+                />
+              </div> */}
               Lender Details: {data.fullName} (ID: {data._id})
             </DialogTitle>
           </DialogHeader>

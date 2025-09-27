@@ -1,10 +1,9 @@
-
-"use client";
-import { DataTable } from "@/components/ui/data-table";
+'use client'
+import { DataTable } from '@/components/ui/data-table'
 // import { PaginationControls } from "@/components/ui/pagination-controls";
-import useDebounce from "@/hook/useDebounce";
-import { LenderProfile, LendersGetResponse } from "@/types/lender";
-import { useQuery } from "@tanstack/react-query";
+import useDebounce from '@/hook/useDebounce'
+import { LenderProfile, LendersGetResponse } from '@/types/lender'
+import { useQuery } from '@tanstack/react-query'
 
 import {
   ColumnDef,
@@ -12,9 +11,10 @@ import {
   getPaginationRowModel,
   useReactTable,
 } from '@tanstack/react-table'
-import { AlertTriangle, Loader2 } from 'lucide-react'
+import { AlertTriangle } from 'lucide-react'
 import { lenderTableColumns } from './lender-table-column'
 import { useLenderSearchStore } from './state'
+// import { PaginationControls } from "@/components/ui/pagination-controls";
 
 interface LenderTableContainerProps {
   accessToken: string
@@ -47,9 +47,14 @@ const LenderTableContainer = ({ accessToken }: LenderTableContainerProps) => {
 
   if (isLoading) {
     content = (
-      <div className="h-[400px] flex justify-center items-center flex-col">
-        <Loader2 className="animate-spin opacity-80" />
-        <p>Please wait...</p>
+      <div className="rounded-md border bg-white p-4 space-y-3">
+        {/* 7 Skeleton Rows */}
+        {Array.from({ length: 7 }).map((_, i) => (
+          <div
+            key={i}
+            className="h-10 w-full bg-gray-100 rounded animate-pulse"
+          ></div>
+        ))}
       </div>
     )
   } else if (isError) {
@@ -83,7 +88,7 @@ interface TableProps {
   totalPages: number
 }
 
-const TableContainer = ({ data, columns, totalPages }: TableProps) => {
+const TableContainer = ({ data, columns }: TableProps) => {
   // const { page, setPage } = useLenderSearchStore();
   const table = useReactTable({
     data,
@@ -96,17 +101,17 @@ const TableContainer = ({ data, columns, totalPages }: TableProps) => {
       <div className="bg-white">
         <DataTable table={table} columns={columns} />
       </div>
-      {totalPages > 1 && (
+      {/* {totalPages > 1 && (
         <div className="mt-4 w-full  flex justify-end">
-          {/* <div>
-            <PaginationControls
-              currentPage={page}
-              onPageChange={(page) => setPage(page)}
-              totalPages={totalPages}
-            />
-          </div> */}
+          <PaginationControls
+                currentPage={data.pagination.currentPage}
+                totalPages={data.pagination.totalPages}
+                totalItems={data.pagination.totalItems}
+                itemsPerPage={data.pagination.itemsPerPage}
+                onPageChange={(page) => setPage(page)}
+              />
         </div>
-      )}
+      )} */}
     </>
   )
 }

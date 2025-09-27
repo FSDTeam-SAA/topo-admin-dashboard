@@ -14,7 +14,7 @@ const CustomersHeader = () => {
         </Button>
       </div>
 
-      <div className="mt-[30px] grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+      <div className="mt-[30px] grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 font-sans">
         <InfoCard title="Total Customers" value="500" />
         <InfoCard title="Active Customers" value="450" />
         <InfoCard title="Pending verifications" value="50" />

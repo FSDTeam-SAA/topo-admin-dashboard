@@ -7,33 +7,29 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
-import { LenderProfile } from '@/types/lender'
-import DisputesTab from './disputs-tab'
-import DocumentsTab from './documen-tab'
-import ListingTab from './listing-tab'
-import MatricsTab from './matrics-tab'
-import NotesTab from './notes-tab'
-import ProfileTab from './profile-tab'
-import StatusTab from './status-tab'
+import { DemoCustomerProfile } from './customer-table-column'
+import ProfileTab from './actions/profile-tab'
+import StatusTab from './actions/status-tab'
+
 // import Image from 'next/image'
 
 interface Props {
-  data: LenderProfile
+  data: DemoCustomerProfile
 }
 
-const LenderAction = ({ data }: Props) => {
+const CustomerAction = ({ data }: Props) => {
   const tabs = [
     { id: 'profile', label: 'Profile', content: <ProfileTab data={data} /> },
     { id: 'status', label: 'Status', content: <StatusTab data={data} /> },
-    { id: 'matrics', label: 'Matrics', content: <MatricsTab data={data} /> },
-    { id: 'listing', label: 'Listing', content: <ListingTab data={data} /> },
-    { id: 'disputes', label: 'Disputes', content: <DisputesTab data={data} /> },
-    {
-      id: 'documents',
-      label: 'Documents',
-      content: <DocumentsTab data={data} />,
-    },
-    { id: 'notes', label: 'Notes', content: <NotesTab data={data} /> },
+    // { id: 'matrics', label: 'Matrics', content: <MatricsTab data={data} /> },
+    // { id: 'listing', label: 'Listing', content: <ListingTab data={data} /> },
+    // { id: 'disputes', label: 'Disputes', content: <DisputesTab data={data} /> },
+    // {
+    //   id: 'documents',
+    //   label: 'Documents',
+    //   content: <DocumentsTab data={data} />,
+    // },
+    // { id: 'notes', label: 'Notes', content: <NotesTab data={data} /> },
   ]
 
   return (
@@ -69,7 +65,7 @@ const LenderAction = ({ data }: Props) => {
                   className="rounded-full object-cover"
                 />
               </div> */}
-              Lender Details: {data.fullName} (ID: {data._id})
+              Customer Details: {data.customerName} (ID: {data?.customerId})
             </DialogTitle>
           </DialogHeader>
 
@@ -87,4 +83,4 @@ const LenderAction = ({ data }: Props) => {
   )
 }
 
-export default LenderAction
+export default CustomerAction

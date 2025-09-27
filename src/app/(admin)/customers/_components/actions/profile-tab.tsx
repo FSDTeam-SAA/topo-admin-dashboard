@@ -1,9 +1,10 @@
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { LenderProfile } from '@/types/lender'
 import moment from 'moment'
+import { DemoCustomerProfile } from '../customer-table-column'
+
 interface Props {
-  data: LenderProfile
+  data: DemoCustomerProfile
 }
 
 const ProfileTab = ({ data }: Props) => {
@@ -18,16 +19,16 @@ const ProfileTab = ({ data }: Props) => {
 
         <CardContent className="font-light text-[14px] font-sans">
           <div className="space-y-2">
-            <p>Name: {data.fullName}</p>
-            <p>Lender ID: {data._id}</p>
-            <p>Email: {data.email}</p>
+            <p>Name: {data.customerName}</p>
+            <p>Lender ID: {data.customerId}</p>
+            <p>Email: {data?.email}</p>
             <p>Phone: {data.phoneNumber}</p>
             <p>
-              Join Date: {moment(data.createdAt).format('MMMM DD, YYYY h:mm A')}
+              Join Date: {moment(data.joinedAt).format('MMMM DD, YYYY h:mm A')}
             </p>
             <p>Address: {data.businessAddress}</p>
             <p>Business Address: {data.address}</p>
-            <p>Post Code: {data.postcode}</p>
+            <p>Post Code: {data.postCode}</p>
           </div>
         </CardContent>
       </Card>

@@ -1,49 +1,51 @@
-"use client";
-import { Card } from "@/components/ui/card";
-import AlertModal from "@/components/ui/custom/alert-modal";
-import SkeletonWrapper from "@/components/ui/custom/skeleton-wrapper";
-import { Listing } from "@/types/listings/index";
-import { useQuery } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import ListingDetailsOverview from "./listing-detials-first-three-component/listingDetails-overview";
+'use client'
+import { Card } from '@/components/ui/card'
+import AlertModal from '@/components/ui/custom/alert-modal'
+import SkeletonWrapper from '@/components/ui/custom/skeleton-wrapper'
+import { Listing } from '@/types/listings/index'
+import { useQuery } from '@tanstack/react-query'
+import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
+import ListingDetailsOverview from './listing-detials-first-three-component/listingDetails-overview'
+import { Button } from '@/components/ui/button'
+import { ArrowLeft } from 'lucide-react'
 
 interface Props {
-  listingId: string;
-  token: string;
+  listingId: string
+  token: string
 }
 
 interface ApiProps {
-  status: true;
-  message: string;
-  data: Listing;
+  status: true
+  message: string
+  data: Listing
 }
 
 const ListingDetailsContainer = ({ listingId, token }: Props) => {
-  const [isRouteChanging, setIsRouteChangin] = useState(false);
-  const [editAlertDialog, setEditAlertDialog] = useState(false);
+  const [isRouteChanging, setIsRouteChangin] = useState(false)
+  const [editAlertDialog, setEditAlertDialog] = useState(false)
 
-  const router = useRouter();
+  const router = useRouter()
   const { data, isLoading, isError, error, refetch, isRefetching } =
     useQuery<ApiProps>({
-      queryKey: ["listing", listingId],
+      queryKey: ['listing', listingId],
       queryFn: () =>
         fetch(
           `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/lender/listings/${listingId}`,
           {
             headers: {
-              "content-type": "application/json",
+              'content-type': 'application/json',
               Authorization: `Bearer ${token}`,
             },
           }
         ).then((res) => res.json()),
-    });
+    })
 
   useEffect(() => {
     return () => {
-      setIsRouteChangin(false);
-    };
-  }, []);
+      setIsRouteChangin(false)
+    }
+  }, [])
 
   if (isError) {
     return (
@@ -61,11 +63,17 @@ const ListingDetailsContainer = ({ listingId, token }: Props) => {
           </button>
         </div>
       </div>
-    );
+    )
   }
 
   return (
     <div className="p-5 bg-[#fefaf6] space-y-8">
+      <Button onClick={() => router.back()} variant={'default'}>
+        <span>
+          <ArrowLeft />
+        </span>
+        Go Back
+      </Button>
       <h2 className="text-[20px] font-normal uppercase  ">LISTINGS DETAILS</h2>
 
       {/* {data?.data.approvalStatus === "rejected" && (
@@ -89,15 +97,15 @@ const ListingDetailsContainer = ({ listingId, token }: Props) => {
 
           <div className="space-y-4">
             <p className="text-base font-normal">
-              <span className="font-normal">Description:</span>{" "}
+              <span className="font-normal">Description:</span>{' '}
               {data?.data.description}
             </p>
             <p className="text-base">
-              <span className="font-normal">Materials:</span>{" "}
+              <span className="font-normal">Materials:</span>{' '}
               {data?.data.material}
             </p>
             <p className="text-base">
-              <span className="font-normal">Care Instructions:</span>{" "}
+              <span className="font-normal">Care Instructions:</span>{' '}
               {data?.data.careInstructions}
             </p>
           </div>
@@ -130,8 +138,8 @@ const ListingDetailsContainer = ({ listingId, token }: Props) => {
       <AlertModal
         loading={isRouteChanging}
         onConfirm={() => {
-          setIsRouteChangin(true);
-          router.push(`/listings/${data?.data._id}/edit`);
+          setIsRouteChangin(true)
+          router.push(`/listings/${data?.data._id}/edit`)
         }}
         onClose={() => setEditAlertDialog(false)}
         title="Edit Listing Confirmation"
@@ -139,7 +147,7 @@ const ListingDetailsContainer = ({ listingId, token }: Props) => {
         isOpen={editAlertDialog}
       />
     </div>
-  );
-};
+  )
+}
 
-export default ListingDetailsContainer;
+export default ListingDetailsContainer

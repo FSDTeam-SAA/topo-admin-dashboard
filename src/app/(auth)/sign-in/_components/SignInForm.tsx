@@ -127,7 +127,7 @@ export default function SignInForm() {
             className="font-poppins h-[40px] w-full bg-black text-lg font-semibold leading-[120%] tracking-[0%] rounded-[8px] text-[#F4F4F4] py-[15px]"
             disabled={isPending}
           >
-            Sign In
+            {isPending ? 'Signing In...' : 'Sign In'}
           </Button>
 
           {/* Sign Up Link */}

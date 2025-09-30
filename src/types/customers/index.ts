@@ -1,15 +1,4 @@
-type ReviewStockMethod = {
-  website: boolean
-  instagram: boolean
-  keyBrands: boolean
-}
-
-export interface LenderProfile {
-  file: {
-    url: string
-    type: string
-  }
-  reviewStockMethod: ReviewStockMethod
+export interface CustomerProfile {
   _id: string
   fullName: string
   phoneNumber: string
@@ -18,7 +7,7 @@ export interface LenderProfile {
   username: string
   dob: string | null
   gender: string
-  role: 'APPLICANT'
+  role: 'CUSTOMER'
   bio: string
   profileImage: string
   multiProfileImage: string[]
@@ -28,18 +17,9 @@ export interface LenderProfile {
   isActive: boolean
   hasActiveSubscription: boolean
   subscriptionExpireDate: string | null
-  businessName: string
-  abnNumber: string
-  businessAddress: string
-  instagramHandle: string
-  businessWebsite: string
-  numberOfDresses: string
-  allowTryOn: boolean
-  allowLocalPickup: boolean
-  shipAustraliaWide: boolean
   agreedTerms: boolean
   agreedCurationPolicy: boolean
-  totalbookings: number
+  totalBookings: number
   totalRatting: number
   totalListings: number
   totalReveneue: number
@@ -72,11 +52,11 @@ export type Pagination = {
   totalPages: number
 }
 
-export type LendersGetResponse = {
+export type CustomersGetResponse = {
   status: string
   message: string
   data: {
-    data: LenderProfile[]
+    data: CustomerProfile[]
     pagination: Pagination
   }
 }

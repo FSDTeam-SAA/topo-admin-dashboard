@@ -72,3 +72,19 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* global.css or component style section */
+input[type='file']::-webkit-file-upload-button {
+  border: none;
+  background: transparent;
+  color: #050505; /* optional */
+  font-weight: 400;
+  cursor: pointer;
+}
+input[type='file']::-moz-file-upload-button {
+  border: none;
+  background: transparent;
+  color: #020202;
+  font-weight: 400;
+  cursor: pointer;
+}

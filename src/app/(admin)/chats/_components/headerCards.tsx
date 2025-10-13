@@ -20,7 +20,7 @@ export default function HeaderCards() {
         <InfoCard title="Active Conversations" value="##" />
 
         <InfoCard title="Flagged Conversations" value="##" />
-        <InfoCard title="Top Topics" value="Booking Issues (40%)" />
+        {/* <InfoCard title="Top Topics" value="Booking Issues (40%)" /> */}
       </div>
 
       {/* {isError && (

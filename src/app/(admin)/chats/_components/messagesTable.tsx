@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 
 import React, { useMemo, useState, useEffect } from 'react'
@@ -8,6 +9,7 @@ import {
   useReactTable,
   flexRender,
 } from '@tanstack/react-table'
+import { useQuery } from '@tanstack/react-query'
 import { Input } from '@/components/ui/input'
 import { PaginationControls } from '@/components/ui/pagination-controls'
 import { Badge } from '@/components/ui/badge'
@@ -18,58 +20,50 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { ChatsDetailsPopup } from './chatsDetailsModal'
+import { Button } from '@/components/ui/button'
+import { useSession } from 'next-auth/react'
+import SkeletonLoader from '@/components/loader/SkeletonLoader'
 
 // ✅ Type Definition
 type Conversation = {
-  customerId: string
-  lenderId: string
-  lastMessage: string
+  _id: string
+  customerName: string
+  lenderName: string
+  lastMessage?: string
   date: string
-  status: 'Active' | 'Pending' | 'Closed'
+  status?: string
 }
 
-// ✅ Demo Data
-const dummyConversations: Conversation[] = [
-  {
-    customerId: 'CUS-101',
-    lenderId: 'LEN-501',
-    lastMessage: 'Thank you, I’ll review and confirm soon.',
-    date: '2025-10-05',
-    status: 'Active',
-  },
-  {
-    customerId: 'CUS-102',
-    lenderId: 'LEN-502',
-    lastMessage: 'Can you extend the repayment date?',
-    date: '2025-09-29',
-    status: 'Pending',
-  },
-  {
-    customerId: 'CUS-103',
-    lenderId: 'LEN-503',
-    lastMessage: 'This case has been resolved successfully.',
-    date: '2025-09-20',
-    status: 'Closed',
-  },
-  {
-    customerId: 'CUS-104',
-    lenderId: 'LEN-504',
-    lastMessage: 'Need help updating my contact details.',
-    date: '2025-09-15',
-    status: 'Active',
-  },
-]
+// ✅ Fetch Function
+const fetchChatRooms = async (accessToken: string) => {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/message/chatrooms/admin/all`,
+    {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    }
+  )
+
+  if (!res.ok) {
+    throw new Error('Failed to fetch chat rooms')
+  }
+
+  const data = await res.json()
+  return data?.data?.data || []
+}
 
 // ✅ Table Columns
 const columns: ColumnDef<Conversation>[] = [
-  { accessorKey: 'customerId', header: 'Customer ID' },
-  { accessorKey: 'lenderId', header: 'Lender ID' },
+  { accessorKey: 'customerName', header: 'Customer Name' },
+  { accessorKey: 'lenderName', header: 'Lender Name' },
   {
     accessorKey: 'lastMessage',
     header: 'Last Message',
     cell: ({ row }) => (
       <span className="line-clamp-1 text-gray-800">
-        {row.original.lastMessage}
+        {row.original.lastMessage || 'N/A'}
       </span>
     ),
   },
@@ -87,13 +81,15 @@ const columns: ColumnDef<Conversation>[] = [
     accessorKey: 'status',
     header: 'Status',
     cell: ({ row }) => {
-      const status = row.original.status
+      const status = row.original.status || 'N/A'
       const color =
         status === 'Active'
           ? 'bg-green-100 text-green-700'
           : status === 'Pending'
           ? 'bg-yellow-100 text-yellow-700'
-          : 'bg-gray-100 text-gray-700'
+          : status === 'Closed'
+          ? 'bg-gray-100 text-gray-700'
+          : 'bg-slate-100 text-slate-600'
 
       return (
         <Badge
@@ -108,29 +104,73 @@ const columns: ColumnDef<Conversation>[] = [
     id: 'actions',
     header: 'Action',
     cell: () => (
-      <button className="px-3 py-1 text-sm rounded-lg bg-black text-white hover:bg-gray-800 transition">
-        View Chat
-      </button>
+      <ChatsDetailsPopup>
+        <Button
+          variant="default"
+          className="px-3 py-1 text-[13px] rounded-lg bg-black text-white hover:bg-gray-800 transition-colors"
+        >
+          View Chat
+        </Button>
+      </ChatsDetailsPopup>
     ),
   },
 ]
 
 // ✅ Main Component
 export default function MessageTable() {
+  const { data: session } = useSession()
+  const accessToken = session?.user?.accessToken || ''
+
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<
     'all' | 'Active' | 'Pending' | 'Closed'
   >('all')
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 5 })
 
-  // reset to first page when filters change
+  // ✅ React Query — Fetch API Data
+  const {
+    data: chatRooms = [],
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ['chatRooms', accessToken],
+    queryFn: () => fetchChatRooms(accessToken),
+    enabled: !!accessToken, // ensures query only runs when token is ready
+  })
+
+  // ✅ Transform API Data
+  const conversations: Conversation[] = useMemo(() => {
+    return chatRooms.map((room: any) => {
+      const customer =
+        room.participants.find((p: any) => p.role === 'USER') || {}
+      const lender =
+        room.participants.find((p: any) => p.role === 'LENDER') || {}
+
+      return {
+        _id: room._id,
+        customerName:
+          `${customer.firstName || ''} ${customer.lastName || ''}`.trim() ||
+          customer.email ||
+          'N/A',
+        lenderName:
+          `${lender.firstName || ''} ${lender.lastName || ''}`.trim() ||
+          lender.email ||
+          'N/A',
+        lastMessage: room.lastMessage || 'N/A',
+        date: room.updatedAt || room.createdAt,
+        status: 'N/A', // since API doesn’t provide it
+      }
+    })
+  }, [chatRooms])
+
+  // ✅ Reset pagination when filters change
   useEffect(() => {
     setPagination((prev) => ({ ...prev, pageIndex: 0 }))
   }, [search, statusFilter])
 
-  // filtered data
+  // ✅ Filtered Data
   const filteredData = useMemo(() => {
-    return dummyConversations.filter((item) => {
+    return conversations.filter((item) => {
       const matchesSearch = JSON.stringify(item)
         .toLowerCase()
         .includes(search.toLowerCase())
@@ -138,7 +178,7 @@ export default function MessageTable() {
         statusFilter === 'all' || item.status === statusFilter
       return matchesSearch && matchesStatus
     })
-  }, [search, statusFilter])
+  }, [search, statusFilter, conversations])
 
   const table = useReactTable({
     data: filteredData,
@@ -152,6 +192,16 @@ export default function MessageTable() {
       Math.ceil(filteredData.length / pagination.pageSize)
     ),
   })
+
+  // ✅ Loading & Error States
+  if (isLoading) return <SkeletonLoader />
+
+  if (isError)
+    return (
+      <div className="flex items-center justify-center py-10 text-red-500">
+        Failed to load chat rooms.
+      </div>
+    )
 
   return (
     <div className="bg-white shadow-md rounded-xl p-6">
@@ -189,11 +239,11 @@ export default function MessageTable() {
         <table className="w-full text-sm">
           <thead>
             {table.getHeaderGroups().map((hg) => (
-              <tr key={hg.id} className="bg-gray-50">
+              <tr key={hg.id} className="">
                 {hg.headers.map((header) => (
                   <th
                     key={header.id}
-                    className="text-center p-3 text-gray-600 font-medium"
+                    className="text-center p-3 text-gray-800 font-medium"
                   >
                     {flexRender(
                       header.column.columnDef.header,

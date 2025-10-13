@@ -6,7 +6,7 @@ import { Download } from 'lucide-react'
 
 export default function HeaderCards() {
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 ">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl md:text-[32px] font-light tracking-[0.2em]">
           Chats
@@ -16,7 +16,7 @@ export default function HeaderCards() {
         </Button>
       </div>
 
-      <div className="mt-[30px] grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 text-lg">
+      <div className="mt-[30px] grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 text-lg font-sans">
         <InfoCard title="Active Conversations" value="##" />
 
         <InfoCard title="Flagged Conversations" value="##" />

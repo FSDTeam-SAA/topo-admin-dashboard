@@ -1,14 +1,15 @@
 import React from 'react'
 
 interface SkeletonLoaderProps {
-  title: string
+  title?: string
 }
 
 const SkeletonLoader = ({ title }: SkeletonLoaderProps) => {
   return (
     <div className="bg-white shadow rounded-lg p-4">
       <div className="flex flex-col md:flex-row justify-between items-center mb-4 gap-3 py-5">
-        <h2 className="text-2xl font-semibold">{title}</h2>
+        {title && <h2 className="text-2xl font-semibold">{title}</h2>}
+
         <div className="flex items-center gap-2">
           <div className="w-[200px] bg-gray-300 h-6 rounded-md animate-pulse"></div>
         </div>

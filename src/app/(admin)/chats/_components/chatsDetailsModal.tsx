@@ -13,25 +13,46 @@ import { useState } from 'react'
 import Image from 'next/image'
 import { toast } from 'sonner'
 
-export function ChatsDetailsPopup({ children }: { children: React.ReactNode }) {
-  // ---- Demo Data ----
-  const id = 'CHAT-12345'
-  const data = {
-    user: { _id: 'USR-98765' },
-    issueType: 'Message Support',
-    createdAt: new Date(),
-    message:
-      'Customer reported a delay in receiving chat responses. Please review conversation logs.',
-  }
+// ✅ Conversation type
+export type Conversation = {
+  _id: string
+  bookingId: string
+  customerId: string
+  lenderId: string
+  customerName: string
+  lenderName: string
+  date: string
+  lastMessage?: string
+  status?: string
+}
 
+// ✅ Props type
+interface ChatsDetailsPopupProps {
+  conversation: Conversation
+  children: React.ReactNode
+}
+
+export function ChatsDetailsPopup({
+  conversation,
+  children,
+}: ChatsDetailsPopupProps) {
   const [response, setResponse] = useState('')
+  const [file, setFile] = useState<File | null>(null)
 
-  // --- DEMO Save Function ---
   const handleSave = () => {
-    const payload = { response, status }
-    console.log('💬 Demo Save Payload:', payload)
-    toast.success('Chat details updated (demo only)')
+    const payload = {
+      chatId: conversation._id,
+      bookingId: conversation.bookingId,
+      response,
+      status: conversation.status || 'N/A',
+      file,
+    }
+
+    console.log('💬 Save Payload:', payload)
+    toast.success('Chat details updated successfully (demo)')
   }
+
+  console.log('cons', conversation)
 
   return (
     <Dialog>
@@ -53,7 +74,8 @@ export function ChatsDetailsPopup({ children }: { children: React.ReactNode }) {
           </div>
           <div className="flex justify-start">
             <span className="text-lg font-light tracking-wider">
-              <strong className="font-medium">Conversation ID:</strong> {id}
+              <strong className="font-medium">Conversation ID:</strong>{' '}
+              {conversation._id}
             </span>
           </div>
         </DialogHeader>
@@ -62,36 +84,46 @@ export function ChatsDetailsPopup({ children }: { children: React.ReactNode }) {
         <Card>
           <CardHeader>
             <CardTitle className="text-lg font-light tracking-wider">
-              Chat Summary
+              Conversation Summary
             </CardTitle>
           </CardHeader>
           <CardContent className="text-sm space-y-2 font-light tracking-wider">
             <p>
-              <strong className="font-medium">Chat ID:</strong> {id}
+              <strong className="font-medium">Booking ID:</strong>{' '}
+              {conversation.bookingId || 'N/A'}
             </p>
             <p>
-              <strong className="font-medium">User ID:</strong>{' '}
-              {data?.user?._id || 'Guest'}
+              <strong className="font-medium">Customer Name:</strong>{' '}
+              {conversation.customerId || 'N/A'}
             </p>
             <p>
-              <strong className="font-medium">Topic:</strong>{' '}
-              {data?.issueType || 'N/A'}
+              <strong className="font-medium">Lender Name:</strong>{' '}
+              {conversation.lenderId || 'N/A'}
             </p>
             <p>
-              <strong className="font-medium">Status:</strong> {status}
+              <strong className="font-medium">Customer Name:</strong>{' '}
+              {conversation.customerName || 'N/A'}
             </p>
             <p>
+              <strong className="font-medium">Lender Name:</strong>{' '}
+              {conversation.lenderName || 'N/A'}
+            </p>
+            <p>
+              <strong className="font-medium">Status:</strong>{' '}
+              {conversation.status || 'N/A'}
+            </p>
+            {/* <p>
               <strong className="font-medium">Created Date:</strong>{' '}
-              {new Date(data?.createdAt).toLocaleDateString('en-US', {
+              {new Date(conversation.date).toLocaleDateString('en-US', {
                 month: 'short',
                 day: '2-digit',
                 year: 'numeric',
               })}
             </p>
             <p>
-              <strong className="font-medium">Message:</strong>{' '}
-              {data?.message || 'N/A'}
-            </p>
+              <strong className="font-medium">Last Message:</strong>{' '}
+              {conversation.lastMessage || 'N/A'}
+            </p> */}
           </CardContent>
         </Card>
 
@@ -112,14 +144,28 @@ export function ChatsDetailsPopup({ children }: { children: React.ReactNode }) {
             <div className="flex items-center gap-2">
               <input
                 type="file"
-                className="border border-gray-300 rounded-md p-2 w-full "
+                onChange={(e) =>
+                  setFile(e.target.files ? e.target.files[0] : null)
+                }
+                className="border border-gray-300 rounded-md p-2 w-full"
               />
-              <Button className="whitespace-nowrap">Upload File</Button>
+              <Button
+                className="whitespace-nowrap"
+                onClick={() =>
+                  file
+                    ? toast.success(`File "${file.name}" selected`)
+                    : toast.error('No file selected')
+                }
+              >
+                Upload File
+              </Button>
             </div>
 
             {/* Send Button */}
             <div className="flex justify-start">
-              <Button variant="default">Send</Button>
+              <Button variant="default" onClick={handleSave}>
+                Send
+              </Button>
             </div>
           </CardContent>
         </Card>

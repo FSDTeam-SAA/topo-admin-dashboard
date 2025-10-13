@@ -26,15 +26,17 @@ import { useSession } from 'next-auth/react'
 import SkeletonLoader from '@/components/loader/SkeletonLoader'
 
 // ✅ Type Definition
-type Conversation = {
+export type Conversation = {
   _id: string
+  bookingId: string
+  customerId: string
+  lenderId: string
   customerName: string
   lenderName: string
-  lastMessage?: string
   date: string
+  lastMessage?: string
   status?: string
 }
-
 // ✅ Fetch Function
 const fetchChatRooms = async (accessToken: string) => {
   const res = await fetch(
@@ -53,68 +55,6 @@ const fetchChatRooms = async (accessToken: string) => {
   const data = await res.json()
   return data?.data?.data || []
 }
-
-// ✅ Table Columns
-const columns: ColumnDef<Conversation>[] = [
-  { accessorKey: 'customerName', header: 'Customer Name' },
-  { accessorKey: 'lenderName', header: 'Lender Name' },
-  {
-    accessorKey: 'lastMessage',
-    header: 'Last Message',
-    cell: ({ row }) => (
-      <span className="line-clamp-1 text-gray-800">
-        {row.original.lastMessage || 'N/A'}
-      </span>
-    ),
-  },
-  {
-    accessorKey: 'date',
-    header: 'Date',
-    cell: ({ row }) =>
-      new Date(row.original.date).toLocaleDateString('en-US', {
-        month: 'short',
-        day: '2-digit',
-        year: 'numeric',
-      }),
-  },
-  {
-    accessorKey: 'status',
-    header: 'Status',
-    cell: ({ row }) => {
-      const status = row.original.status || 'N/A'
-      const color =
-        status === 'Active'
-          ? 'bg-green-100 text-green-700'
-          : status === 'Pending'
-          ? 'bg-yellow-100 text-yellow-700'
-          : status === 'Closed'
-          ? 'bg-gray-100 text-gray-700'
-          : 'bg-slate-100 text-slate-600'
-
-      return (
-        <Badge
-          className={`${color} font-medium text-xs px-3 py-1 rounded-full`}
-        >
-          {status}
-        </Badge>
-      )
-    },
-  },
-  {
-    id: 'actions',
-    header: 'Action',
-    cell: () => (
-      <ChatsDetailsPopup>
-        <Button
-          variant="default"
-          className="px-3 py-1 text-[13px] rounded-lg bg-black text-white hover:bg-gray-800 transition-colors"
-        >
-          View Chat
-        </Button>
-      </ChatsDetailsPopup>
-    ),
-  },
-]
 
 // ✅ Main Component
 export default function MessageTable() {
@@ -135,11 +75,13 @@ export default function MessageTable() {
   } = useQuery({
     queryKey: ['chatRooms', accessToken],
     queryFn: () => fetchChatRooms(accessToken),
-    enabled: !!accessToken, // ensures query only runs when token is ready
+    enabled: !!accessToken,
   })
 
-  // ✅ Transform API Data
+  // Transform API Data
   const conversations: Conversation[] = useMemo(() => {
+    if (!chatRooms?.length) return []
+
     return chatRooms.map((room: any) => {
       const customer =
         room.participants.find((p: any) => p.role === 'USER') || {}
@@ -156,9 +98,12 @@ export default function MessageTable() {
           `${lender.firstName || ''} ${lender.lastName || ''}`.trim() ||
           lender.email ||
           'N/A',
+        customerId: customer._id || null,
+        lenderId: lender._id || null,
         lastMessage: room.lastMessage || 'N/A',
-        date: room.updatedAt || room.createdAt,
-        status: 'N/A', // since API doesn’t provide it
+        date: room.lastMessageAt || room.updatedAt || room.createdAt,
+        bookingId: room.bookingId || 'N/A',
+        status: 'Active', // or derive dynamically if needed
       }
     })
   }, [chatRooms])
@@ -179,6 +124,68 @@ export default function MessageTable() {
       return matchesSearch && matchesStatus
     })
   }, [search, statusFilter, conversations])
+
+  // ✅ Table Columns
+  const columns: ColumnDef<Conversation>[] = [
+    { accessorKey: 'customerName', header: 'Customer Name' },
+    { accessorKey: 'lenderName', header: 'Lender Name' },
+    {
+      accessorKey: 'lastMessage',
+      header: 'Last Message',
+      cell: ({ row }) => (
+        <span className="line-clamp-1 text-gray-800">
+          {row.original.lastMessage || 'N/A'}
+        </span>
+      ),
+    },
+    {
+      accessorKey: 'date',
+      header: 'Date',
+      cell: ({ row }) =>
+        new Date(row.original.date).toLocaleDateString('en-US', {
+          month: 'short',
+          day: '2-digit',
+          year: 'numeric',
+        }),
+    },
+    {
+      accessorKey: 'status',
+      header: 'Status',
+      cell: ({ row }) => {
+        const status = row.original.status || 'N/A'
+        const color =
+          status === 'Active'
+            ? 'bg-green-100 text-green-700'
+            : status === 'Pending'
+            ? 'bg-yellow-100 text-yellow-700'
+            : status === 'Closed'
+            ? 'bg-gray-100 text-gray-700'
+            : 'bg-slate-100 text-slate-600'
+
+        return (
+          <Badge
+            className={`${color} font-medium text-xs px-3 py-1 rounded-full`}
+          >
+            {status}
+          </Badge>
+        )
+      },
+    },
+    {
+      id: 'actions',
+      header: 'Action',
+      cell: ({ row }) => (
+        <ChatsDetailsPopup conversation={row.original}>
+          <Button
+            variant="default"
+            className="px-3 py-1 text-[13px] rounded-lg bg-black text-white hover:bg-gray-800 transition-colors"
+          >
+            View Chat
+          </Button>
+        </ChatsDetailsPopup>
+      ),
+    },
+  ]
 
   const table = useReactTable({
     data: filteredData,
@@ -207,7 +214,6 @@ export default function MessageTable() {
     <div className="bg-white shadow-md rounded-xl p-6">
       {/* Search + Filter */}
       <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-3">
-        {/* Left: Search */}
         <Input
           type="text"
           placeholder="Search by name, ID, or message..."
@@ -215,7 +221,6 @@ export default function MessageTable() {
           className="w-full md:w-[250px]"
         />
 
-        {/* Right: Status Filter */}
         <Select
           value={statusFilter}
           onValueChange={(value) =>
@@ -239,7 +244,7 @@ export default function MessageTable() {
         <table className="w-full text-sm">
           <thead>
             {table.getHeaderGroups().map((hg) => (
-              <tr key={hg.id} className="">
+              <tr key={hg.id}>
                 {hg.headers.map((header) => (
                   <th
                     key={header.id}

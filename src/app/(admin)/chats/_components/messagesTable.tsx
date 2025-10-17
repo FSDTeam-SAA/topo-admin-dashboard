@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 
-import React, { useMemo, useState, useEffect } from 'react'
+import React, { useMemo, useState } from 'react'
 import {
   ColumnDef,
   getCoreRowModel,
@@ -36,7 +36,9 @@ export type Conversation = {
   date: string
   lastMessage?: string
   status?: string
+  flagged?: boolean
 }
+
 // ✅ Fetch Function
 const fetchChatRooms = async (accessToken: string) => {
   const res = await fetch(
@@ -63,7 +65,7 @@ export default function MessageTable() {
 
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<
-    'all' | 'Active' | 'Pending' | 'Closed'
+    'active' | 'flagged' | 'closed' | 'all'
   >('all')
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 5 })
 
@@ -77,6 +79,8 @@ export default function MessageTable() {
     queryFn: () => fetchChatRooms(accessToken),
     enabled: !!accessToken,
   })
+
+  console.log('data', chatRooms)
 
   // Transform API Data
   const conversations: Conversation[] = useMemo(() => {
@@ -103,24 +107,30 @@ export default function MessageTable() {
         lastMessage: room.lastMessage || 'N/A',
         date: room.lastMessageAt || room.updatedAt || room.createdAt,
         bookingId: room.bookingId || 'N/A',
-        status: 'Active', // or derive dynamically if needed
+        status: room.status, // or derive dynamically if needed
+        flagged: room.flagged.status || false,
       }
     })
   }, [chatRooms])
 
-  // ✅ Reset pagination when filters change
-  useEffect(() => {
-    setPagination((prev) => ({ ...prev, pageIndex: 0 }))
-  }, [search, statusFilter])
+  console.log('conversations', conversations)
 
-  // ✅ Filtered Data
   const filteredData = useMemo(() => {
     return conversations.filter((item) => {
       const matchesSearch = JSON.stringify(item)
         .toLowerCase()
         .includes(search.toLowerCase())
+
+      // ✅ Updated logic — when statusFilter === "all", skip filtering
       const matchesStatus =
-        statusFilter === 'all' || item.status === statusFilter
+        statusFilter === 'all'
+          ? true
+          : statusFilter === 'active'
+          ? item.status?.toLowerCase() === 'active'
+          : statusFilter === 'flagged'
+          ? item.flagged === true
+          : item.status?.toLowerCase() === statusFilter
+
       return matchesSearch && matchesStatus
     })
   }, [search, statusFilter, conversations])
@@ -154,11 +164,11 @@ export default function MessageTable() {
       cell: ({ row }) => {
         const status = row.original.status || 'N/A'
         const color =
-          status === 'Active'
+          status === 'active'
             ? 'bg-green-100 text-green-700'
-            : status === 'Pending'
+            : status === 'flagged'
             ? 'bg-yellow-100 text-yellow-700'
-            : status === 'Closed'
+            : status === 'closed'
             ? 'bg-gray-100 text-gray-700'
             : 'bg-slate-100 text-slate-600'
 
@@ -224,7 +234,7 @@ export default function MessageTable() {
         <Select
           value={statusFilter}
           onValueChange={(value) =>
-            setStatusFilter(value as 'all' | 'Active' | 'Pending' | 'Closed')
+            setStatusFilter(value as 'active' | 'flagged' | 'closed')
           }
         >
           <SelectTrigger className="w-[150px]">
@@ -232,9 +242,9 @@ export default function MessageTable() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All</SelectItem>
-            <SelectItem value="Active">Active</SelectItem>
-            <SelectItem value="Pending">Pending</SelectItem>
-            <SelectItem value="Closed">Closed</SelectItem>
+            <SelectItem value="active">Active</SelectItem>
+            <SelectItem value="flagged">Flagged</SelectItem>
+            <SelectItem value="closed">Closed</SelectItem>
           </SelectContent>
         </Select>
       </div>

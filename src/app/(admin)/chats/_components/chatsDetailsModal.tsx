@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -13,6 +13,18 @@ import Image from 'next/image'
 import { File, Download } from 'lucide-react'
 import { useSession } from 'next-auth/react'
 import { useChatStore } from '@/store/useChatStore'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { Textarea } from '@/components/ui/textarea'
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTrigger,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from '@/components/ui/alert-dialog'
+import { toast } from 'sonner'
 
 export type Conversation = {
   _id: string
@@ -24,6 +36,7 @@ export type Conversation = {
   date: string
   lastMessage?: string
   status?: string
+  flagged?: boolean
 }
 
 interface ChatsDetailsPopupProps {
@@ -48,9 +61,45 @@ export function ChatsDetailsPopup({
 
   const { data: session } = useSession()
   const accessToken = session?.user?.accessToken || ''
+  const queryClient = useQueryClient()
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
-  // Scroll to bottom after loading
+  const [flagModalOpen, setFlagModalOpen] = useState(false)
+  const [closeModalOpen, setCloseModalOpen] = useState(false)
+  const [activeModalOpen, setActiveModalOpen] = useState(false)
+  const [reason, setReason] = useState('')
+
+  // ✅ Common PUT API mutation
+  const updateStatusMutation = useMutation({
+    mutationFn: async (payload: { status: string; reason?: string }) => {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/message/chatrooms/admin/${conversation._id}/status`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify(payload),
+        }
+      )
+      if (!res.ok) throw new Error('Failed to update conversation status')
+      return res.json()
+    },
+    onSuccess: (_, variables) => {
+      toast.success(`Conversation marked as ${variables.status}`)
+      queryClient.invalidateQueries({ queryKey: ['chatRooms'] })
+      setReason('')
+      setFlagModalOpen(false)
+      setCloseModalOpen(false)
+      setActiveModalOpen(false)
+    },
+    onError: () => {
+      toast.error('Failed to update conversation status')
+    },
+  })
+
+  // ✅ Auto scroll
   useEffect(() => {
     if (!isFetchingMore && messages.length > 0) {
       setTimeout(() => {
@@ -171,9 +220,13 @@ export function ChatsDetailsPopup({
               <strong>Status:</strong>{' '}
               <span
                 className={`px-2 py-1 rounded text-xs ${
-                  conversation.status === 'Active'
+                  conversation.status === 'active'
                     ? 'bg-green-100 text-green-700'
-                    : 'bg-gray-100 text-gray-700'
+                    : conversation.status === 'closed'
+                    ? 'bg-gray-100 text-gray-700'
+                    : conversation.status === 'flagged'
+                    ? 'bg-red-100 text-red-700'
+                    : 'bg-slate-100 text-slate-600'
                 }`}
               >
                 {conversation.status || 'N/A'}
@@ -190,7 +243,7 @@ export function ChatsDetailsPopup({
           <CardContent className="p-0">
             <div className="w-full h-[500px] overflow-y-auto p-4 bg-white border rounded-lg">
               {isLoading ? (
-                <div className="flex justify-center font-light  items-center h-full text-sm text-gray-500">
+                <div className="flex justify-center font-light items-center h-full text-sm text-gray-500">
                   Loading messages...
                 </div>
               ) : error ? (
@@ -281,11 +334,109 @@ export function ChatsDetailsPopup({
           <CardHeader>
             <CardTitle className="text-lg font-light">Actions</CardTitle>
           </CardHeader>
-          <CardContent className="flex gap-4">
-            <Button className="font-normal">Flag Conversation</Button>
-            <Button variant="secondary" className="font-normal">
-              Close Conversation
-            </Button>
+          <CardContent className="flex gap-4 flex-wrap">
+            {/* Flag Modal */}
+            <Dialog open={flagModalOpen} onOpenChange={setFlagModalOpen}>
+              <DialogTrigger asChild>
+                <Button className="font-normal" variant="destructive">
+                  Flag Conversation
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-md space-y-4">
+                <DialogHeader>
+                  <p className="text-lg font-semibold">
+                    Why are you flagging this conversation?
+                  </p>
+                </DialogHeader>
+                <Textarea
+                  placeholder="Write your reason here..."
+                  value={reason}
+                  onChange={(e) => setReason(e.target.value)}
+                />
+                <div className="flex justify-end gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => setFlagModalOpen(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    disabled={!reason || updateStatusMutation.isPending}
+                    onClick={() =>
+                      updateStatusMutation.mutate({
+                        status: 'flagged',
+                        reason,
+                      })
+                    }
+                  >
+                    {updateStatusMutation.isPending
+                      ? 'Submitting...'
+                      : 'Submit'}
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+
+            {/* Close Confirmation */}
+            <AlertDialog open={closeModalOpen} onOpenChange={setCloseModalOpen}>
+              <AlertDialogTrigger asChild>
+                <Button variant="secondary" className="font-normal">
+                  Close Conversation
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent className="space-y-3">
+                <AlertDialogHeader>
+                  <p className="text-lg font-semibold">
+                    Are you sure you want to close this conversation?
+                  </p>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={() =>
+                      updateStatusMutation.mutate({ status: 'closed' })
+                    }
+                    disabled={updateStatusMutation.isPending}
+                  >
+                    {updateStatusMutation.isPending
+                      ? 'Closing...'
+                      : 'Yes, Close it'}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+
+            {/* Activate Confirmation */}
+            <AlertDialog
+              open={activeModalOpen}
+              onOpenChange={setActiveModalOpen}
+            >
+              <AlertDialogTrigger asChild>
+                <Button variant="outline" className="font-normal">
+                  Activate Conversation
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent className="space-y-3">
+                <AlertDialogHeader>
+                  <p className="text-lg font-semibold">
+                    Are you sure you want to activate this conversation?
+                  </p>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={() =>
+                      updateStatusMutation.mutate({ status: 'active' })
+                    }
+                    disabled={updateStatusMutation.isPending}
+                  >
+                    {updateStatusMutation.isPending
+                      ? 'Activating...'
+                      : 'Yes, Activate it'}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </CardContent>
         </Card>
       </DialogContent>

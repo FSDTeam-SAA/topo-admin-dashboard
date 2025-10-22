@@ -85,13 +85,13 @@ export default function ListingReviewModal({
                 src={'/logo.png'}
                 alt="modal-Alert"
                 width={70}
-                height={60}
+                height={70}
               />
             </div>
             <DialogTitle className="text-2xl font-light tracking-wide mb-6 pb-8 ">
               Review Submission:{' '}
               <span className="font-normal">
-                {listing?.dressId?.slice(0, 6) ?? '#####'}
+                {listing?.dressId?.slice(0, 20) ?? '#####'}
               </span>
             </DialogTitle>
           </DialogHeader>
@@ -101,7 +101,7 @@ export default function ListingReviewModal({
           ) : isError ? (
             <p className="text-red-500 text-base">Failed to load data</p>
           ) : listing ? (
-            <div className="space-y-5 text-base">
+            <div className="space-y-8 text-base">
               {/* ID fields */}
               <div>
                 <label className="font-medium">Submission ID</label>

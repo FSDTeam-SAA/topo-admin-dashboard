@@ -32,7 +32,7 @@ export const listingColumn: ColumnDef<Listing>[] = [
   {
     accessorKey: 'dressId',
     header: 'Listing ID',
-    cell: ({ row }) => row.original.dressId.slice(0, 6),
+    cell: ({ row }) => row.original.dressId.slice(0, 20),
   },
   {
     accessorKey: 'media',

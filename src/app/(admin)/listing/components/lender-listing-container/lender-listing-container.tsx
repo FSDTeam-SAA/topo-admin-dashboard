@@ -60,6 +60,8 @@ const LenderListingContainer = ({ accessToken }: Props) => {
       ).then((res) => res.json()),
   })
 
+  console.log('Lender Listings Data:', data)
+
   const table = useReactTable({
     data: data?.data ?? [],
     columns: listingColumn,

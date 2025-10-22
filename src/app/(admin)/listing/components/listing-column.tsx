@@ -1,8 +1,32 @@
+'use client'
+
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { ColumnDef } from '@tanstack/react-table'
 import Image from 'next/image'
-import Link from 'next/link'
+import { ColumnDef } from '@tanstack/react-table'
+import ListingReviewModal from './lender-listing-container/listingReviewModal'
 import { Listing } from '../types/listingsTypes'
+
+function ListingActionsCell({ listing }: { listing: Listing }) {
+  const [open, setOpen] = useState(false)
+
+  return (
+    <>
+      <Button
+        className="px-3 py-1 text-sm rounded bg-black text-white"
+        onClick={() => setOpen(true)}
+      >
+        View
+      </Button>
+
+      <ListingReviewModal
+        open={open}
+        onClose={() => setOpen(false)}
+        listingId={listing._id}
+      />
+    </>
+  )
+}
 
 export const listingColumn: ColumnDef<Listing>[] = [
   {
@@ -68,22 +92,8 @@ export const listingColumn: ColumnDef<Listing>[] = [
     },
   },
   {
-    accessorKey: 'updatedAt',
-    header: 'Last Updated',
-    cell: ({ row }) =>
-      new Date(row.original.updatedAt).toLocaleDateString('en-US', {
-        month: 'short',
-        day: '2-digit',
-        year: 'numeric',
-      }),
-  },
-  {
     id: 'actions',
     header: 'Action',
-    cell: ({ row }) => (
-      <Button className="px-3 py-1 text-sm rounded bg-black text-white">
-        <Link href={`/listing/${row.original._id}`}>View</Link>
-      </Button>
-    ),
+    cell: ({ row }) => <ListingActionsCell listing={row.original} />,
   },
 ]

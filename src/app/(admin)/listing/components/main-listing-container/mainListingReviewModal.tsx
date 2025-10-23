@@ -235,19 +235,16 @@ export default function MainListingReviewModal({
     const newMediaFiles = mediaItems
       .filter((item) => item.isNew && item.file)
       .map((item) => item.file as File)
-    const existingMediaUrls = mediaItems
-      .filter((item) => !item.isNew)
-      .map((item) => item.url)
 
-    if (newMediaFiles.length > 0) {
-      // send each file under key "mediaUpload"
-      newMediaFiles.forEach((file) => {
-        fd.append('mediaUpload', file)
-      })
-    } else {
-      // send existing media URLs if no new upload
-      fd.append('media', JSON.stringify(existingMediaUrls))
-    }
+    const existingMediaUrls = mediaItems.map((item) => item.url)
+
+    // ✅ সবসময়ই existing media পাঠানো হবে
+    fd.append('media', JSON.stringify(existingMediaUrls))
+
+    // ✅ নতুন upload থাকলে তবেই mediaUpload পাঠানো হবে
+    newMediaFiles.forEach((file) => {
+      fd.append('mediaUpload', file)
+    })
 
     updateMutation.mutate(fd)
   }

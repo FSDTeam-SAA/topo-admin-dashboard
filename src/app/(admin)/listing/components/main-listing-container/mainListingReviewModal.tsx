@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 
 import Image from 'next/image'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, ChangeEvent } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -13,14 +14,19 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
 import { toast } from 'sonner'
-import { FileUploader } from '@/components/fileUploader'
 import { useSession } from 'next-auth/react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { Upload, X, ImageIcon } from 'lucide-react'
 
 interface Props {
   open: boolean
   onClose: () => void
   dressId: string | null
+}
+
+interface ShippingDetails {
+  isLocalPickup?: boolean
+  isShippingAvailable?: boolean
 }
 
 interface MasterDressData {
@@ -38,17 +44,19 @@ interface MasterDressData {
   rrpPrice?: number
   thumbnail?: string
   media?: string[]
-  shippingDetails?: {
-    isLocalPickup?: boolean
-    isShippingAvailable?: boolean
-  }
+  shippingDetails?: ShippingDetails
   isActive?: boolean
   slug?: string
   createdAt?: string
   updatedAt?: string
 }
 
-// ------------------------ COMPONENT ------------------------
+interface MediaItem {
+  url: string
+  isNew: boolean
+  file?: File
+}
+
 export default function MainListingReviewModal({
   open,
   onClose,
@@ -58,9 +66,16 @@ export default function MainListingReviewModal({
   const accessToken = session?.user?.accessToken || ''
   const queryClient = useQueryClient()
   const [formData, setFormData] = useState<MasterDressData | null>(null)
-  const [isUploading, setIsUploading] = useState(false)
 
-  // ---------------- FETCH DATA (React Query v5 style) ----------------
+  // Thumbnail state
+  const [thumbnailFile, setThumbnailFile] = useState<File | null>(null)
+  const [thumbnailPreview, setThumbnailPreview] = useState<string>('')
+  const [isThumbnailChanged, setIsThumbnailChanged] = useState(false)
+
+  // Media state
+  const [mediaItems, setMediaItems] = useState<MediaItem[]>([])
+
+  // ---------------- FETCH DATA ----------------
   const {
     data: masterData,
     isLoading,
@@ -85,83 +100,156 @@ export default function MainListingReviewModal({
     retry: false,
   })
 
-  // keep local state in sync with query data
   useEffect(() => {
     if (masterData) {
       setFormData(masterData)
+      setThumbnailPreview(masterData.thumbnail || '')
+      setThumbnailFile(null)
+      setIsThumbnailChanged(false)
+
+      // Initialize media items
+      const existingMedia: MediaItem[] = (masterData.media || []).map(
+        (url) => ({
+          url,
+          isNew: false,
+        })
+      )
+      setMediaItems(existingMedia)
     }
   }, [masterData])
 
-  console.log('formData', formData)
-
-  // ---------------- PATCH MUTATION (React Query) ----------------
   const updateMutation = useMutation({
-    mutationFn: async (updatedData: Partial<MasterDressData>) => {
-      if (!updatedData.masterDressId) {
-        throw new Error('masterDressId missing')
-      }
+    mutationFn: async (updatedData: FormData) => {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/admin/master/${updatedData.masterDressId}`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/admin/master/${formData?.masterDressId}`,
         {
           method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${accessToken}`,
-          },
-          body: JSON.stringify(updatedData),
+          headers: { Authorization: `Bearer ${accessToken}` },
+          body: updatedData,
         }
       )
-      if (!res.ok) throw new Error('Failed to update master dress')
+      if (!res.ok) {
+        const error = await res.json()
+        throw new Error(error.message || 'Failed to update master dress')
+      }
       return res.json()
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['master-dress', dressId] })
+      queryClient.invalidateQueries({ queryKey: ['main-listing'] })
       toast.success('Master Dress updated successfully')
       onClose()
     },
-    onError: () => {
-      toast.error('Update failed')
+    onError: (error: Error) => {
+      toast.error(error.message || 'Update failed')
     },
   })
 
-  // ---------------- FIELD CHANGE HANDLER ----------------
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleChange = (field: keyof MasterDressData, value: any) => {
     setFormData((prev) => (prev ? { ...prev, [field]: value } : prev))
   }
 
-  // ---------------- Colors input helper ----------------
-  // store the colors as array in formData.colors but bind the input to a comma-separated string
-  const colorsInputValue = formData?.colors?.join(', ') ?? ''
+  // ---------------- THUMBNAIL ----------------
+  const handleThumbnailUpload = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
 
-  const handleColorsInputChange = (raw: string) => {
-    const arr = raw
-      .split(',')
-      .map((s) => s.trim())
-      .filter(Boolean)
-    handleChange('colors', arr)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('File size should be less than 5MB')
+      return
+    }
+
+    const preview = URL.createObjectURL(file)
+    setThumbnailPreview(preview)
+    setThumbnailFile(file)
+    setIsThumbnailChanged(true)
   }
 
-  // ---------------- SAVE HANDLER ----------------
+  // ---------------- MEDIA ----------------
+  const handleMediaUpload = (e: ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files ? Array.from(e.target.files) : []
+    if (mediaItems.length + files.length > 10) {
+      toast.error('Maximum 10 images allowed')
+      return
+    }
+
+    for (const file of files) {
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error(`${file.name} is too large (max 5MB)`)
+        return
+      }
+    }
+
+    const newItems: MediaItem[] = files.map((file) => ({
+      url: URL.createObjectURL(file),
+      isNew: true,
+      file,
+    }))
+    setMediaItems((prev) => [...prev, ...newItems])
+  }
+
+  const handleRemoveMedia = (index: number) => {
+    const item = mediaItems[index]
+    if (item.isNew && item.url.startsWith('blob:')) {
+      URL.revokeObjectURL(item.url)
+    }
+    setMediaItems((prev) => prev.filter((_, i) => i !== index))
+  }
+
+  // ---------------- SAVE ----------------
   const handleSave = () => {
     if (!formData) return
 
-    const patchBody: Partial<MasterDressData> = {
-      masterDressId: formData.masterDressId,
-      dressName: formData.dressName,
-      brand: formData.brand,
-      sizes: formData.sizes,
-      colors: formData.colors,
-      basePrice: formData.basePrice,
-      insuranceFee: formData.insuranceFee,
-      rrpPrice: formData.rrpPrice,
-      thumbnail: formData.thumbnail,
-      media: formData.media,
-      shippingDetails: formData.shippingDetails,
-      isActive: formData.isActive,
+    const fd = new FormData()
+    fd.append('masterDressId', formData.masterDressId)
+    fd.append('dressName', formData.dressName)
+
+    if (formData.brand) fd.append('brand', formData.brand)
+    if (formData.basePrice !== undefined)
+      fd.append('basePrice', String(formData.basePrice))
+    if (formData.insuranceFee !== undefined)
+      fd.append('insuranceFee', String(formData.insuranceFee))
+    if (formData.rrpPrice !== undefined)
+      fd.append('rrpPrice', String(formData.rrpPrice))
+
+    if (formData.shippingDetails) {
+      fd.append(
+        'shippingDetails[isLocalPickup]',
+        String(formData.shippingDetails.isLocalPickup || false)
+      )
+      fd.append(
+        'shippingDetails[isShippingAvailable]',
+        String(formData.shippingDetails.isShippingAvailable || false)
+      )
     }
 
-    updateMutation.mutate(patchBody)
+    if (formData.isActive !== undefined)
+      fd.append('isActive', String(formData.isActive))
+
+    // --- Thumbnail ---
+    if (isThumbnailChanged && thumbnailFile) {
+      fd.append('thumbnail', thumbnailFile)
+    }
+
+    // --- MEDIA HANDLING ---
+    const newMediaFiles = mediaItems
+      .filter((item) => item.isNew && item.file)
+      .map((item) => item.file as File)
+    const existingMediaUrls = mediaItems
+      .filter((item) => !item.isNew)
+      .map((item) => item.url)
+
+    if (newMediaFiles.length > 0) {
+      // send each file under key "mediaUpload"
+      newMediaFiles.forEach((file) => {
+        fd.append('mediaUpload', file)
+      })
+    } else {
+      // send existing media URLs if no new upload
+      fd.append('media', JSON.stringify(existingMediaUrls))
+    }
+
+    updateMutation.mutate(fd)
   }
 
   if (!open) return null
@@ -174,20 +262,33 @@ export default function MainListingReviewModal({
             <div className="flex justify-center my-6">
               <Image src="/logo.png" alt="logo" width={60} height={60} />
             </div>
-            <DialogTitle className="text-2xl font-light text-start mb-4">
-              Master Dress Review
+            <DialogTitle className="text-2xl font-light text-start mb-4 pb-5">
+              Listings Review
             </DialogTitle>
           </DialogHeader>
 
           {isLoading ? (
-            <p className="text-gray-600">Loading...</p>
+            <div className="flex items-center justify-center py-20">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+            </div>
           ) : isError ? (
-            <p className="text-red-500">Failed to load data.</p>
+            <div className="text-center py-20">
+              <p className="text-red-500 text-lg">Failed to load data.</p>
+              <Button
+                onClick={() =>
+                  queryClient.invalidateQueries({
+                    queryKey: ['master-dress', dressId],
+                  })
+                }
+                className="mt-4"
+              >
+                Retry
+              </Button>
+            </div>
           ) : formData ? (
             <div className="space-y-8">
-              {/* --- Read-only Fields --- */}
-              {/* Status Toggle */}
-              <div className="flex items-center justify-between  py-5">
+              {/* Active Status */}
+              <div className="flex items-center justify-between py-5 border-b">
                 <span className="font-medium text-base">Active Status</span>
                 <Switch
                   checked={!!formData.isActive}
@@ -197,108 +298,112 @@ export default function MainListingReviewModal({
                 />
               </div>
 
-              <div className="grid grid-cols-1 gap-4 border-b pb-3">
+              {/* IDs Section */}
+              <div className="grid grid-cols-1 gap-4 border-b pb-6">
                 <div>
-                  <label className="font-medium">Master Dress ID</label>
-                  <Input value={formData.masterDressId} disabled />
-                </div>
-                <div>
-                  <label className="font-medium">Slug</label>
-                  <Input value={formData.slug || ''} disabled />
-                </div>
-                <div>
-                  <label className="font-medium">Listing IDs</label>
+                  <label className="font-medium block mb-2">
+                    Master Dress ID
+                  </label>
                   <Input
-                    value={formData.listingIds?.join(', ') || ''}
+                    value={formData.masterDressId}
                     disabled
+                    className="bg-gray-50"
                   />
                 </div>
+
                 <div>
-                  <label className="font-medium">Lender IDs</label>
-                  <select
-                    className="border rounded-md w-full p-2 bg-gray-100"
+                  <label className="font-medium block mb-2">Slug</label>
+                  <Input
+                    value={formData.slug || ''}
                     disabled
+                    className="bg-gray-50"
+                  />
+                </div>
+
+                <div>
+                  <label className="font-medium block mb-2">Listing IDs</label>
+                  <Input
+                    value={formData.listingIds?.join(', ') || 'No listings'}
+                    disabled
+                    className="bg-gray-50"
+                  />
+                </div>
+
+                <div>
+                  <label className="font-medium block mb-2">Lender IDs</label>
+                  <select
+                    className="border rounded-md w-full p-2 bg-gray-50 outline-none"
                     value={formData.lenderIds?.[0] ?? ''}
+                    disabled
                   >
-                    {formData.lenderIds?.map((id) => (
-                      <option key={id} value={id}>
-                        {id}
-                      </option>
-                    ))}
+                    {formData.lenderIds?.length ? (
+                      formData.lenderIds.map((id) => (
+                        <option key={id} value={id}>
+                          {id}
+                        </option>
+                      ))
+                    ) : (
+                      <option value="">No lenders</option>
+                    )}
                   </select>
                 </div>
               </div>
 
-              {/* --- Editable Fields --- */}
-
-              {/* Dress Name */}
+              {/* Occasions */}
               <div>
-                <label className="font-medium">Dress Name</label>
+                <label className="font-medium block mb-2">Occasions</label>
                 <Input
-                  value={formData.dressName || ''}
-                  onChange={(e) => handleChange('dressName', e.target.value)}
-                  className="mt-1"
-                />
-              </div>
-
-              {/* Brand */}
-              {/* Occasions (read-only) */}
-              <div>
-                <label className="font-medium">Occasions</label>
-                <Input
-                  value={formData.occasions?.join(', ') || ''}
+                  value={formData.occasions?.join(', ') || 'Not specified'}
                   disabled
-                  className="mt-1 bg-gray-100"
+                  className="bg-gray-50"
                 />
               </div>
 
-              {/* Sizes */}
+              {/* Sizes - READ ONLY */}
               <div>
-                <label className="font-medium">Sizes (comma separated)</label>
+                <label className="font-medium block mb-2">Sizes</label>
                 <Input
-                  value={formData.sizes?.join(', ') || ''}
-                  onChange={(e) =>
-                    handleChange(
-                      'sizes',
-                      e.target.value
-                        .split(',')
-                        .map((s) => s.trim())
-                        .filter(Boolean)
-                    )
-                  }
-                  className="mt-1"
+                  value={formData.sizes?.join(', ') || 'Not specified'}
+                  disabled
+                  className="bg-gray-50"
                 />
               </div>
 
-              {/* ---------------- Colors (comma separated) ---------------- */}
+              {/* Colors - READ ONLY */}
               <div>
-                <label className="font-medium">
-                  Colors (hex values, comma separated)
-                </label>
+                <label className="font-medium block mb-2">Colors</label>
                 <Input
-                  value={colorsInputValue}
-                  onChange={(e) => handleColorsInputChange(e.target.value)}
-                  className="mt-1"
-                  placeholder="#FFFFFF, #000000"
+                  value={formData.colors?.join(', ') || 'Not specified'}
+                  disabled
+                  className="bg-gray-50"
                 />
-                <div className="flex gap-2 mt-2 flex-wrap">
-                  {formData.colors?.map((clr, i) => (
-                    <span
-                      key={i}
-                      className="w-8 h-8 rounded-full border"
-                      style={{ backgroundColor: clr }}
-                      title={clr}
-                    />
-                  ))}
-                </div>
+                {formData.colors && formData.colors.length > 0 && (
+                  <div className="flex gap-2 mt-3 flex-wrap">
+                    {formData.colors.map((clr, i) => (
+                      <div key={i} className="flex flex-col items-center gap-1">
+                        <div
+                          className="w-10 h-10 rounded-full border-2 border-gray-300 shadow-sm"
+                          style={{ backgroundColor: clr }}
+                          title={clr}
+                        />
+                        <span className="text-xs text-gray-500">{clr}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Prices */}
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 border-t pt-6">
                 <div>
-                  <label className="font-medium">Base Price</label>
+                  <label className="font-medium block mb-2">
+                    Base Price ($)
+                  </label>
                   <Input
                     type="number"
+                    min="0"
+                    step="0.01"
+                    placeholder="0.00"
                     value={formData.basePrice ?? ''}
                     onChange={(e) =>
                       handleChange('basePrice', parseFloat(e.target.value) || 0)
@@ -306,9 +411,14 @@ export default function MainListingReviewModal({
                   />
                 </div>
                 <div>
-                  <label className="font-medium">Insurance Fee</label>
+                  <label className="font-medium block mb-2">
+                    Insurance Fee ($)
+                  </label>
                   <Input
                     type="number"
+                    min="0"
+                    step="0.01"
+                    placeholder="0.00"
                     value={formData.insuranceFee ?? ''}
                     onChange={(e) =>
                       handleChange(
@@ -319,9 +429,14 @@ export default function MainListingReviewModal({
                   />
                 </div>
                 <div>
-                  <label className="font-medium">RRP Price</label>
+                  <label className="font-medium block mb-2">
+                    RRP Price ($)
+                  </label>
                   <Input
                     type="number"
+                    min="0"
+                    step="0.01"
+                    placeholder="0.00"
                     value={formData.rrpPrice ?? ''}
                     onChange={(e) =>
                       handleChange('rrpPrice', parseFloat(e.target.value) || 0)
@@ -330,34 +445,103 @@ export default function MainListingReviewModal({
                 </div>
               </div>
 
-              {/* Thumbnail */}
-              <div>
-                <label className="font-medium">Thumbnail</label>
-                <FileUploader
-                  values={formData.thumbnail ? [formData.thumbnail] : []}
-                  onChange={(urls) =>
-                    handleChange('thumbnail', urls.length ? urls[0] : '')
-                  }
-                  onUploadStateChange={setIsUploading}
-                />
+              {/* Thumbnail Upload */}
+              <div className="border-t pt-6">
+                <label className="font-medium mb-3 flex items-center gap-2">
+                  <ImageIcon className="w-5 h-5" /> Thumbnail
+                </label>
+                <div className="flex flex-col gap-3">
+                  <label className="cursor-pointer flex items-center justify-center gap-2 border-2 border-dashed rounded-lg p-4 hover:bg-gray-50 transition-colors">
+                    <Upload className="w-5 h-5 text-gray-500" />
+                    <span className="text-sm text-gray-600">
+                      {isThumbnailChanged
+                        ? 'Change Thumbnail'
+                        : 'Upload Thumbnail'}
+                    </span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      hidden
+                      onChange={handleThumbnailUpload}
+                    />
+                  </label>
+                  {thumbnailPreview && (
+                    <div className="relative w-40 h-40 group">
+                      <Image
+                        src={thumbnailPreview}
+                        alt="thumbnail"
+                        fill
+                        className="rounded-md border object-cover"
+                      />
+                      {isThumbnailChanged && (
+                        <div className="absolute top-2 left-2 bg-green-500 text-white text-xs px-2 py-1 rounded">
+                          New
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
 
-              {/* Media */}
-              <div>
-                <label className="font-medium">Media</label>
-                <FileUploader
-                  values={formData.media || []}
-                  onChange={(urls) => handleChange('media', urls)}
-                  onUploadStateChange={setIsUploading}
-                />
+              {/* Media Gallery */}
+              <div className="border-t pt-6">
+                <label className="font-medium mb-3 flex items-center gap-2">
+                  <Upload className="w-5 h-5" /> Media Gallery (
+                  {mediaItems.length}/10)
+                </label>
+                <label className="cursor-pointer flex items-center justify-center gap-2 border-2 border-dashed rounded-lg p-4 hover:bg-gray-50 transition-colors">
+                  <Upload className="w-5 h-5 text-gray-500" />
+                  <span className="text-sm text-gray-600">
+                    Upload New Images
+                  </span>
+                  <input
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    hidden
+                    onChange={handleMediaUpload}
+                    disabled={mediaItems.length >= 10}
+                  />
+                </label>
+                {mediaItems.length > 0 && (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-4">
+                    {mediaItems.map((item, idx) => (
+                      <div key={idx} className="relative group aspect-square">
+                        <Image
+                          src={item.url}
+                          alt={`media-${idx}`}
+                          fill
+                          className="rounded-md border object-cover"
+                        />
+                        <button
+                          onClick={() => handleRemoveMedia(idx)}
+                          className="absolute top-2 right-2 bg-red-500 text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                          type="button"
+                        >
+                          <X size={14} />
+                        </button>
+                        <div className="absolute bottom-2 left-2 bg-black/60 text-white text-xs px-2 py-1 rounded">
+                          {idx + 1}
+                        </div>
+                        {item.isNew && (
+                          <div className="absolute top-2 left-2 bg-green-500 text-white text-xs px-2 py-1 rounded">
+                            New
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Shipping Details */}
-              <div className="flex flex-col gap-6 mt-4">
-                <label className="flex items-center gap-2">
+              <div className="flex flex-col gap-4 border-t pt-6">
+                <label className="font-medium mb-2">Shipping Options</label>
+                <label className="flex items-center gap-3 cursor-pointer">
                   <input
                     type="checkbox"
-                    checked={formData.shippingDetails?.isLocalPickup || false}
+                    className="w-4 h-4"
+                    checked={!!formData.shippingDetails?.isLocalPickup}
                     onChange={(e) =>
                       handleChange('shippingDetails', {
                         ...formData.shippingDetails,
@@ -365,15 +549,13 @@ export default function MainListingReviewModal({
                       })
                     }
                   />
-                  Local Pickup
+                  <span className="text-sm">Local Pickup Available</span>
                 </label>
-
-                <label className="flex items-center gap-2">
+                <label className="flex items-center gap-3 cursor-pointer">
                   <input
                     type="checkbox"
-                    checked={
-                      formData.shippingDetails?.isShippingAvailable || false
-                    }
+                    className="w-4 h-4"
+                    checked={!!formData.shippingDetails?.isShippingAvailable}
                     onChange={(e) =>
                       handleChange('shippingDetails', {
                         ...formData.shippingDetails,
@@ -381,29 +563,33 @@ export default function MainListingReviewModal({
                       })
                     }
                   />
-                  Shipping Available
+                  <span className="text-sm">Shipping Available</span>
                 </label>
               </div>
 
-              {/* Save Button */}
-              <div className="flex justify-start gap-5 mt-8 mb-5">
+              {/* Save Buttons */}
+              <div className="flex justify-start gap-4 mt-8 mb-5 border-t pt-6">
                 <Button
                   variant="outline"
                   onClick={onClose}
-                  disabled={updateMutation.isPending || isUploading}
+                  disabled={updateMutation.isPending}
+                  className="min-w-[100px]"
                 >
                   Cancel
                 </Button>
                 <Button
                   onClick={handleSave}
-                  disabled={updateMutation.isPending || isUploading}
+                  disabled={updateMutation.isPending}
+                  className="min-w-[100px]"
                 >
                   {updateMutation.isPending ? 'Saving...' : 'Save Changes'}
                 </Button>
               </div>
             </div>
           ) : (
-            <p>No data found.</p>
+            <div className="text-center py-20">
+              <p className="text-gray-500">No data found.</p>
+            </div>
           )}
         </ScrollArea>
       </DialogContent>

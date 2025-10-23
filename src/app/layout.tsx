@@ -7,7 +7,6 @@ import { Raleway } from 'next/font/google'
 import NextTopLoader from 'nextjs-toploader'
 import { Toaster } from 'sonner'
 import './globals.css'
-import { EdgeStoreProvider } from '@/lib/edgestore'
 
 const raleway = Raleway({
   subsets: ['latin'],
@@ -29,13 +28,11 @@ export default async function RootLayout({
     <html suppressHydrationWarning={true} lang="en">
       <body className={`${raleway.className} antialiased`}>
         <AppProvider>
-          <EdgeStoreProvider>
-            {' '}
-            {/* ✅ This should be here */}
-            <SessionProvider session={session}>
-              <TooltipProvider>{children}</TooltipProvider>
-            </SessionProvider>
-          </EdgeStoreProvider>
+          {' '}
+          {/* ✅ This should be here */}
+          <SessionProvider session={session}>
+            <TooltipProvider>{children}</TooltipProvider>
+          </SessionProvider>
         </AppProvider>
         <Toaster richColors position="bottom-right" />
         <NextTopLoader showSpinner={false} color="#1E2A38" />

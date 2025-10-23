@@ -27,11 +27,13 @@ export default async function RootLayout({
   const session = await auth()
   return (
     <html suppressHydrationWarning={true} lang="en">
-      <body className={`${raleway.className}  antialiased`}>
+      <body className={`${raleway.className} antialiased`}>
         <AppProvider>
           <EdgeStoreProvider>
+            {' '}
+            {/* ✅ This should be here */}
             <SessionProvider session={session}>
-              <TooltipProvider>{children} </TooltipProvider>
+              <TooltipProvider>{children}</TooltipProvider>
             </SessionProvider>
           </EdgeStoreProvider>
         </AppProvider>

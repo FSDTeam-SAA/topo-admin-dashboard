@@ -92,6 +92,8 @@ export default function MainListingReviewModal({
     }
   }, [masterData])
 
+  console.log('formData', formData)
+
   // ---------------- PATCH MUTATION (React Query) ----------------
   const updateMutation = useMutation({
     mutationFn: async (updatedData: Partial<MasterDressData>) => {
@@ -166,7 +168,7 @@ export default function MainListingReviewModal({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl w-full h-[90vh] py-6 overflow-hidden ">
+      <DialogContent className="max-w-4xl w-full h-[90vh] py-2 overflow-hidden font-sans font-light text-gray-700">
         <ScrollArea className="h-[90vh] px-6 py-6 space-y-6 pb-20">
           <DialogHeader>
             <div className="flex justify-center my-6">

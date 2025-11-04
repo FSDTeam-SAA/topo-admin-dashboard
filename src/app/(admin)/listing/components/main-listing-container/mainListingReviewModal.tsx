@@ -17,6 +17,13 @@ import { toast } from 'sonner'
 import { useSession } from 'next-auth/react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Upload, X, ImageIcon } from 'lucide-react'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 
 interface Props {
   open: boolean
@@ -154,8 +161,8 @@ export default function MainListingReviewModal({
     const file = e.target.files?.[0]
     if (!file) return
 
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error('File size should be less than 5MB')
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('File size should be less than 10MB')
       return
     }
 
@@ -347,21 +354,26 @@ export default function MainListingReviewModal({
 
                 <div>
                   <label className="font-medium block mb-2">Lender IDs</label>
-                  <select
-                    className="border rounded-md w-full p-2 bg-gray-50 outline-none"
-                    value={formData.lenderIds?.[0] ?? ''}
-                    disabled
-                  >
-                    {formData.lenderIds?.length ? (
-                      formData.lenderIds.map((id) => (
-                        <option key={id} value={id}>
-                          {id}
-                        </option>
-                      ))
-                    ) : (
-                      <option value="">No lenders</option>
-                    )}
-                  </select>
+
+                  <Select value={formData.lenderIds?.[0] ?? ''}>
+                    <SelectTrigger className="w-full bg-gray-50">
+                      <SelectValue placeholder="No lenders" />
+                    </SelectTrigger>
+
+                    <SelectContent>
+                      {formData.lenderIds?.length ? (
+                        formData.lenderIds.map((id) => (
+                          <SelectItem key={id} value={id}>
+                            {id}
+                          </SelectItem>
+                        ))
+                      ) : (
+                        <SelectItem disabled value="">
+                          No lenders
+                        </SelectItem>
+                      )}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
 

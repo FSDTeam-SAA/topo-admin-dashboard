@@ -175,7 +175,6 @@ const DisputesTable = ({ token }: { token: string }) => {
                 <TableCell className="text-center">
                   <Button 
                     onClick={() => handleViewDispute(dispute._id)}
-                    variant="outline"
                     size="sm"
                   >
                     View

@@ -12,7 +12,7 @@ const page = async () => {
     <div>
       <DisputesHeader token={token as string} />
       <SearchDisputes />
-      <DisputesTable />
+      <DisputesTable token={token as string} />
     </div>
   );
 };

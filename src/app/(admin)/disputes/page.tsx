@@ -2,11 +2,15 @@ import React from "react";
 import DisputesHeader from "./_components/DisputesHeader";
 import SearchDisputes from "./_components/search-disputes";
 import DisputesTable from "./_components/disputes-table";
+import { auth } from "@/auth";
 
-const page = () => {
+const page = async () => {
+  const cu = await auth();
+  const token = cu?.user?.accessToken;
+
   return (
     <div>
-      <DisputesHeader />
+      <DisputesHeader token={token as string} />
       <SearchDisputes />
       <DisputesTable />
     </div>

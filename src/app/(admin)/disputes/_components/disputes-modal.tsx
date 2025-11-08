@@ -95,7 +95,7 @@ const DisputesModal = ({ id, token, isOpen, onClose }: DisputesModalProps) => {
               />
               <div>
                 <h1 className="text-xl font-medium text-gray-900">
-                  Dispute Details: {id ? `#${id}` : "Loading..."}
+                  Dispute Details: {id ? `${id}` : "Loading..."}
                 </h1>
                 <p className="text-sm text-gray-500 mt-1">
                   Review and manage dispute information
@@ -112,7 +112,7 @@ const DisputesModal = ({ id, token, isOpen, onClose }: DisputesModalProps) => {
 
           {/* Tabs */}
           <div className="border-b border-gray-200">
-            <div className="flex items-center px-6 pt-4">
+            <div className="flex items-center px-6 pt-5">
               {levels.map((item, index) => (
                 <button
                   key={index}

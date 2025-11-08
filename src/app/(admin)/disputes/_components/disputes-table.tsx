@@ -16,7 +16,9 @@ import { useQuery } from "@tanstack/react-query";
 
 const DisputesTable = ({ token }: { token: string }) => {
   const [page, setPage] = useState(1);
-  
+  const [selectedDisputeId, setSelectedDisputeId] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   const { data, isLoading } = useQuery({
     queryKey: ["all-disputes", page],
     queryFn: async () => {
@@ -35,25 +37,41 @@ const DisputesTable = ({ token }: { token: string }) => {
   });
 
   const disputes = data?.disputes || [];
-  const paginationInfo = data ? {
-    currentPage: data.page,
-    totalPages: data.pages,
-    totalData: data.total,
-    hasPrevPage: data.page > 1,
-    hasNextPage: data.page < data.pages
-  } : null;
+  const paginationInfo = data
+    ? {
+        currentPage: data.page,
+        totalPages: data.pages,
+        totalData: data.total,
+        hasPrevPage: data.page > 1,
+        hasNextPage: data.page < data.pages,
+      }
+    : null;
+
+  const handleViewDispute = (disputeId: string) => {
+    setSelectedDisputeId(disputeId);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedDisputeId(null);
+  };
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
-      "Pending": "bg-yellow-200 text-yellow-800",
-      "Escalated": "bg-orange-200 text-orange-800",
-      "Resolved": "bg-green-200 text-green-800",
+      Pending: "bg-yellow-200 text-yellow-800",
+      Escalated: "bg-orange-200 text-orange-800",
+      Resolved: "bg-green-200 text-green-800",
     };
-    
-    const className = statusConfig[status as keyof typeof statusConfig] || "bg-gray-200 text-gray-800";
-    
+
+    const className =
+      statusConfig[status as keyof typeof statusConfig] ||
+      "bg-gray-200 text-gray-800";
+
     return (
-      <button className={`px-2 rounded-3xl font-semibold text-xs py-1 ${className}`}>
+      <button
+        className={`px-2 rounded-3xl font-semibold text-xs py-1 ${className}`}
+      >
         {status}
       </button>
     );
@@ -125,17 +143,23 @@ const DisputesTable = ({ token }: { token: string }) => {
                 </TableCell>
                 <TableCell className="text-center">
                   <div className="flex flex-col">
-                    <span className="text-sm font-mono">{dispute.booking.customer._id}</span>
+                    <span className="text-sm font-mono">
+                      {dispute.booking.customer._id}
+                    </span>
                     <span className="text-xs text-gray-500">
-                      {dispute.booking.customer.firstName} {dispute.booking.customer.lastName}
+                      {dispute.booking.customer.firstName}{" "}
+                      {dispute.booking.customer.lastName}
                     </span>
                   </div>
                 </TableCell>
                 <TableCell className="text-center">
                   <div className="flex flex-col">
-                    <span className="text-sm font-mono">{dispute.booking.lender._id}</span>
+                    <span className="text-sm font-mono">
+                      {dispute.booking.lender._id}
+                    </span>
                     <span className="text-xs text-gray-500">
-                      {dispute.booking.lender.firstName} {dispute.booking.lender.lastName}
+                      {dispute.booking.lender.firstName}{" "}
+                      {dispute.booking.lender.lastName}
                     </span>
                   </div>
                 </TableCell>
@@ -149,7 +173,13 @@ const DisputesTable = ({ token }: { token: string }) => {
                   {formatDate(dispute.createdAt)}
                 </TableCell>
                 <TableCell className="text-center">
-                  <DisputesModal dispute={dispute} />
+                  <Button 
+                    onClick={() => handleViewDispute(dispute._id)}
+                    variant="outline"
+                    size="sm"
+                  >
+                    View
+                  </Button>
                 </TableCell>
               </TableRow>
             ))
@@ -195,6 +225,14 @@ const DisputesTable = ({ token }: { token: string }) => {
           </div>
         </div>
       )}
+
+      {/* Custom Modal */}
+      <DisputesModal
+        id={selectedDisputeId}
+        token={token}
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+      />
     </div>
   );
 };

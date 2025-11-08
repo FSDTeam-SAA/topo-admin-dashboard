@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import React from "react";
 
@@ -8,12 +7,15 @@ interface BookingSnapShotProps {
   isLoading: boolean;
 }
 
-const BookingSnapShot = ({ disputesDetails, isLoading }: BookingSnapShotProps) => {
+const BookingSnapShot = ({
+  disputesDetails,
+  isLoading,
+}: BookingSnapShotProps) => {
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
     });
   };
 
@@ -78,7 +80,9 @@ const BookingSnapShot = ({ disputesDetails, isLoading }: BookingSnapShotProps) =
           <h3 className="font-medium">
             Dates:{" "}
             <span className="font-normal text-gray-600">
-              {disputesDetails?.createdAt ? formatDate(disputesDetails.createdAt) : "2025-04-20 to 2025-04-22"}
+              {disputesDetails?.createdAt
+                ? formatDate(disputesDetails.createdAt)
+                : "2025-04-20 to 2025-04-22"}
             </span>
           </h3>
           <h3 className="font-medium">
@@ -90,7 +94,9 @@ const BookingSnapShot = ({ disputesDetails, isLoading }: BookingSnapShotProps) =
           <h3 className="font-medium">
             Customer:{" "}
             <span className="font-normal text-gray-600">
-              {customer ? `${customer.firstName} ${customer.lastName}` : "Jane Doe"} 
+              {customer
+                ? `${customer.firstName} ${customer.lastName}`
+                : "Jane Doe"}
               {customer?.email && ` (${customer.email})`}
               {customer?.phone && `, ${customer.phone}`}
             </span>
@@ -130,20 +136,11 @@ const BookingSnapShot = ({ disputesDetails, isLoading }: BookingSnapShotProps) =
           <h3 className="font-medium">
             Created:{" "}
             <span className="font-normal text-gray-600">
-              {disputesDetails?.createdAt ? formatDate(disputesDetails.createdAt) : "N/A"}
+              {disputesDetails?.createdAt
+                ? formatDate(disputesDetails.createdAt)
+                : "N/A"}
             </span>
           </h3>
-        </div>
-      </div>
-
-      <div className="border border-gray-200 p-5 rounded-lg shadow-sm mt-10">
-        <h1 className="text-xl font-semibold mb-4">Actions</h1>
-
-        <div className="text-sm flex items-center gap-5 flex-wrap">
-          <Button>Save Changes</Button>
-          <Button variant="outline">Submit Resolution</Button>
-          <Button variant="outline">Download Report</Button>
-          <Button variant="outline">Refund</Button>
         </div>
       </div>
     </div>

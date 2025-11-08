@@ -135,7 +135,7 @@ const DisputesModal = ({ id, token, isOpen, onClose }: DisputesModalProps) => {
           {/* Content */}
           <div className="h-[600px] overflow-auto p-6">
             {activeTab === "Booking Snapshot" && <BookingSnapShot disputesDetails={disputesDetails} isLoading={isLoading} />}
-            {activeTab === "Dispute Details" && <DisputesDetails />}
+            {activeTab === "Dispute Details" && <DisputesDetails disputesDetails={disputesDetails} isLoading={isLoading} />}
             {activeTab === "Platform Policy Flags" && <PlatformPolicyFlags />}
             {activeTab === "Resolution Panel" && (
               <div className="text-center py-12">

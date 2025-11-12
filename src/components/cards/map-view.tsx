@@ -5,7 +5,7 @@ import { useEffect, useRef } from 'react'
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MABBOX_TOKEN!
 
-console.log('mapbox token: ', mapboxgl.accessToken)
+// console.log('mapbox token: ', mapboxgl.accessToken)
 
 interface MapboxMapProps {
   latitude: number

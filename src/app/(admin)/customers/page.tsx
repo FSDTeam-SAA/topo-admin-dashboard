@@ -12,7 +12,7 @@ const Page = async () => {
   console.log('accessToken', accessToken)
 
   return (
-    <div className="space-y-[30px] p-[40px]">
+    <div className="space-y-[30px] p-[10px] font-sans">
       <CustomersHeader />
       <CustomerSearchHeader />
       <CustomerTableContainer accessToken={accessToken} />

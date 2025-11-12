@@ -147,7 +147,7 @@ export const BannerAdd = () => {
         <Button variant="default">{'Add Banner'}</Button>
       </DialogTrigger>
 
-      <DialogContent className="p-8 max-w-2xl font-sans">
+      <DialogContent className="p-8 max-w-2xl font-sans ">
         <DialogHeader>
           <div className="flex justify-center my-8">
             <Image src={'/logo.png'} alt="modal-Alert" width={70} height={60} />
@@ -171,7 +171,7 @@ export const BannerAdd = () => {
 
           {/* Image Upload */}
           <div className="space-y-2">
-            <Label htmlFor="image">Banner Image (JPEG/PNG, Max 10MB)</Label>
+            <Label htmlFor="image">Banner Image (JPEG/PNG, Max 20MB)</Label>
             <Input
               id="image"
               name="filename"
@@ -256,7 +256,7 @@ export const BannerEdit = ({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
 
-      <DialogContent className="p-8 max-w-2xl font-sans">
+      <DialogContent className="p-8 max-w-2xl font-sans overflow-y-auto max-h-[90vh] scroll-smooth ">
         <DialogHeader>
           <div className="flex justify-center my-8">
             <Image src={'/logo.png'} alt="modal-Alert" width={70} height={60} />
@@ -293,8 +293,8 @@ export const BannerEdit = ({
                   <Image
                     src={bannerData.image[0].url}
                     alt={bannerData.title}
-                    width={150}
-                    height={80}
+                    width={899}
+                    height={480}
                     className="rounded-md border object-cover"
                   />
                 </div>

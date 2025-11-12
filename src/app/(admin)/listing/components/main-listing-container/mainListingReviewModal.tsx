@@ -17,6 +17,13 @@ import { toast } from 'sonner'
 import { useSession } from 'next-auth/react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Upload, X, ImageIcon } from 'lucide-react'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 
 interface Props {
   open: boolean
@@ -154,8 +161,8 @@ export default function MainListingReviewModal({
     const file = e.target.files?.[0]
     if (!file) return
 
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error('File size should be less than 5MB')
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('File size should be less than 10MB')
       return
     }
 
@@ -166,16 +173,28 @@ export default function MainListingReviewModal({
   }
 
   // ---------------- MEDIA ----------------
+  // Component-এর বাইরে বা উপরে define করো না, function-এর ভিতরে রাখো
+  let lastUploadTime = 0
+
   const handleMediaUpload = (e: ChangeEvent<HTMLInputElement>) => {
+    const now = Date.now()
+    // 🧠 যদি 500ms এর মধ্যে আবার trigger হয়, তাহলে ignore করো
+    if (now - lastUploadTime < 500) return
+    lastUploadTime = now
+
     const files = e.target.files ? Array.from(e.target.files) : []
+    if (files.length === 0) return
+
     if (mediaItems.length + files.length > 10) {
       toast.error('Maximum 10 images allowed')
+      e.target.value = ''
       return
     }
 
     for (const file of files) {
-      if (file.size > 5 * 1024 * 1024) {
-        toast.error(`${file.name} is too large (max 5MB)`)
+      if (file.size > 10 * 1024 * 1024) {
+        toast.error(`${file.name} is too large (max 10MB)`)
+        e.target.value = ''
         return
       }
     }
@@ -185,7 +204,9 @@ export default function MainListingReviewModal({
       isNew: true,
       file,
     }))
+
     setMediaItems((prev) => [...prev, ...newItems])
+    e.target.value = ''
   }
 
   const handleRemoveMedia = (index: number) => {
@@ -201,6 +222,8 @@ export default function MainListingReviewModal({
     if (!formData) return
 
     const fd = new FormData()
+
+    // --- BASIC INFO ---
     fd.append('masterDressId', formData.masterDressId)
     fd.append('dressName', formData.dressName)
 
@@ -226,26 +249,29 @@ export default function MainListingReviewModal({
     if (formData.isActive !== undefined)
       fd.append('isActive', String(formData.isActive))
 
-    // --- Thumbnail ---
+    // --- THUMBNAIL ---
     if (isThumbnailChanged && thumbnailFile) {
       fd.append('thumbnail', thumbnailFile)
     }
 
-    // --- MEDIA HANDLING ---
+    // --- MEDIA HANDLING (Fixed ✅) ---
+    const existingMediaUrls = mediaItems
+      .filter((item) => !item.isNew) // শুধু পুরনোগুলো
+      .map((item) => item.url)
+
     const newMediaFiles = mediaItems
-      .filter((item) => item.isNew && item.file)
+      .filter((item) => item.isNew && item.file) // শুধু নতুন ফাইল
       .map((item) => item.file as File)
 
-    const existingMediaUrls = mediaItems.map((item) => item.url)
-
-    // ✅ সবসময়ই existing media পাঠানো হবে
+    // ✅ শুধুমাত্র পুরনো মিডিয়া URL গুলো stringify করে পাঠানো হবে
     fd.append('media', JSON.stringify(existingMediaUrls))
 
-    // ✅ নতুন upload থাকলে তবেই mediaUpload পাঠানো হবে
+    // ✅ নতুন আপলোড করা ফাইলগুলো mediaUpload নামে পাঠানো হবে
     newMediaFiles.forEach((file) => {
       fd.append('mediaUpload', file)
     })
 
+    // --- SUBMIT ---
     updateMutation.mutate(fd)
   }
 
@@ -328,21 +354,26 @@ export default function MainListingReviewModal({
 
                 <div>
                   <label className="font-medium block mb-2">Lender IDs</label>
-                  <select
-                    className="border rounded-md w-full p-2 bg-gray-50 outline-none"
-                    value={formData.lenderIds?.[0] ?? ''}
-                    disabled
-                  >
-                    {formData.lenderIds?.length ? (
-                      formData.lenderIds.map((id) => (
-                        <option key={id} value={id}>
-                          {id}
-                        </option>
-                      ))
-                    ) : (
-                      <option value="">No lenders</option>
-                    )}
-                  </select>
+
+                  <Select value={formData.lenderIds?.[0] ?? ''}>
+                    <SelectTrigger className="w-full bg-gray-50">
+                      <SelectValue placeholder="No lenders" />
+                    </SelectTrigger>
+
+                    <SelectContent>
+                      {formData.lenderIds?.length ? (
+                        formData.lenderIds.map((id) => (
+                          <SelectItem key={id} value={id}>
+                            {id}
+                          </SelectItem>
+                        ))
+                      ) : (
+                        <SelectItem disabled value="">
+                          No lenders
+                        </SelectItem>
+                      )}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
 

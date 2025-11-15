@@ -137,44 +137,44 @@ const DisputesTable = ({ token }: { token: string }) => {
             </TableRow>
           ) : (
             disputes.map((dispute: any) => (
-              <TableRow key={dispute._id}>
+              <TableRow key={dispute?._id}>
                 <TableCell className="text-center text-sm font-mono">
-                  {dispute._id}
+                  {dispute?._id}
                 </TableCell>
                 <TableCell className="text-center">
                   <div className="flex flex-col">
                     <span className="text-sm font-mono">
-                      {dispute.booking.customer._id}
+                      {dispute?.booking?.customer?._id}
                     </span>
                     <span className="text-xs text-gray-500">
-                      {dispute.booking.customer.firstName}{" "}
-                      {dispute.booking.customer.lastName}
+                      {dispute?.booking?.customer?.firstName}{" "}
+                      {dispute?.booking?.customer?.lastName}
                     </span>
                   </div>
                 </TableCell>
                 <TableCell className="text-center">
                   <div className="flex flex-col">
                     <span className="text-sm font-mono">
-                      {dispute.booking.lender._id}
+                      {dispute?.booking?.lender?._id}
                     </span>
                     <span className="text-xs text-gray-500">
-                      {dispute.booking.lender.firstName}{" "}
-                      {dispute.booking.lender.lastName}
+                      {dispute?.booking?.lender?.firstName}{" "}
+                      {dispute?.booking?.lender?.lastName}
                     </span>
                   </div>
                 </TableCell>
                 <TableCell className="text-center">
-                  {dispute.issueType}
+                  {dispute?.issueType}
                 </TableCell>
                 <TableCell className="text-center">
-                  {getStatusBadge(dispute.status)}
+                  {getStatusBadge(dispute?.status)}
                 </TableCell>
                 <TableCell className="text-center">
-                  {formatDate(dispute.createdAt)}
+                  {formatDate(dispute?.createdAt)}
                 </TableCell>
                 <TableCell className="text-center">
                   <Button 
-                    onClick={() => handleViewDispute(dispute._id)}
+                    onClick={() => handleViewDispute(dispute?._id)}
                     size="sm"
                   >
                     View
@@ -190,14 +190,14 @@ const DisputesTable = ({ token }: { token: string }) => {
       {paginationInfo && (
         <div className="flex justify-between items-center mt-4 text-sm">
           <span>
-            Page {paginationInfo.currentPage} of {paginationInfo.totalPages} •{" "}
-            {paginationInfo.totalData} records
+            Page {paginationInfo?.currentPage} of {paginationInfo?.totalPages} •{" "}
+            {paginationInfo?.totalData} records
           </span>
           <div className="space-x-2">
             <Button
               variant="outline"
               size="sm"
-              disabled={!paginationInfo.hasPrevPage}
+              disabled={!paginationInfo?.hasPrevPage}
               onClick={() => setPage((p) => Math.max(1, p - 1))}
             >
               Previous
@@ -205,7 +205,7 @@ const DisputesTable = ({ token }: { token: string }) => {
             <Button
               variant="outline"
               size="sm"
-              disabled={!paginationInfo.hasNextPage}
+              disabled={!paginationInfo?.hasNextPage}
               onClick={() => setPage((p) => p + 1)}
             >
               Next

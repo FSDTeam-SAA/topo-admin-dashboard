@@ -7,12 +7,10 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import moment from 'moment'
 import { cn } from '@/lib/utils'
+import Image from 'next/image'
 
 interface Props {
-  data: {
-    data: any[]
-    paginationInfo: any
-  }
+  data: any
 }
 
 const PaymentsTab = ({ data }: Props) => {
@@ -20,34 +18,34 @@ const PaymentsTab = ({ data }: Props) => {
 
   // Calculate total revenue from bookings
   const totalRevenue =
-    data?.data?.reduce((sum: number, booking: any) => {
+    data.reduce((sum: number, booking: any) => {
       return sum + (booking.price || 0)
     }, 0) || 0
 
   const paidBookings =
-    data?.data?.filter((booking: any) => booking.status === 'Paid') || []
+    data.filter((booking: any) => booking.status === 'Paid') || []
   const pendingBookings =
-    data?.data?.filter((booking: any) => booking.status === 'Pending') || []
+    data.filter((booking: any) => booking.status === 'Pending') || []
 
   return (
-    <div className="space-y-6 w-full">
+    <div className="space-y-6 w-full font-sans ">
       {/* Payment Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="shadow-sm rounded-lg">
           <CardContent className="pt-6">
-            <div className="text-sm text-gray-500 mb-1">Total Revenue</div>
+            <div className="text-base text-gray-500 mb-1">Total Revenue</div>
             <div className="text-2xl font-bold text-green-600">
               ${totalRevenue}
             </div>
             <div className="text-xs text-gray-400 mt-1">
-              From {data?.data?.length || 0} bookings
+              From {data.length || 0} bookings
             </div>
           </CardContent>
         </Card>
 
         <Card className="shadow-sm rounded-lg">
           <CardContent className="pt-6">
-            <div className="text-sm text-gray-500 mb-1">Paid Bookings</div>
+            <div className="text-base text-gray-500 mb-1">Paid Bookings</div>
             <div className="text-2xl font-bold text-blue-600">
               {paidBookings.length}
             </div>
@@ -60,7 +58,7 @@ const PaymentsTab = ({ data }: Props) => {
 
         <Card className="shadow-sm rounded-lg">
           <CardContent className="pt-6">
-            <div className="text-sm text-gray-500 mb-1">Pending Payments</div>
+            <div className="text-base text-gray-500 mb-1">Pending Payments</div>
             <div className="text-2xl font-bold text-yellow-600">
               {pendingBookings.length}
             </div>
@@ -85,34 +83,39 @@ const PaymentsTab = ({ data }: Props) => {
         </CardHeader>
 
         <CardContent className="font-light text-[14px] font-sans">
-          {data?.data && data.data.length > 0 ? (
+          {data && data.length > 0 ? (
             <div className="space-y-3">
-              {data.data.map((booking: any, index: number) => (
+              {data.map((booking: any, index: number) => (
                 <div
                   key={booking.bookingId || index}
                   className="border rounded-lg p-4 hover:bg-gray-50 transition-colors"
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex gap-3">
-                      <img
+                      <Image
                         src={booking.thumbnail}
                         alt={booking.dressName}
-                        className="w-16 h-16 rounded object-cover"
+                        width={64}
+                        height={64}
+                        className="rounded object-cover"
                       />
                       <div>
                         <h4 className="font-medium text-base">
                           {booking.dressName}
                         </h4>
-                        <p className="text-xs text-gray-500 mt-1">
+
+                        <p className="text-base text-gray-500 mt-1">
                           Booking ID: {booking.bookingId}
                         </p>
-                        <p className="text-xs text-gray-500">
+
+                        <p className="text-base text-gray-500">
                           Booked:{' '}
                           {moment(booking.bookedAt).format(
                             'D MMM YYYY, hh:mm A'
                           )}
                         </p>
-                        <p className="text-xs text-gray-600 mt-1">
+
+                        <p className="text-base text-gray-600 mt-1">
                           Rental: {moment(booking.start).format('D MMM')} -{' '}
                           {moment(booking.end).format('D MMM YYYY')}
                         </p>

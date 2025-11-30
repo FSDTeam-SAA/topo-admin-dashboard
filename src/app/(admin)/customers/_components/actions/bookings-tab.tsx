@@ -4,30 +4,29 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 
-import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-// import { TableContainer } from '../table-container'
-import { BookingData, bookingTableColumns } from './bookings-column'
-import { PaginationControls } from '@/components/ui/pagination-controls'
+import { bookingTableColumns } from './bookings-column'
 import {
   ColumnDef,
   getCoreRowModel,
-  getPaginationRowModel,
   useReactTable,
 } from '@tanstack/react-table'
 import { DataTable } from '@/components/ui/data-table'
 
+interface BookingData {
+  bookingId: string
+  dressName: string
+  thumbnail: string
+  lenderId: string
+  status: string
+  price: number
+  start: string
+  end: string
+  bookedAt: string
+}
+
 interface Props {
-  data: {
-    data: any[]
-    paginationInfo: {
-      currentPage: number
-      totalPages: number
-      totalData: number
-      hasNextPage: boolean
-      hasPrevPage: boolean
-    }
-  }
+  data: BookingData[] // bookings array
 }
 
 interface BookingTableProps {
@@ -36,12 +35,6 @@ interface BookingTableProps {
 }
 
 const BookingsTab = ({ data }: Props) => {
-  const [currentPage, setCurrentPage] = useState(
-    data?.paginationInfo?.currentPage || 1
-  )
-
-  console.log('current page', currentPage)
-
   console.log('bookings data', data)
 
   return (
@@ -56,22 +49,9 @@ const BookingsTab = ({ data }: Props) => {
         <CardContent className="font-light text-[14px] font-sans">
           {/* Table */}
           <BookingsTable
-            data={data?.data ?? []}
+            data={data ?? []} // FIXED (only array passed)
             columns={bookingTableColumns}
           />
-
-          {/* Pagination */}
-          {data?.paginationInfo && data.paginationInfo.totalPages > 1 && (
-            <div className="mt-4 w-full flex justify-end">
-              <PaginationControls
-                currentPage={data.paginationInfo.currentPage}
-                totalPages={data.paginationInfo.totalPages}
-                totalItems={data.paginationInfo.totalData}
-                itemsPerPage={10} // You can adjust this or get from API
-                onPageChange={(page) => setCurrentPage(page)}
-              />
-            </div>
-          )}
         </CardContent>
       </Card>
     </div>
@@ -80,22 +60,22 @@ const BookingsTab = ({ data }: Props) => {
 
 export default BookingsTab
 
+// ================================================================
+// TABLE COMPONENT
+// ================================================================
 export const BookingsTable = ({ data, columns }: BookingTableProps) => {
   const table = useReactTable({
     data,
     columns: columns,
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
   })
 
   return (
-    <>
-      <div className="bg-white">
-        {/*  Scrollable Wrapper */}
-        <div className="max-h-[500px] overflow-auto border rounded-md">
-          <DataTable table={table} columns={columns} />
-        </div>
+    <div className="bg-white">
+      {/* Scrollable Table Wrapper */}
+      <div className="max-h-[500px] overflow-auto border rounded-md">
+        <DataTable table={table} columns={columns} />
       </div>
-    </>
+    </div>
   )
 }

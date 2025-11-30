@@ -52,18 +52,9 @@ export interface CustomerDetailsResponse {
   message: string
   data: {
     customerProfile: CustomerProfile
-    bookingHistory: {
-      data: any[]
-      paginationInfo: PaginationInfo
-    }
-    customerDisputes: {
-      data: any[]
-      paginationInfo: PaginationInfo
-    }
-    timeline: {
-      data: any[]
-      paginationInfo: PaginationInfo
-    }
+    bookingHistory: any[]
+    customerDisputes: any[]
+    timeline: any[]
   }
 }
 
@@ -114,7 +105,7 @@ const CustomerAction = ({ customerId }: Props) => {
         {
           id: 'payments',
           label: 'Payments',
-          content: <PaymentsTab data={customerDetails} />,
+          content: <PaymentsTab data={customerDetails.bookingHistory} />,
         },
         {
           id: 'disputes',
@@ -124,7 +115,7 @@ const CustomerAction = ({ customerId }: Props) => {
         {
           id: 'documents',
           label: 'Documents',
-          content: <DocumentsTab data={customerDetails} />,
+          content: <DocumentsTab data={customerDetails.customerProfile} />,
         },
         {
           id: 'timeline',

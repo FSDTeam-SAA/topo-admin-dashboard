@@ -1,3 +1,9 @@
+// ================================================================
+// customer-action.tsx
+// ================================================================
+'use client'
+
+import { useState } from 'react'
 import { AnimatedTabs } from '@/components/ui/animated-tabs'
 import { Button } from '@/components/ui/button'
 import {
@@ -7,75 +13,182 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
-import { DemoCustomerProfile } from './customer-table-column'
 import ProfileTab from './actions/profile-tab'
-import StatusTab from './actions/status-tab'
+import { useQuery } from '@tanstack/react-query'
+import { useSession } from 'next-auth/react'
+import Image from 'next/image'
+import BookingsTab from './actions/bookings-tab'
+import DisputesTab from './actions/diputes-tab'
+import TimelineTab from './actions/timeline-tab'
+import PaymentsTab from './actions/payments-tab'
+import DocumentsTab from '../../lenders/_components/actions/documen-tab'
 
-// import Image from 'next/image'
-
-interface Props {
-  data: DemoCustomerProfile
+/* eslint-disable @typescript-eslint/no-explicit-any */
+export interface CustomerProfile {
+  _id: number
+  firstName: string
+  lastName: string
+  email: string
+  createdAt?: string
+  totalBookings?: number
+  totalSpent?: number
+  // add more fields as needed
 }
 
-const CustomerAction = ({ data }: Props) => {
-  const tabs = [
-    { id: 'profile', label: 'Profile', content: <ProfileTab data={data} /> },
-    { id: 'status', label: 'Status', content: <StatusTab data={data} /> },
-    // { id: 'matrics', label: 'Matrics', content: <MatricsTab data={data} /> },
-    // { id: 'listing', label: 'Listing', content: <ListingTab data={data} /> },
-    // { id: 'disputes', label: 'Disputes', content: <DisputesTab data={data} /> },
-    // {
-    //   id: 'documents',
-    //   label: 'Documents',
-    //   content: <DocumentsTab data={data} />,
-    // },
-    // { id: 'notes', label: 'Notes', content: <NotesTab data={data} /> },
-  ]
+// ------------------------------------------------------
+// Pagination Structure
+// ------------------------------------------------------
+export interface PaginationInfo {
+  page: number
+  limit: number
+  total: number
+}
+
+// ------------------------------------------------------
+// Customer Details Response
+// ------------------------------------------------------
+export interface CustomerDetailsResponse {
+  status: boolean
+  message: string
+  data: {
+    customerProfile: CustomerProfile
+    bookingHistory: {
+      data: any[]
+      paginationInfo: PaginationInfo
+    }
+    customerDisputes: {
+      data: any[]
+      paginationInfo: PaginationInfo
+    }
+    timeline: {
+      data: any[]
+      paginationInfo: PaginationInfo
+    }
+  }
+}
+
+interface Props {
+  customerId: string
+}
+
+const CustomerAction = ({ customerId }: Props) => {
+  const [isOpen, setIsOpen] = useState(false)
+  const cu = useSession()
+  const accessToken = cu?.data?.user?.accessToken || ''
+
+  const { data: customerDetails, isLoading: loading } = useQuery({
+    queryKey: ['customer-details', customerId],
+    queryFn: async () => {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/admin/customer/${customerId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      )
+
+      const data: CustomerDetailsResponse = await response.json()
+
+      if (!data.status) throw new Error('Failed to fetch customer details')
+
+      return data.data
+    },
+    enabled: isOpen, // fetch ONLY when dialog opens
+  })
+
+  const tabs = customerDetails
+    ? [
+        {
+          id: 'profile',
+          label: 'Profile',
+          content: <ProfileTab data={customerDetails.customerProfile} />,
+        },
+
+        {
+          id: 'bookings',
+          label: 'Bookings',
+          content: <BookingsTab data={customerDetails.bookingHistory} />,
+        },
+        {
+          id: 'payments',
+          label: 'Payments',
+          content: <PaymentsTab data={customerDetails} />,
+        },
+        {
+          id: 'disputes',
+          label: 'Disputes',
+          content: <DisputesTab data={customerDetails.customerDisputes} />,
+        },
+        {
+          id: 'documents',
+          label: 'Documents',
+          content: <DocumentsTab data={customerDetails} />,
+        },
+        {
+          id: 'timeline',
+          label: 'Timeline',
+          content: <TimelineTab data={customerDetails.timeline} />,
+        },
+      ]
+    : []
 
   return (
     <div>
-      <Dialog>
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogTrigger asChild>
-          <Button variant="default" size="sm">
+          <Button className="px-4" variant="default" size="sm">
             View
           </Button>
         </DialogTrigger>
 
         <DialogContent
           className="
-            w-full 
-            !max-w-[95vw]    /* override shadcn default */
-            md:!max-w-[80vw] /* desktop এ 80% */
-            lg:!max-w-[70vw] /* বড়ো স্ক্রিনে 70% */
-            h-auto 
-            px-4 
-            py-2 
-            space-y-5 
-            overflow-y-auto
-          "
+    w-full 
+    !max-w-[80vw]
+    md:!max-w-[75vw]
+    lg:!max-w-[60vw]
+    h-auto 
+    px-6
+    py-2
+    pb-12 
+    space-y-5 
+    overflow-y-auto
+  "
         >
           <DialogHeader>
             <DialogTitle>
-              {/* <div className="flex justify-center py-4">
+              <div className="py-8 flex justify-center">
                 <Image
-                  src={'/logo.png'}
-                  alt={data.fullName || 'Lender Profile Image'}
-                  width={90}
-                  height={90}
-                  className="rounded-full object-cover"
+                  src="/logo.png"
+                  alt="Muse Gala Logo"
+                  width={70}
+                  height={70}
                 />
-              </div> */}
-              Customer Details: {data.customerName} (ID: {data?.customerId})
+              </div>
+              Customer Details: {customerDetails?.customerProfile.firstName}{' '}
+              {customerDetails?.customerProfile.lastName} (ID: {customerId})
             </DialogTitle>
           </DialogHeader>
 
           <div>
-            <AnimatedTabs
-              tabs={tabs}
-              defaultTab="profile"
-              className="bg-white rounded-[15px] shadow-sm"
-              tabClassName="min-w-[80px]"
-            />
+            {loading ? (
+              <div className="flex items-center justify-center py-8">
+                <p>Loading customer details...</p>
+              </div>
+            ) : customerDetails ? (
+              <AnimatedTabs
+                tabs={tabs}
+                defaultTab="profile"
+                className="bg-white rounded-[15px] shadow-sm"
+                tabClassName="min-w-[80px]"
+              />
+            ) : (
+              <div className="flex items-center justify-center py-8">
+                <p>No data available</p>
+              </div>
+            )}
           </div>
         </DialogContent>
       </Dialog>

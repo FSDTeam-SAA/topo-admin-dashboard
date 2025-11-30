@@ -1,10 +1,11 @@
-import { Card } from "@/components/ui/card";
-import { LenderProfile } from "@/types/lender";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Card } from '@/components/ui/card'
 
 interface Props {
-  data: LenderProfile;
+  data: any
 }
-const DocumentsTab = ({}: Props) => {
+const DocumentsTab = ({ data }: Props) => {
+  console.log('customers documents', data)
   return (
     <div className="space-y-6">
       <Card className="shadow-none rounded-[6px]">
@@ -17,7 +18,7 @@ const DocumentsTab = ({}: Props) => {
         </div>
       </Card>
     </div>
-  );
-};
+  )
+}
 
-export default DocumentsTab;
+export default DocumentsTab

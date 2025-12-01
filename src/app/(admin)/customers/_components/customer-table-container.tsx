@@ -7,6 +7,7 @@ import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { PaginationInfo, TableContainer } from './table-container'
 import { customerTableColumns, CustomerProfile } from './customer-table-column'
+import SkeletonLoader from '@/components/loader/SkeletonLoader'
 
 interface CustomerTableContainerProps {
   accessToken: string
@@ -52,12 +53,7 @@ export default function CustomerTableContainer({
     queryFn: fetchCustomers,
   })
 
-  if (isLoading)
-    return (
-      <div className="flex items-center justify-center p-8">
-        <div className="text-lg">Loading customers...</div>
-      </div>
-    )
+  if (isLoading) return <SkeletonLoader />
 
   if (error)
     return (

@@ -12,6 +12,7 @@ import {
 } from '@tanstack/react-table'
 import { CustomerProfile } from './customer-table-column'
 import { PaginationControls } from '@/components/ui/pagination-controls'
+import { Card } from '@/components/ui/card'
 
 export interface PaginationInfo {
   currentPage: number
@@ -43,7 +44,7 @@ export const TableContainer = ({ data, columns, onPageChange }: TableProps) => {
   const pagination = data.pagination
 
   return (
-    <>
+    <Card className="pb-5">
       <div className="bg-white">
         <DataTable table={table} columns={columns} />
       </div>
@@ -60,6 +61,6 @@ export const TableContainer = ({ data, columns, onPageChange }: TableProps) => {
           />
         </div>
       )}
-    </>
+    </Card>
   )
 }

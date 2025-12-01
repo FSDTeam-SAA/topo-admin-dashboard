@@ -27,11 +27,11 @@ export function DataTable<TData, TValue>({
   return (
     <div className="rounded-md border ">
       <Table className=" border-collapse border-spacing-y-3">
-        <TableHeader className="border ">
+        <TableHeader className="border">
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
               {headerGroup.headers.map((header) => (
-                <TableHead key={header.id} className="text-center text-lg">
+                <TableHead key={header.id} className="text-center text-lg py-4">
                   {header.isPlaceholder
                     ? null
                     : flexRender(

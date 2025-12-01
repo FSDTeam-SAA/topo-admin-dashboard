@@ -21,7 +21,7 @@ import BookingsTab from './actions/bookings-tab'
 import DisputesTab from './actions/diputes-tab'
 import TimelineTab from './actions/timeline-tab'
 import PaymentsTab from './actions/payments-tab'
-import DocumentsTab from '../../lenders/_components/actions/documen-tab'
+import DocumentsTab from './actions/document-tab'
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export interface CustomerProfile {
@@ -150,7 +150,7 @@ const CustomerAction = ({ customerId }: Props) => {
         >
           <DialogHeader>
             <DialogTitle>
-              <div className="py-8 flex justify-center">
+              <div className="py-5 flex justify-center">
                 <Image
                   src="/logo.png"
                   alt="Muse Gala Logo"

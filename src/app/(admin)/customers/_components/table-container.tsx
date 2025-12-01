@@ -1,6 +1,8 @@
 // ================================================================
 // table-container.tsx
 // ================================================================
+'use client'
+
 import { DataTable } from '@/components/ui/data-table'
 import {
   ColumnDef,
@@ -9,26 +11,55 @@ import {
   useReactTable,
 } from '@tanstack/react-table'
 import { CustomerProfile } from './customer-table-column'
+import { PaginationControls } from '@/components/ui/pagination-controls'
 
-interface TableProps {
-  data: CustomerProfile[]
-  columns: ColumnDef<CustomerProfile>[]
+export interface PaginationInfo {
+  currentPage: number
+  totalPages: number
+  totalData: number
+  hasNextPage: boolean
+  hasPrevPage: boolean
 }
 
-export const TableContainer = ({ data, columns }: TableProps) => {
+export interface Data {
+  customers: CustomerProfile[]
+  pagination: PaginationInfo
+}
+
+interface TableProps {
+  data: Data
+  columns: ColumnDef<CustomerProfile>[]
+  onPageChange: (page: number) => void
+}
+
+export const TableContainer = ({ data, columns, onPageChange }: TableProps) => {
   const table = useReactTable({
-    data,
-    columns: columns,
+    data: data.customers,
+    columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
   })
+
+  const pagination = data.pagination
 
   return (
     <>
       <div className="bg-white">
         <DataTable table={table} columns={columns} />
       </div>
-      {/* Pagination can be added here */}
+
+      {/* Pagination */}
+      {pagination && (
+        <div className="mt-4 w-full flex justify-end">
+          <PaginationControls
+            itemsPerPage={10}
+            currentPage={pagination.currentPage}
+            totalPages={pagination.totalPages}
+            totalItems={pagination.totalData}
+            onPageChange={onPageChange}
+          />
+        </div>
+      )}
     </>
   )
 }

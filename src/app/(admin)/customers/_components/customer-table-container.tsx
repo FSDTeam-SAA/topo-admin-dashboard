@@ -3,8 +3,9 @@
 // ================================================================
 'use client'
 
+import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { TableContainer } from './table-container'
+import { PaginationInfo, TableContainer } from './table-container'
 import { customerTableColumns, CustomerProfile } from './customer-table-column'
 
 interface CustomerTableContainerProps {
@@ -15,19 +16,19 @@ interface CustomerListResponse {
   status: boolean
   message: string
   data: {
-    page: number
-    limit: number
-    total: number
     customers: CustomerProfile[]
+    pagination: PaginationInfo
   }
 }
 
 export default function CustomerTableContainer({
   accessToken,
 }: CustomerTableContainerProps) {
-  const fetchCustomers = async (): Promise<CustomerProfile[]> => {
+  const [page, setPage] = useState(1)
+
+  const fetchCustomers = async () => {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/admin/customer/all-customers`,
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/admin/customer/all-customers?page=${page}`,
       {
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -36,39 +37,40 @@ export default function CustomerTableContainer({
       }
     )
 
-    const data: CustomerListResponse = await response.json()
+    const res: CustomerListResponse = await response.json()
 
-    if (!data.status) throw new Error('Failed to fetch customers')
+    if (!res.status) throw new Error('Failed to fetch customers')
 
-    return data.data.customers
+    return {
+      customers: res.data.customers,
+      pagination: res.data.pagination,
+    }
   }
 
-  const {
-    data: customers,
-    isLoading,
-    error,
-  } = useQuery({
-    queryKey: ['customers'],
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['customers', page],
     queryFn: fetchCustomers,
   })
 
-  if (isLoading) {
+  if (isLoading)
     return (
       <div className="flex items-center justify-center p-8">
         <div className="text-lg">Loading customers...</div>
       </div>
     )
-  }
 
-  if (error) {
+  if (error)
     return (
       <div className="flex items-center justify-center p-8">
         <div className="text-red-600">{(error as Error).message}</div>
       </div>
     )
-  }
 
   return (
-    <TableContainer data={customers ?? []} columns={customerTableColumns} />
+    <TableContainer
+      data={data!}
+      columns={customerTableColumns}
+      onPageChange={(newPage) => setPage(newPage)}
+    />
   )
 }

@@ -28,11 +28,11 @@ const PaymentsTab = ({ data }: Props) => {
     data.filter((booking: any) => booking.status === 'Pending') || []
 
   return (
-    <div className="space-y-6 w-full font-sans ">
+    <div className="space-y-3 w-full font-sans ">
       {/* Payment Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         <Card className="shadow-sm rounded-lg">
-          <CardContent className="pt-6">
+          <CardContent className="pt-4">
             <div className="text-base text-gray-500 mb-1">Total Revenue</div>
             <div className="text-2xl font-bold text-green-600">
               ${totalRevenue}
@@ -44,7 +44,7 @@ const PaymentsTab = ({ data }: Props) => {
         </Card>
 
         <Card className="shadow-sm rounded-lg">
-          <CardContent className="pt-6">
+          <CardContent className="pt-4">
             <div className="text-base text-gray-500 mb-1">Paid Bookings</div>
             <div className="text-2xl font-bold text-blue-600">
               {paidBookings.length}
@@ -57,7 +57,7 @@ const PaymentsTab = ({ data }: Props) => {
         </Card>
 
         <Card className="shadow-sm rounded-lg">
-          <CardContent className="pt-6">
+          <CardContent className="pt-2">
             <div className="text-base text-gray-500 mb-1">Pending Payments</div>
             <div className="text-2xl font-bold text-yellow-600">
               {pendingBookings.length}
@@ -84,7 +84,7 @@ const PaymentsTab = ({ data }: Props) => {
 
         <CardContent className="font-light text-[14px] font-sans">
           {data && data.length > 0 ? (
-            <div className="space-y-3">
+            <div className="max-h-[280px] overflow-auto border rounded-md space-y-3">
               {data.map((booking: any, index: number) => (
                 <div
                   key={booking.bookingId || index}

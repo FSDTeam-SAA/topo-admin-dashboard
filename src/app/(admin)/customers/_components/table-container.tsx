@@ -1,43 +1,65 @@
+// ================================================================
+// table-container.tsx
+// ================================================================
+'use client'
+
 import { DataTable } from '@/components/ui/data-table'
-// import { CustomerProfile } from '@/types/customers'
 import {
   ColumnDef,
   getCoreRowModel,
   getPaginationRowModel,
   useReactTable,
 } from '@tanstack/react-table'
-import { DemoCustomerProfile } from './customer-table-column'
+import { CustomerProfile } from './customer-table-column'
+import { PaginationControls } from '@/components/ui/pagination-controls'
 
-interface TableProps {
-  data: DemoCustomerProfile[]
-  columns: ColumnDef<DemoCustomerProfile>[]
+export interface PaginationInfo {
+  currentPage: number
+  totalPages: number
+  totalData: number
+  hasNextPage: boolean
+  hasPrevPage: boolean
 }
 
-export const TableContainer = ({ data, columns }: TableProps) => {
-  // const { page, setPage } = useLenderSearchStore();
+export interface Data {
+  customers: CustomerProfile[]
+  pagination: PaginationInfo
+}
+
+interface TableProps {
+  data: Data
+  columns: ColumnDef<CustomerProfile>[]
+  onPageChange: (page: number) => void
+}
+
+export const TableContainer = ({ data, columns, onPageChange }: TableProps) => {
   const table = useReactTable({
-    data,
-    columns: columns,
+    data: data.customers,
+    columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
   })
+
+  const pagination = data.pagination
 
   return (
     <>
       <div className="bg-white">
         <DataTable table={table} columns={columns} />
       </div>
-      {/* {totalPages > 1 && (
-        <div className="mt-4 w-full  flex justify-end">
+
+      {/* Pagination */}
+      {pagination && (
+        <div className="mt-4 w-full flex justify-end">
           <PaginationControls
-                currentPage={data.pagination.currentPage}
-                totalPages={data.pagination.totalPages}
-                totalItems={data.pagination.totalItems}
-                itemsPerPage={data.pagination.itemsPerPage}
-                onPageChange={(page) => setPage(page)}
-              />
+            itemsPerPage={10}
+            currentPage={pagination.currentPage}
+            totalPages={pagination.totalPages}
+            totalItems={pagination.totalData}
+            onPageChange={onPageChange}
+          />
         </div>
-      )} */}
+      )}
     </>
   )
 }

@@ -26,12 +26,12 @@ export function DataTable<TData, TValue>({
 }: DataTableProps<TData, TValue>) {
   return (
     <div className="rounded-md border ">
-      <Table className="border-separate border-spacing-y-3">
-        <TableHeader className="border ">
+      <Table className=" border-collapse border-spacing-y-3">
+        <TableHeader className="border">
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
               {headerGroup.headers.map((header) => (
-                <TableHead key={header.id} className="text-center text-lg">
+                <TableHead key={header.id} className="text-center text-lg py-4">
                   {header.isPlaceholder
                     ? null
                     : flexRender(
@@ -43,16 +43,16 @@ export function DataTable<TData, TValue>({
             </TableRow>
           ))}
         </TableHeader>
-        <TableBody className="text-center">
+        <TableBody className="text-center text-gray-600">
           {table.getRowModel().rows?.length ? (
             table.getRowModel().rows.map((row) => (
               <TableRow
-                className="border-none"
+                className="border-b last:border-0 border-gray-200 pb-4 text-base"
                 key={row.id}
                 data-state={row.getIsSelected() && 'selected'}
               >
                 {row.getVisibleCells().map((cell) => (
-                  <TableCell className="text-center" key={cell.id}>
+                  <TableCell className="text-center py-5" key={cell.id}>
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
                 ))}

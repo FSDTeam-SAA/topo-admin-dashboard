@@ -22,7 +22,7 @@ const PasswordSecurity = ({
     mutationKey: ["update-user-info"],
     mutationFn: async () => {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/change-password`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/auth/change-password`,
         {
           method: "POST",
           headers: {

@@ -11,6 +11,7 @@ export type LoginResponse = {
       profileImage: string
       refreshToken: string
       updatedAt: string // ISO timestamp string
+      permission:[]
     }
     accessToken: string
   }

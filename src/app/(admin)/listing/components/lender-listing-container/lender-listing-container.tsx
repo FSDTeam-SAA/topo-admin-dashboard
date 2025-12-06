@@ -31,14 +31,14 @@ interface Props {
 type Status = 'All' | 'approved' | 'pending' | 'rejected'
 
 interface APiProps {
-  status: boolean
-  message: string
-  data: Listing[]
-  pagination: {
-    currentPage: number
-    itemsPerPage: number
-    totalItems: number
-    totalPages: number
+  status?: boolean
+  message?: string
+  data?: Listing[]
+  pagination?: {
+    currentPage?: number
+    itemsPerPage?: number
+    totalItems?: number
+    totalPages?: number
   }
 }
 
@@ -57,7 +57,9 @@ const LenderListingContainer = ({ accessToken }: Props) => {
             Authorization: `Bearer ${accessToken}`,
           },
         }
-      ).then((res) => res.json()),
+      )
+        .then((res) => res?.json?.())
+        .catch(() => ({ data: [], pagination: {} })),
   })
 
   console.log('Lender Listings Data:', data)
@@ -74,10 +76,10 @@ const LenderListingContainer = ({ accessToken }: Props) => {
   if (isLoading) {
     content = <FancyLoader message="Fetching your listings, please wait..." />
   } else if (isError) {
-    content = <ErrorContainer message={(error as Error).message} />
-  } else if (data && data.data.length === 0) {
+    content = <ErrorContainer message={(error as Error)?.message ?? 'Error occurred'} />
+  } else if (data?.data?.length === 0) {
     content = <EmptyContainer message="No listings found for your search." />
-  } else if (data && data.data && data.data.length > 0) {
+  } else if ((data?.data?.length ?? 0) > 0) {
     content = (
       <div className="bg-white">
         <DataTable table={table} columns={listingColumn} />
@@ -90,14 +92,14 @@ const LenderListingContainer = ({ accessToken }: Props) => {
       <LenderListingHeader />
       <CardContent>
         {content}
-        {data?.pagination && data.pagination.totalPages >= 1 && (
+        {(data?.pagination?.totalPages ?? 0) >= 1 && (
           <div className="mt-4 w-full flex justify-end">
             <PaginationControls
-              currentPage={data.pagination.currentPage}
-              totalPages={data.pagination.totalPages}
-              totalItems={data.pagination.totalItems}
-              itemsPerPage={data.pagination.itemsPerPage}
-              onPageChange={(page) => setPage(page)}
+              currentPage={data?.pagination?.currentPage ?? 1}
+              totalPages={data?.pagination?.totalPages ?? 1}
+              totalItems={data?.pagination?.totalItems ?? 0}
+              itemsPerPage={data?.pagination?.itemsPerPage ?? 10}
+              onPageChange={(page) => setPage?.(page)}
             />
           </div>
         )}
@@ -110,7 +112,7 @@ export default LenderListingContainer
 
 const LenderListingHeader = () => {
   const { approvalStatus, setApprovalStatus, searchQuery, setSearchQuery } =
-    useLenderListingState()
+    useLenderListingState() ?? {}
 
   return (
     <CardHeader>
@@ -119,7 +121,7 @@ const LenderListingHeader = () => {
         <div className="flex items-center gap-x-5">
           <Select
             value={approvalStatus}
-            onValueChange={(val) => setApprovalStatus(val as Status)}
+            onValueChange={(val) => setApprovalStatus?.(val as Status)}
           >
             <SelectTrigger className="w-[150px]">
               <SelectValue placeholder="Filter by status" />
@@ -133,8 +135,8 @@ const LenderListingHeader = () => {
           </Select>
 
           <Input
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            value={searchQuery ?? ''}
+            onChange={(e) => setSearchQuery?.(e.target.value)}
             placeholder="Search by dress name"
           />
         </div>

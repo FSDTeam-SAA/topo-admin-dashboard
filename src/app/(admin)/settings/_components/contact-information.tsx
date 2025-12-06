@@ -1,29 +1,29 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-"use client";
+'use client'
 
-import { Input } from "@/components/ui/input";
-import React, { useEffect } from "react";
-import { useSettingStore } from "./states/useSettingStore";
-import { Button } from "@/components/ui/button";
-import { useMutation } from "@tanstack/react-query";
-import { LoaderCircle } from "lucide-react";
-import { toast } from "sonner";
+import { Input } from '@/components/ui/input'
+import React, { useEffect } from 'react'
+import { useSettingStore } from './states/useSettingStore'
+import { Button } from '@/components/ui/button'
+import { useMutation } from '@tanstack/react-query'
+import { LoaderCircle } from 'lucide-react'
+import { toast } from 'sonner'
 
 type UserInfo = {
-  firstName?: string;
-  lastName?: string;
-  email?: string;
-  phoneNumber?: string;
-};
+  firstName?: string
+  lastName?: string
+  email?: string
+  phoneNumber?: string
+}
 
 const ContactInformation = ({
   userInfo = {} as UserInfo,
   token,
   userID,
 }: {
-  userInfo?: UserInfo;
-  token: string;
-  userID: string;
+  userInfo?: UserInfo
+  token: string
+  userID: string
 }) => {
   const {
     firstName,
@@ -32,23 +32,23 @@ const ContactInformation = ({
     setLastName,
     phoneNumber,
     setPhoneNumber,
-  } = useSettingStore();
+  } = useSettingStore()
 
   useEffect(() => {
-    if (userInfo.firstName) setFirstName(userInfo.firstName);
-    if (userInfo.lastName) setLastName(userInfo.lastName);
-    if (userInfo.phoneNumber) setPhoneNumber(userInfo.phoneNumber);
-  }, [userInfo, setFirstName, setLastName, setPhoneNumber]);
+    if (userInfo?.firstName) setFirstName(userInfo?.firstName)
+    if (userInfo?.lastName) setLastName(userInfo?.lastName)
+    if (userInfo?.phoneNumber) setPhoneNumber(userInfo?.phoneNumber)
+  }, [userInfo, setFirstName, setLastName, setPhoneNumber])
 
   const updateUserInfo = useMutation({
-    mutationKey: ["update-user-info"],
+    mutationKey: ['update-user-info'],
     mutationFn: async () => {
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/user/${userID}`,
         {
-          method: "PUT",
+          method: 'PUT',
           headers: {
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
@@ -56,27 +56,27 @@ const ContactInformation = ({
             lastName,
             phoneNumber,
           }),
-        }
-      );
+        },
+      )
 
       if (!res.ok) {
-        throw new Error("Failed to update user info");
+        throw new Error('Failed to update user info')
       }
 
-      return res.json();
+      return res.json()
     },
-    onSuccess: (data) => {
-      toast.success(data.message);
+    onSuccess: data => {
+      toast.success(data.message)
     },
     onError: (error: any) => {
-      toast.error(error.message);
+      toast.error(error.message)
     },
-  });
+  })
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    updateUserInfo.mutate();
-  };
+    e.preventDefault()
+    updateUserInfo.mutate()
+  }
 
   return (
     <div className="p-6 bg-white shadow-[0px_4px_10px_0px_#0000001A] rounded-lg">
@@ -90,7 +90,7 @@ const ContactInformation = ({
               className="focus-visible:ring-0"
               placeholder="Enter Full Name"
               value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
+              onChange={e => setFirstName(e.target.value)}
             />
           </div>
 
@@ -100,7 +100,7 @@ const ContactInformation = ({
               className="focus-visible:ring-0"
               placeholder="Enter Full Name"
               value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
+              onChange={e => setLastName(e.target.value)}
             />
           </div>
 
@@ -110,7 +110,7 @@ const ContactInformation = ({
               disabled
               className="focus-visible:ring-0"
               placeholder="Enter Email Address"
-              value={userInfo.email}
+              value={userInfo?.email}
             />
           </div>
 
@@ -120,7 +120,7 @@ const ContactInformation = ({
               className="focus-visible:ring-0"
               placeholder="Enter Phone Number"
               value={phoneNumber}
-              onChange={(e) => setPhoneNumber(e.target.value)}
+              onChange={e => setPhoneNumber(e.target.value)}
             />
           </div>
         </div>
@@ -137,13 +137,13 @@ const ContactInformation = ({
                 Save Changes
               </h1>
             ) : (
-              "Save Changes"
+              'Save Changes'
             )}
           </Button>
         </div>
       </form>
     </div>
-  );
-};
+  )
+}
 
-export default ContactInformation;
+export default ContactInformation

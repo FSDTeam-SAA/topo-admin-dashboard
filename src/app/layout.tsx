@@ -29,7 +29,7 @@ export default async function RootLayout({
       <body className={`${raleway.className} antialiased`}>
         <AppProvider>
           {' '}
-          {/* ✅ This should be here */}
+          {/* This should be here */}
           <SessionProvider session={session}>
             <TooltipProvider>{children}</TooltipProvider>
           </SessionProvider>

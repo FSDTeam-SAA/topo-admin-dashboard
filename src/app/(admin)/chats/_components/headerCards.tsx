@@ -2,9 +2,8 @@
 'use client'
 
 import { InfoCard } from '@/components/cards/stat-card'
-import { Button } from '@/components/ui/button'
+import { AlertTriangle } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
-import { Download, AlertTriangle } from 'lucide-react'
 import { useSession } from 'next-auth/react'
 import { Skeleton } from '@/components/ui/custom/skeleton'
 
@@ -15,7 +14,7 @@ const fetchChatRooms = async (accessToken: string) => {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
-    }
+    },
   )
 
   if (!res.ok) {
@@ -42,23 +41,23 @@ export default function HeaderCards() {
 
   // ✅ Calculate stats
   const activeConversations = chatRooms.filter(
-    (room: any) => room.status?.toLowerCase() === 'active'
+    (room: any) => room.status?.toLowerCase() === 'active',
   ).length
 
   const flaggedConversations = chatRooms.filter(
-    (room: any) => room.flagged?.status === true
+    (room: any) => room.flagged?.status === true,
   ).length
 
   return (
     <div className="space-y-8">
       {/* Header Section */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-start">
         <h1 className="text-2xl md:text-[32px] font-light tracking-[0.2em]">
           Chats
         </h1>
-        <Button disabled={isLoading}>
+        {/* <Button disabled={isLoading}>
           Download Report <Download className="ml-2 h-4 w-4" />
-        </Button>
+        </Button> */}
       </div>
 
       {/* Loading Skeleton */}

@@ -35,7 +35,6 @@ type AdminTeamSectionProps = {
 const PERMISSIONS = [
   'All Access',
   'Settings',
-  'Overview',
   'Listings Management',
   'Lenders Management',
   'Customers Management',
@@ -75,7 +74,7 @@ export const AdminTeamSection = ({
           headers: {
             Authorization: `Bearer ${accessToken}`,
           },
-        }
+        },
       )
       if (!response.ok) {
         throw new Error('Failed to fetch admin details')
@@ -108,7 +107,7 @@ export const AdminTeamSection = ({
             'Content-Type': 'application/json',
           },
           body: JSON.stringify(formData),
-        }
+        },
       )
 
       if (!response.ok) {
@@ -147,7 +146,7 @@ export const AdminTeamSection = ({
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({ permissions }),
-        }
+        },
       )
 
       if (!response.ok) {
@@ -184,7 +183,7 @@ export const AdminTeamSection = ({
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({ status }),
-        }
+        },
       )
 
       if (!response.ok) {
@@ -221,7 +220,7 @@ export const AdminTeamSection = ({
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({ name }),
-        }
+        },
       )
 
       if (!response.ok) {
@@ -248,10 +247,10 @@ export const AdminTeamSection = ({
   }
 
   const handlePermissionToggle = (permission: string) => {
-    setSelectedPermissions((prev) =>
+    setSelectedPermissions(prev =>
       prev.includes(permission)
-        ? prev.filter((p) => p !== permission)
-        : [...prev, permission]
+        ? prev.filter(p => p !== permission)
+        : [...prev, permission],
     )
   }
 
@@ -293,7 +292,7 @@ export const AdminTeamSection = ({
           updatePermissionsMutation.mutateAsync({
             adminId,
             permissions: selectedPermissions,
-          })
+          }),
         )
       }
 
@@ -357,7 +356,7 @@ export const AdminTeamSection = ({
               name="name"
               placeholder="Enter name"
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={e => setName(e.target.value)}
             />
           </div>
 
@@ -372,7 +371,7 @@ export const AdminTeamSection = ({
               type="email"
               placeholder="Enter email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={e => setEmail(e.target.value)}
               disabled={mode === 'edit'}
               className={
                 mode === 'edit' ? 'bg-gray-100 cursor-not-allowed' : ''
@@ -384,7 +383,7 @@ export const AdminTeamSection = ({
           <div className="space-y-2">
             <Label className="tracking-wide font-light">Permissions</Label>
             <div className="border rounded-lg p-4 max-h-[200px] overflow-y-auto space-y-2">
-              {PERMISSIONS.map((permission) => (
+              {PERMISSIONS.map(permission => (
                 <div key={permission} className="flex items-center space-x-2">
                   <Checkbox
                     id={permission}

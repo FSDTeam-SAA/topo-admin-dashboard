@@ -2,8 +2,6 @@
 
 import { useQuery } from '@tanstack/react-query'
 import { InfoCard } from '@/components/cards/stat-card'
-import { Button } from '@/components/ui/button'
-import { Download } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/custom/skeleton'
 import { useSession } from 'next-auth/react'
@@ -32,7 +30,7 @@ async function fetchStats(accessToken: string): Promise<StatsResponse['data']> {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
-    }
+    },
   )
   if (!res.ok) throw new Error('Failed to fetch stats')
   const json: StatsResponse = await res.json()
@@ -56,13 +54,10 @@ export default function HeaderCards() {
   return (
     <div className="space-y-8 font-sans">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-start">
         <h1 className="text-2xl md:text-[32px] font-light tracking-[0.2em]">
           Support
         </h1>
-        <Button>
-          Download Report <Download className="ml-2 h-4 w-4" />
-        </Button>
       </div>
 
       {/* Content */}

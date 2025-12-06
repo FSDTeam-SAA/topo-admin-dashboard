@@ -1,8 +1,9 @@
 import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
-import Sidebar from './_components/sidebar'
+// import Sidebar from './_components/sidebar'
 import Topbar from './_components/top-bar'
 import { Toaster } from 'sonner'
+import SidebarLayout from './_components/sidebarLayout'
 
 export default async function RootLayout({
   children,
@@ -15,7 +16,7 @@ export default async function RootLayout({
 
   return (
     <div className="flex min-h-screen flex-col bg-[#FEFAF6]">
-      <Sidebar />
+      <SidebarLayout />
       {/* Main Content */}
       <div className="ml-64 flex flex-1 flex-col ">
         <Topbar name={'' as string} />

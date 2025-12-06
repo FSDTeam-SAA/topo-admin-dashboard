@@ -1,12 +1,15 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import NextAuth from "next-auth";
 import { JWT } from "next-auth/jwt";
 import CredentialsProvider from "next-auth/providers/credentials";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   secret: process.env.NEXTAUTH_SECRET,
+
   providers: [
     CredentialsProvider({
       name: "Credentials",
+
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
           throw new Error("Please enter your email and password");
@@ -16,9 +19,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           const url =
             process.env.NEXT_PUBLIC_BACKEND_URL + "/api/v1/auth/login";
 
-          const res = await fetch(`${url}`, {
+          const res = await fetch(url, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+              "Content-Type": "application/json",
+            },
             body: JSON.stringify({
               email: credentials.email,
               password: credentials.password,
@@ -35,10 +40,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
           return {
             id: user._id,
-            firstName: user.firstName,
-            lastName: user.lastName,
+            name: user.name,
             email: user.email,
-            role: user.role,
+            role: user.role, // "ADMIN" | "SUPER_ADMIN"
+            permissions: user.permissions || [], // 👈 ADD THIS
             profileImage: user.profileImage,
             accessToken,
           };
@@ -51,27 +56,28 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   ],
 
   callbacks: {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // Store data inside JWT  
     async jwt({ token, user }: { token: JWT; user?: any }) {
       if (user) {
         token.id = user.id;
-        token.firstName = user.firstName;
-        token.lastName = user.lastName;
+        token.name = user.name;
         token.email = user.email;
         token.role = user.role;
+        token.permissions = user.permissions || []; // 👈 ADD
         token.profileImage = user.profileImage;
         token.accessToken = user.accessToken;
       }
       return token;
     },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
+    // Expose JWT → session
     async session({ session, token }: { session: any; token: JWT }) {
       session.user = {
         id: token.id,
-        firstName: token.firstName,
-        lastName: token.lastName,
+        name: token.name,
         email: token.email,
         role: token.role,
+        permissions: token.permissions || [], // 👈 ADD
         profileImage: token.profileImage,
         accessToken: token.accessToken,
       };

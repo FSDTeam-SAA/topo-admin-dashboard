@@ -1,8 +1,9 @@
-import { type DefaultSession } from "next-auth";
+import { DefaultSession } from "next-auth";
 
 export type ExtendedUser = DefaultSession["user"] & {
   accessToken: string;
-  accessToken: string;
+  role: "ADMIN" | "SUPER_ADMIN";
+  permissions: string[];
 };
 
 declare module "next-auth" {

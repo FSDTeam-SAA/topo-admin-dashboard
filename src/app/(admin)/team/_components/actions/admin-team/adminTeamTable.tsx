@@ -18,56 +18,72 @@ import {
 } from '@/components/ui/select'
 import { PaginationControls } from '@/components/ui/pagination-controls'
 import { AdminTeamSection } from './addAdmin'
+import { useQuery } from '@tanstack/react-query'
+import { toast } from 'sonner'
+import { useSession } from 'next-auth/react'
+import { Skeleton } from '@/components/ui/skeleton'
 
 // Type
 type Admin = {
-  adminId: string
+  _id: string
   name: string
   email: string
-  role: 'Super Admin' | 'Admin' | 'Editor' | 'Viewer'
+  permissions: string[]
+  status: 'Active' | 'Suspended'
+  createdAt: string
   updatedAt: string
-  status: 'Active' | 'Inactive' | 'Suspended'
+  createdBy: {
+    _id: string
+    email: string
+  }
 }
 
-// Dummy Data
-const dummyAdmins: Admin[] = [
-  {
-    adminId: 'adm-301',
-    name: 'John Doe',
-    email: 'john@example.com',
-    role: 'Super Admin',
-    updatedAt: '2025-09-18',
-    status: 'Active',
-  },
-  {
-    adminId: 'adm-302',
-    name: 'Jane Smith',
-    email: 'jane@example.com',
-    role: 'Editor',
-    updatedAt: '2025-09-12',
-    status: 'Inactive',
-  },
-  {
-    adminId: 'adm-303',
-    name: 'Mike Johnson',
-    email: 'mike@example.com',
-    role: 'Viewer',
-    updatedAt: '2025-09-05',
-    status: 'Suspended',
-  },
-]
+// API function to fetch admins
+const fetchAdmins = async (accessToken: string) => {
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/admin/team`,
+    {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      cache: 'no-store',
+    }
+  )
+  if (!response.ok) {
+    throw new Error('Failed to fetch admins')
+  }
+  const data = await response.json()
+  return data.data
+}
 
 // Columns
 const columns: ColumnDef<Admin>[] = [
-  { accessorKey: 'adminId', header: 'Admin ID' },
-  { accessorKey: 'name', header: 'Name' },
-  { accessorKey: 'email', header: 'Email' },
-  { accessorKey: 'role', header: 'Role' },
   {
-    accessorKey: 'updatedAt',
-    header: 'Last Updated',
+    accessorKey: 'name',
+    header: 'Name',
+  },
+  {
+    accessorKey: 'email',
+    header: 'Email',
+  },
+  {
+    accessorKey: 'permissions',
+    header: 'Permissions',
+    cell: ({ row }) => (
+      <div className="text-sm">
+        {row.original.permissions.slice(0, 2).join(', ')}
+        {row.original.permissions.length > 2 &&
+          ` +${row.original.permissions.length - 2}`}
+      </div>
+    ),
+  },
+  {
+    accessorKey: 'createdAt',
+    header: 'Created At',
     cell: ({ row }) =>
-      new Date(row.original.updatedAt).toLocaleDateString('en-US', {
+      new Date(row.original.createdAt).toLocaleDateString('en-US', {
         month: 'short',
         day: '2-digit',
         year: 'numeric',
@@ -81,8 +97,6 @@ const columns: ColumnDef<Admin>[] = [
         className={`px-2 py-1 rounded-full text-xs font-medium ${
           row.original.status === 'Active'
             ? 'bg-green-100 text-green-700'
-            : row.original.status === 'Inactive'
-            ? 'bg-gray-100 text-gray-700'
             : 'bg-red-100 text-red-700'
         }`}
       >
@@ -93,10 +107,8 @@ const columns: ColumnDef<Admin>[] = [
   {
     id: 'actions',
     header: 'Action',
-    cell: () => (
-      <button className="px-3 py-1 text-[13px] rounded-lg bg-black text-white">
-        View Details
-      </button>
+    cell: ({ row }) => (
+      <AdminTeamSection mode="edit" adminId={row.original._id} />
     ),
   },
 ]
@@ -104,19 +116,41 @@ const columns: ColumnDef<Admin>[] = [
 // Main Component
 export default function AdminTable() {
   const [search, setSearch] = useState('')
+  const [statusFilter, setStatusFilter] = useState('all')
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 5 })
+  const cu = useSession()
+  const accessToken = cu?.data?.user?.accessToken || ''
 
-  // reset to first page when search changes
+  // Fetch admins using React Query
+  const { data, isLoading, isError, error, refetch } = useQuery({
+    queryKey: ['admins'],
+    queryFn: () => fetchAdmins(accessToken),
+  })
+
+  useEffect(() => {
+    if (isError) {
+      toast.error(error?.message || 'Failed to fetch admins')
+    }
+  }, [isError, error])
+
+  // reset to first page when search or filter changes
   useEffect(() => {
     setPagination((prev) => ({ ...prev, pageIndex: 0 }))
-  }, [search])
+  }, [search, statusFilter])
 
   // filter locally
   const filteredData = useMemo(() => {
-    return dummyAdmins.filter((item) =>
-      JSON.stringify(item).toLowerCase().includes(search.toLowerCase())
-    )
-  }, [search])
+    if (!data?.admins) return []
+
+    return data.admins.filter((item: Admin) => {
+      const matchesSearch = JSON.stringify(item)
+        .toLowerCase()
+        .includes(search.toLowerCase())
+      const matchesStatus =
+        statusFilter === 'all' || item.status.toLowerCase() === statusFilter
+      return matchesSearch && matchesStatus
+    })
+  }, [data, search, statusFilter])
 
   const table = useReactTable({
     data: filteredData,
@@ -130,6 +164,10 @@ export default function AdminTable() {
       Math.ceil(filteredData.length / pagination.pageSize)
     ),
   })
+
+  if (isLoading) {
+    return <Skeleton />
+  }
 
   return (
     <div className="bg-white shadow-md rounded-xl p-6">
@@ -146,14 +184,13 @@ export default function AdminTable() {
             />
             <div>
               {/* Status Dropdown */}
-              <Select defaultValue="all">
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
                 <SelectTrigger className="w-[150px]">
                   <SelectValue placeholder="Filter by status" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All</SelectItem>
                   <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="inactive">Inactive</SelectItem>
                   <SelectItem value="suspended">Suspended</SelectItem>
                 </SelectContent>
               </Select>
@@ -161,20 +198,20 @@ export default function AdminTable() {
           </div>
         </div>
 
-        {/* Add Admin Button (optional, can connect to Add Admin modal later) */}
-        <AdminTeamSection />
+        {/* Add Admin Button */}
+        <AdminTeamSection mode="add" onSuccess={refetch} />
       </div>
 
       {/* Table */}
-      <div className="w-full border rounded-2xl overflow-hidden">
-        <table className="w-full rounded-xl text-sm">
+      <div className="w-full border rounded overflow-hidden">
+        <table className="w-full rounded text-sm">
           <thead>
             {table.getHeaderGroups().map((hg) => (
               <tr key={hg.id}>
                 {hg.headers.map((header) => (
                   <th
                     key={header.id}
-                    className="text-center p-2 text-gray-500 font-medium"
+                    className="text-center p-2 text-gray-500 text-base font-medium py-5 border-b border-gray-300"
                   >
                     {flexRender(
                       header.column.columnDef.header,
@@ -190,10 +227,10 @@ export default function AdminTable() {
               table.getRowModel().rows.map((row) => (
                 <tr
                   key={row.id}
-                  className="hover:bg-gray-50 text-gray-900 text-base"
+                  className="hover:bg-gray-50 text-gray-600 text-base font-sans"
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <td key={cell.id} className="p-2 text-center">
+                    <td key={cell.id} className="p-2 text-center py-6">
                       <div className="flex justify-center">
                         {flexRender(
                           cell.column.columnDef.cell,

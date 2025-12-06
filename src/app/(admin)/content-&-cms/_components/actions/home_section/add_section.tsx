@@ -198,7 +198,7 @@ export const HomepageSectionAdd = () => {
           {/* Image Upload */}
           <div className="space-y-2">
             <Label htmlFor="image" className="tracking-wide font-light">
-              Section Image (JPEG/PNG, Max 5MB)
+              Section Image (JPEG/PNG, Max 20MB)
             </Label>
             <Input
               id="image"
@@ -291,7 +291,7 @@ export const HomepageSectionEdit = ({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
 
-      <DialogContent className="p-8 max-w-2xl font-sans">
+      <DialogContent className="p-8 max-w-2xl font-sans overflow-y-auto max-h-[90vh] scroll-smooth">
         <DialogHeader>
           <div className="flex justify-center my-8">
             <Image
@@ -314,7 +314,7 @@ export const HomepageSectionEdit = ({
             <div className="h-10 bg-gray-200 rounded animate-pulse" />
           </div>
         ) : sectionData ? (
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-6">
             {/* Section Name */}
             <div className="space-y-2">
               <Label htmlFor="sectionName" className="tracking-wide font-light">
@@ -354,8 +354,8 @@ export const HomepageSectionEdit = ({
                   <Image
                     src={sectionData.image[0].url}
                     alt={sectionData.sectionName}
-                    width={100}
-                    height={60}
+                    width={600}
+                    height={460}
                     className="rounded-md object-cover border"
                   />
                 </div>
@@ -365,7 +365,7 @@ export const HomepageSectionEdit = ({
             {/* Image Upload */}
             <div className="space-y-2">
               <Label htmlFor="image" className="tracking-wide font-light">
-                Replace Image (JPEG/PNG, Max 10MB) - Optional
+                Replace Image (JPEG/PNG, Max 20MB) - Optional
               </Label>
               <Input id="image" name="filename" type="file" accept="image/*" />
             </div>

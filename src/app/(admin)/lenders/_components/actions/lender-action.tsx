@@ -9,7 +9,7 @@ import {
 } from '@/components/ui/dialog'
 import { LenderProfile } from '@/types/lender'
 import DisputesTab from './disputs-tab'
-import DocumentsTab from './documen-tab'
+import DocumentsTab from '../../../customers/_components/actions/document-tab'
 import ListingTab from './listing-tab'
 import MatricsTab from './matrics-tab'
 import NotesTab from './notes-tab'

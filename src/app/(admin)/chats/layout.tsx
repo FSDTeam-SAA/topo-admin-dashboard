@@ -10,5 +10,5 @@ export default async function chatLayout({
 
   if (!cu?.user) redirect('/sign-in')
 
-  return <div className="p-[40px]">{children}</div>
+  return <div className="p-[10px]">{children}</div>
 }

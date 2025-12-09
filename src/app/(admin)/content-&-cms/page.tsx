@@ -5,6 +5,7 @@ import HomePageSectionTable from './_components/actions/home_section/homepage_se
 import BannerTable from './_components/actions/banner_section/banner_section_table'
 import TestimonialTable from './_components/actions/testimonials/testimonial_section_table'
 import PolicyTable from './_components/actions/policy_section/policy_section_table'
+import PromoCodeTable from './_components/actions/promo-code-section/promoCodeTable'
 
 const Page = async () => {
   const cu = await auth()
@@ -22,6 +23,11 @@ const Page = async () => {
       {/* Banner section */}
       <div>
         <BannerTable />
+      </div>
+
+      {/* promo code section */}
+      <div>
+        <PromoCodeTable />
       </div>
 
       {/* testomonails section */}

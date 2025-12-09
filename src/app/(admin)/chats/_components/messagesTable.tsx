@@ -47,7 +47,7 @@ const fetchChatRooms = async (accessToken: string) => {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
-    }
+    },
   )
 
   if (!res.ok) {
@@ -116,7 +116,7 @@ export default function MessageTable() {
   console.log('conversations', conversations)
 
   const filteredData = useMemo(() => {
-    return conversations.filter((item) => {
+    return conversations.filter(item => {
       const matchesSearch = JSON.stringify(item)
         .toLowerCase()
         .includes(search.toLowerCase())
@@ -206,7 +206,7 @@ export default function MessageTable() {
     onPaginationChange: setPagination,
     pageCount: Math.max(
       1,
-      Math.ceil(filteredData.length / pagination.pageSize)
+      Math.ceil(filteredData.length / pagination.pageSize),
     ),
   })
 
@@ -227,13 +227,13 @@ export default function MessageTable() {
         <Input
           type="text"
           placeholder="Search by name, ID, or message..."
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={e => setSearch(e.target.value)}
           className="w-full md:w-[250px]"
         />
 
         <Select
           value={statusFilter}
-          onValueChange={(value) =>
+          onValueChange={value =>
             setStatusFilter(value as 'active' | 'flagged' | 'closed')
           }
         >
@@ -253,16 +253,16 @@ export default function MessageTable() {
       <div className="w-full border rounded-2xl overflow-hidden">
         <table className="w-full text-sm">
           <thead>
-            {table.getHeaderGroups().map((hg) => (
+            {table.getHeaderGroups().map(hg => (
               <tr key={hg.id}>
-                {hg.headers.map((header) => (
+                {hg.headers.map(header => (
                   <th
                     key={header.id}
                     className="text-center p-3 text-gray-800 font-medium"
                   >
                     {flexRender(
                       header.column.columnDef.header,
-                      header.getContext()
+                      header.getContext(),
                     )}
                   </th>
                 ))}
@@ -271,17 +271,17 @@ export default function MessageTable() {
           </thead>
           <tbody>
             {table.getRowModel().rows.length > 0 ? (
-              table.getRowModel().rows.map((row) => (
+              table.getRowModel().rows.map(row => (
                 <tr
                   key={row.id}
                   className="hover:bg-gray-50 text-gray-900 text-[15px]"
                 >
-                  {row.getVisibleCells().map((cell) => (
+                  {row.getVisibleCells().map(cell => (
                     <td key={cell.id} className="p-3 text-center">
                       <div className="flex justify-center">
                         {flexRender(
                           cell.column.columnDef.cell,
-                          cell.getContext()
+                          cell.getContext(),
                         )}
                       </div>
                     </td>
@@ -309,7 +309,7 @@ export default function MessageTable() {
           totalPages={table.getPageCount()}
           totalItems={filteredData.length}
           itemsPerPage={table.getState().pagination.pageSize}
-          onPageChange={(page) => {
+          onPageChange={page => {
             table.setPageIndex(page - 1)
           }}
         />

@@ -81,7 +81,7 @@ export function ChatsDetailsPopup({
             Authorization: `Bearer ${accessToken}`,
           },
           body: JSON.stringify(payload),
-        }
+        },
       )
       if (!res.ok) throw new Error('Failed to update conversation status')
       return res.json()
@@ -201,7 +201,7 @@ export function ChatsDetailsPopup({
           </CardHeader>
           <CardContent className="text-sm space-y-2 font-light">
             <p>
-              <strong>Booking ID:</strong> {conversation.bookingId || 'N/A'}
+              <strong>Booking ID:</strong> {conversation?.bookingId || 'N/A'}
             </p>
             <p>
               <strong>Customer ID:</strong> {conversation.customerId || 'N/A'}
@@ -280,7 +280,7 @@ export function ChatsDetailsPopup({
                   )}
 
                   <div className="flex flex-col gap-3">
-                    {messages.map((message) => {
+                    {messages.map(message => {
                       const isLender =
                         message.sender._id === conversation.lenderId
                       const messageDate = new Date(message.createdAt)
@@ -351,7 +351,7 @@ export function ChatsDetailsPopup({
                 <Textarea
                   placeholder="Write your reason here..."
                   value={reason}
-                  onChange={(e) => setReason(e.target.value)}
+                  onChange={e => setReason(e.target.value)}
                 />
                 <div className="flex justify-end gap-2">
                   <Button

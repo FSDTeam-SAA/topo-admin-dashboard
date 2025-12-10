@@ -45,9 +45,10 @@ export function SendPromoModal({
   const sendToAll = useSendPromoToAll(promoId, accessToken)
   const sendToSelected = useSendPromoToSelected(promoId, accessToken)
 
-  const users = usersData || []
+  const users = usersData?.users || []
+  console.log('users for promo sending', users)
 
-  const filteredUsers = users.filter((user: any) => {
+  const filteredUsers = users?.filter((user: any) => {
     const searchLower = searchQuery.toLowerCase()
     return (
       user.firstName?.toLowerCase().includes(searchLower) ||
@@ -107,9 +108,11 @@ export function SendPromoModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-2xl">
+          <DialogTitle className="text-xl mb-10 font-light tracking-widest">
             Send Promo Code:{' '}
-            <span className="font-bold text-blue-600">{promoCode}</span>
+            <span className="font-medium tracking-widest font-sans text-blue-600">
+              {promoCode}
+            </span>
           </DialogTitle>
         </DialogHeader>
 
@@ -118,7 +121,7 @@ export function SendPromoModal({
           <div className="flex gap-4">
             <Button
               type="button"
-              variant={sendType === 'all' ? 'default' : 'outline'}
+              variant={sendType === 'all' ? 'secondary' : 'outline'}
               onClick={() => setSendType('all')}
               className="flex-1"
             >
@@ -126,7 +129,7 @@ export function SendPromoModal({
             </Button>
             <Button
               type="button"
-              variant={sendType === 'selected' ? 'default' : 'outline'}
+              variant={sendType === 'selected' ? 'secondary' : 'outline'}
               onClick={() => setSendType('selected')}
               className="flex-1"
             >

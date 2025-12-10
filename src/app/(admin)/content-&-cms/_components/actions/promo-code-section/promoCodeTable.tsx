@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// ==================== FILE: _components/PromoCodeTable.tsx ====================
 'use client'
 
 import React, { useMemo, useState, useEffect } from 'react'
@@ -26,7 +25,19 @@ import { EditPromoCode } from './editPromoCode'
 import { SendPromoModal } from './sendPromoCodeModal'
 import { useGetPromoCodes, useDeletePromo, PromoCode } from '@/lib/promo'
 import { toast } from 'sonner'
-import { Trash2, Send } from 'lucide-react'
+import { Trash2, Send, Edit } from 'lucide-react'
+
+// Alert Dialog (shadcn)
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 
 export default function PromoCodeTable() {
   const [search, setSearch] = useState('')
@@ -40,12 +51,18 @@ export default function PromoCodeTable() {
     code: string
   } | null>(null)
 
+  // ===========================
+  // 🔥 Delete Modal State
+  // ===========================
+  const [deleteId, setDeleteId] = useState<string | null>(null)
+
   const session = useSession()
   const accessToken = session.data?.user?.accessToken || ''
 
   const { data, isLoading, isError } = useGetPromoCodes(accessToken)
   const deletePromo = useDeletePromo(accessToken)
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const promoCodes = data?.data || []
 
   useEffect(() => {
@@ -68,17 +85,11 @@ export default function PromoCodeTable() {
     })
   }, [promoCodes, search, statusFilter])
 
+  // ===========================
+  // 🔥 Delete Handler Opens Modal
+  // ===========================
   const handleDelete = (id: string) => {
-    if (confirm('Are you sure you want to delete this promo code?')) {
-      deletePromo.mutate(id, {
-        onSuccess: () => {
-          toast.success('Promo code deleted successfully!')
-        },
-        onError: (error: any) => {
-          toast.error(error.message || 'Failed to delete promo code')
-        },
-      })
-    }
+    setDeleteId(id)
   }
 
   const columns: ColumnDef<PromoCode>[] = [
@@ -86,7 +97,7 @@ export default function PromoCodeTable() {
       accessorKey: 'code',
       header: 'Code',
       cell: ({ row }) => (
-        <div className="font-mono font-semibold">{row.original.code}</div>
+        <div className="font-mono tracking-wider">{row.original.code}</div>
       ),
     },
     {
@@ -150,9 +161,10 @@ export default function PromoCodeTable() {
         <div className="flex items-center justify-center gap-2">
           <button
             onClick={() => setEditingId(row.original._id)}
-            className="px-3 py-1 text-xs rounded-lg bg-black text-white hover:bg-gray-800 transition-colors"
+            title="edit promo"
+            className=" text-white transition-colors"
           >
-            View Details
+            <Edit className="w-5 h-5 text-black" />
           </button>
           <button
             onClick={() =>
@@ -161,15 +173,16 @@ export default function PromoCodeTable() {
             className="p-1 text-blue-600 hover:text-blue-800 transition-colors"
             title="Send to users"
           >
-            <Send className="w-4 h-4" />
+            <Send className="w-5 h-5 text-black" />
           </button>
+
           <button
             onClick={() => handleDelete(row.original._id)}
-            className="p-1 text-red-600 hover:text-red-800 transition-colors"
+            className="p-1 text-gray-800 hover:text-red-800 transition-colors"
             title="Delete"
             disabled={deletePromo.isPending}
           >
-            <Trash2 className="w-4 h-4" />
+            <Trash2 className="w-5 h-5" />
           </button>
         </div>
       ),
@@ -226,19 +239,28 @@ export default function PromoCodeTable() {
           <AddPromoCode />
         </div>
 
-        {/* Loading State */}
+        {/* Loading */}
         {isLoading && (
-          <div className="w-full border rounded-2xl overflow-hidden">
-            <table className="w-full rounded-xl text-sm">
+          <div className="w-full border rounded-xl overflow-hidden">
+            <table className="w-full">
               <thead>
                 <tr>
-                  <th className="p-2 text-center text-gray-500">Code ID</th>
-                  <th className="p-2 text-center text-gray-500">Code</th>
-                  <th className="p-2 text-center text-gray-500">Discount</th>
-                  <th className="p-2 text-center text-gray-500">Usage Count</th>
-                  <th className="p-2 text-center text-gray-500">Expiry Date</th>
-                  <th className="p-2 text-center text-gray-500">Status</th>
-                  <th className="p-2 text-center text-gray-500">Action</th>
+                  {[
+                    'Code ID',
+                    'Code',
+                    'Discount',
+                    'Usage Count',
+                    'Expiry',
+                    'Status',
+                    'Action',
+                  ].map(head => (
+                    <th
+                      key={head}
+                      className="p-2 py-5 text-center text-gray-500"
+                    >
+                      {head}
+                    </th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
@@ -256,7 +278,7 @@ export default function PromoCodeTable() {
           </div>
         )}
 
-        {/* Error State */}
+        {/* Error */}
         {isError && (
           <p className="text-red-500 mt-3 text-center">
             Failed to load promo codes
@@ -267,14 +289,14 @@ export default function PromoCodeTable() {
         {!isLoading && !isError && (
           <>
             <div className="w-full border rounded-2xl overflow-hidden">
-              <table className="w-full rounded-xl text-sm">
+              <table className="w-full rounded-xl text-base font-sans">
                 <thead>
                   {table.getHeaderGroups().map(hg => (
                     <tr key={hg.id}>
                       {hg.headers.map(header => (
                         <th
                           key={header.id}
-                          className="text-center p-2 text-gray-500 font-medium"
+                          className="text-center p-2 py-3 text-gray-500 font-medium"
                         >
                           {flexRender(
                             header.column.columnDef.header,
@@ -290,10 +312,10 @@ export default function PromoCodeTable() {
                     table.getRowModel().rows.map(row => (
                       <tr
                         key={row.id}
-                        className="hover:bg-gray-50 text-gray-900 text-base border-t"
+                        className="hover:bg-gray-50 py-3 text-gray-700 text-base border-t"
                       >
                         {row.getVisibleCells().map(cell => (
-                          <td key={cell.id} className="p-2 text-center">
+                          <td key={cell.id} className="p-2 py-4 text-center">
                             {flexRender(
                               cell.column.columnDef.cell,
                               cell.getContext(),
@@ -323,9 +345,7 @@ export default function PromoCodeTable() {
                 totalPages={table.getPageCount()}
                 totalItems={filteredData.length}
                 itemsPerPage={table.getState().pagination.pageSize}
-                onPageChange={page => {
-                  table.setPageIndex(page - 1)
-                }}
+                onPageChange={page => table.setPageIndex(page - 1)}
               />
             </div>
           </>
@@ -350,6 +370,46 @@ export default function PromoCodeTable() {
           onOpenChange={open => !open && setSendingPromo(null)}
         />
       )}
+
+      {/* ===========================
+          🔥 Delete Confirmation Modal
+      =========================== */}
+      <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Promo Code?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this promo code? This action
+              cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setDeleteId(null)}>
+              Cancel
+            </AlertDialogCancel>
+
+            <AlertDialogAction
+              onClick={() => {
+                if (!deleteId) return
+
+                deletePromo.mutate(deleteId, {
+                  onSuccess: () => {
+                    toast.success('Promo code deleted successfully!')
+                    setDeleteId(null)
+                  },
+                  onError: (error: any) => {
+                    toast.error(error.message || 'Failed to delete promo code')
+                    setDeleteId(null)
+                  },
+                })
+              }}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   )
 }

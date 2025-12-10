@@ -152,7 +152,7 @@ export const useSendPromoToSelected = (id: string, accessToken: string) => {
   return useMutation({
     mutationFn: async (userIds: string[]) => {
       const res = await fetch(
-        `${API_BASE_URL}/api/v1/admin/promo/${id}/send-to-selected`,
+        `${API_BASE_URL}/api/v1/admin/promo/${id}/send-email`,
         {
           method: 'POST',
           headers: {
@@ -173,7 +173,7 @@ export const useGetAllUsers = (accessToken: string) => {
   return useQuery({
     queryKey: ['all-users'],
     queryFn: async () => {
-      const res = await fetch(`${API_BASE_URL}/api/v1/user/all-user`, {
+      const res = await fetch(`${API_BASE_URL}/api/v1/user/all-users`, {
         headers: { Authorization: `Bearer ${accessToken}` },
       })
       if (!res.ok) throw new Error('Failed to fetch users')

@@ -66,7 +66,7 @@ export function AddPromoCode() {
         <Button variant="default">Add Code</Button>
       </DialogTrigger>
 
-      <DialogContent className="p-8 max-w-md">
+      <DialogContent className="p-8 max-w-md font-sans">
         <DialogHeader>
           <div className="flex justify-center my-4">
             <Image

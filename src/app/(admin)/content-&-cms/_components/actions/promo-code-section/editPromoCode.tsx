@@ -77,7 +77,7 @@ export function EditPromoCode({ id, open, onOpenChange }: EditPromoCodeProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="p-8 max-w-md">
+      <DialogContent className="p-8 max-w-md font-sans">
         <DialogHeader>
           <div className="flex justify-center my-4">
             <Image

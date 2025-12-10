@@ -25,7 +25,7 @@ import { EditPromoCode } from './editPromoCode'
 import { SendPromoModal } from './sendPromoCodeModal'
 import { useGetPromoCodes, useDeletePromo, PromoCode } from '@/lib/promo'
 import { toast } from 'sonner'
-import { Trash2, Send, Eye } from 'lucide-react'
+import { Trash2, Send, Edit } from 'lucide-react'
 
 // Alert Dialog (shadcn)
 import {
@@ -161,10 +161,10 @@ export default function PromoCodeTable() {
         <div className="flex items-center justify-center gap-2">
           <button
             onClick={() => setEditingId(row.original._id)}
-            title="view details"
+            title="edit promo"
             className=" text-white transition-colors"
           >
-            <Eye className="w-5 h-5 text-black" />
+            <Edit className="w-5 h-5 text-black" />
           </button>
           <button
             onClick={() =>

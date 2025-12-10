@@ -121,7 +121,7 @@ export function SendPromoModal({
           <div className="flex gap-4">
             <Button
               type="button"
-              variant={sendType === 'all' ? 'default' : 'outline'}
+              variant={sendType === 'all' ? 'secondary' : 'outline'}
               onClick={() => setSendType('all')}
               className="flex-1"
             >
@@ -129,7 +129,7 @@ export function SendPromoModal({
             </Button>
             <Button
               type="button"
-              variant={sendType === 'selected' ? 'default' : 'outline'}
+              variant={sendType === 'selected' ? 'secondary' : 'outline'}
               onClick={() => setSendType('selected')}
               className="flex-1"
             >

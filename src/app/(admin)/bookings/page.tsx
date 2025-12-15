@@ -1,8 +1,6 @@
 import React from "react";
-import BookingsHeader from "./_components/BookingsHeader";
-import SearchBookings from "./_components/search-bookings";
-import BookingsTable from "./_components/bookings-table";
 import { auth } from "@/auth";
+import Bookings from "./_components/bookings";
 
 const page = async () => {
   const cu = await auth();
@@ -11,9 +9,7 @@ const page = async () => {
 
   return (
     <div>
-      <BookingsHeader />
-      <SearchBookings />
-      <BookingsTable token={token as string} />
+      <Bookings token={token as string } />
     </div>
   );
 };

@@ -1,7 +1,6 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import Image from "next/image";
 import React from "react";
 import BookingSummery from "./modals/booking-summery";
@@ -13,14 +12,15 @@ import BookingPayment from "./modals/booking-payment";
 import BookingDisputes from "./modals/booking-disputes";
 import BookingNotes from "./modals/booking-notes";
 import BookingTimeline from "./modals/booking-timeline";
-import { useQuery } from "@tanstack/react-query";
+import { BookingItem } from "./bookings-table";
 
 interface Props {
-  id: string;
-  token: string;
+  isOpen: boolean;
+  setIsOpen: (value: boolean) => void;
+  bookingDetails: BookingItem;
 }
 
-const BookingsModal = ({ id, token }: Props) => {
+const BookingsModal = ({ isOpen, setIsOpen, bookingDetails }: Props) => {
   const { isBookingModalOpen, setIsBookingModalOpen } = useModalStore();
 
   const levels = [
@@ -34,30 +34,10 @@ const BookingsModal = ({ id, token }: Props) => {
     { label: "Timeline" },
   ];
 
-  const { data: bookingDetails = {} } = useQuery({
-    queryKey: ["booking-details"],
-    queryFn: async () => {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/customer/bookings/${id}`,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      const data = await res.json();
-
-      return data.data;
-    },
-  });
-
+  console.log("bookingDetails: ", bookingDetails);
 
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button>View</Button>
-      </DialogTrigger>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogContent className="sm:max-w-5xl p-10">
         <div className="overflow-auto scrollbar-hide">
           <div>
@@ -89,10 +69,18 @@ const BookingsModal = ({ id, token }: Props) => {
           </div>
 
           <div>
-            {isBookingModalOpen === "Summary" && <BookingSummery bookingDetails={bookingDetails} />}
-            {isBookingModalOpen === "Status" && <BookingStatus bookingDetails={bookingDetails} />}
-            {isBookingModalOpen === "Customer" && <BookingCustomer bookingDetails={bookingDetails} />}
-            {isBookingModalOpen === "Lender" && <BookingLender bookingDetails={bookingDetails} />}
+            {isBookingModalOpen === "Summary" && (
+              <BookingSummery bookingDetails={bookingDetails} />
+            )}
+            {isBookingModalOpen === "Status" && (
+              <BookingStatus bookingDetails={bookingDetails} />
+            )}
+            {isBookingModalOpen === "Customer" && (
+              <BookingCustomer bookingDetails={bookingDetails} />
+            )}
+            {isBookingModalOpen === "Lender" && (
+              <BookingLender bookingDetails={bookingDetails} />
+            )}
             {isBookingModalOpen === "Payment" && <BookingPayment />}
             {isBookingModalOpen === "Disputes" && <BookingDisputes />}
             {isBookingModalOpen === "Notes" && <BookingNotes />}

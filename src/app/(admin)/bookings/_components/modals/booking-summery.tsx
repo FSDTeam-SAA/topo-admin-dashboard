@@ -1,21 +1,6 @@
-type BookingDetails = {
-  id: string;
-  customer: {
-    firstName: string;
-    lastName: string;
-  };
-  lender: {
-    fullName: string;
-  };
-  listing: {
-    dressName: string;
-  };
-  createdAt: string;
-  statusHistory: { _id: string; status: string }[];
-  totalAmount: number;
-};
+import { BookingItem } from "../bookings-table";
 
-const defaultBookingDetails: BookingDetails = {
+const defaultBookingDetails: BookingItem = {
   id: "",
   customer: { firstName: "", lastName: "" },
   lender: { fullName: "" },
@@ -28,9 +13,8 @@ const defaultBookingDetails: BookingDetails = {
 const BookingSummery = ({
   bookingDetails = defaultBookingDetails,
 }: {
-  bookingDetails?: BookingDetails;
+  bookingDetails?: BookingItem;
 }) => {
-
   return (
     <div className="mt-5">
       <div className="border border-gray-200 p-5 rounded-lg shadow-sm">
@@ -39,8 +23,8 @@ const BookingSummery = ({
         <div className="text-sm space-y-2">
           <h3>Booking ID: {bookingDetails?.id}</h3>
           <h3>
-            Customer Name: {bookingDetails?.customer?.firstName}{" "}
-            Customer Name: {bookingDetails?.customer?.firstName}{" "}
+            Customer Name: {bookingDetails?.customer?.firstName} Customer Name: 
+            {bookingDetails?.customer?.firstName}{" "}
             {bookingDetails?.customer?.lastName}
           </h3>
           <h3>Lender Name: {bookingDetails?.lender?.fullName}</h3>

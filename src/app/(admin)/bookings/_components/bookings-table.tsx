@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import {
   Table,
   TableBody,
@@ -11,10 +11,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import BookingsModal from "./bookings-modal";
 import { Skeleton } from "@/components/ui/custom/skeleton";
+import BookingsModal from "./bookings-modal";
 
-interface BookingItem {
+export interface BookingItem {
   _id: string;
   customer: string;
   listing: string;
@@ -53,13 +53,20 @@ interface Props {
 }
 
 const BookingsTable = ({
-  token,
   bookings,
   paginationInfo,
   isLoading,
   isFetching,
   setPage,
 }: Props) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [bookingsDetails, setBookingsDetails] = useState<BookingItem>();
+
+  const handleBookings = (booking: BookingItem) => {
+    setIsOpen(true);
+    setBookingsDetails(booking);
+  };
+
   return (
     <div className="bg-white p-5 rounded-lg mt-8 shadow-[0px_4px_10px_0px_#0000001A]">
       <div className="overflow-x-auto">
@@ -92,7 +99,9 @@ const BookingsTable = ({
               bookings.map((item) => (
                 <TableRow key={item?._id}>
                   <TableCell className="text-center">{item?._id}</TableCell>
-                  <TableCell className="text-center">{item?.customer}</TableCell>
+                  <TableCell className="text-center">
+                    {item?.customer}
+                  </TableCell>
                   <TableCell className="text-center">
                     {item?.listing}{" "}
                   </TableCell>
@@ -121,9 +130,8 @@ const BookingsTable = ({
                       </span>
                     ))}
                   </TableCell>
-                  <TableCell className="text-center space-x-5">
-                    <BookingsModal id={item?._id} token={token} />
-                    <Button variant="outline">Escalate</Button>
+                  <TableCell className="text-center">
+                    <Button onClick={() => handleBookings(item)}>View</Button>
                   </TableCell>
                 </TableRow>
               ))
@@ -139,6 +147,12 @@ const BookingsTable = ({
             )}
           </TableBody>
         </Table>
+
+        <BookingsModal
+          isOpen={isOpen}
+          setIsOpen={() => setIsOpen(false)}
+          bookingDetails={bookingsDetails as BookingItem}
+        />
       </div>
 
       {paginationInfo && (

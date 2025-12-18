@@ -1,6 +1,7 @@
-'use client'
+/* eslint-disable @typescript-eslint/no-explicit-any */
+"use client";
 
-import React from 'react'
+import React, { useState } from "react";
 import {
   Table,
   TableBody,
@@ -8,41 +9,64 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
-import { Button } from '@/components/ui/button'
-import BookingsModal from './bookings-modal'
-import { useQuery } from '@tanstack/react-query'
-import { Skeleton } from '@/components/ui/custom/skeleton'
-import { BookingsResponse } from '@/types/bookings/bookingTypes'
-import { useFilterBooking } from './states/useFilterBooking'
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/custom/skeleton";
+import BookingsModal from "./bookings-modal";
 
-interface Props {
-  token: string
+export interface BookingItem {
+  _id: string;
+  customer: string;
+  listing: string;
+  masterdressId: string;
+  dressName: string;
+  rentalStartDate: string;
+  rentalEndDate: string;
+  totalAmount: number;
+  deliveryStatus: string;
+  paymentStatus: string;
+  statusHistory: Array<{
+    status: string;
+    timestamp: string;
+    updatedBy: string;
+    _id: string;
+  }>;
+  createdAt: string;
 }
 
-const BookingsTable = ({ token }: Props) => {
-  const [page, setPage] = React.useState(1)
-  const { search, date } = useFilterBooking()
+interface PaginationInfo {
+  currentPage: number;
+  totalPages: number;
+  totalData: number;
+  hasPrevPage: boolean;
+  hasNextPage: boolean;
+}
 
-  const { data, isLoading, isFetching } = useQuery<BookingsResponse>({
-    queryKey: ['all-bookings', page, search, date],
-    queryFn: async () => {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/customer/bookings/all?page=${page}&search=${search}&date=${date}`,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      )
-      const json = await res.json()
-      return json.data
-    },
-  })
+interface Props {
+  token: string;
+  bookings: BookingItem[];
+  paginationInfo?: PaginationInfo;
+  isLoading: boolean;
+  isFetching: boolean;
+  page: number;
+  setPage: (value: any) => void;
+}
 
-  const bookings = data?.bookings ?? []
-  const paginationInfo = data?.paginationInfo
+const BookingsTable = ({
+  bookings,
+  paginationInfo,
+  isLoading,
+  isFetching,
+  setPage,
+  token,
+}: Props) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [id, setId] = useState<string>();
+
+  const handleBookings = (id: string) => {
+    setIsOpen(true);
+    setId(id);
+  };
 
   return (
     <div className="bg-white p-5 rounded-lg mt-8 shadow-[0px_4px_10px_0px_#0000001A]">
@@ -74,37 +98,43 @@ const BookingsTable = ({ token }: Props) => {
               ))
             ) : bookings.length > 0 ? (
               bookings.map((item) => (
-                <TableRow key={item.id}>
-                  <TableCell className="text-center">{item.id}</TableCell>
+                <TableRow key={item?._id}>
+                  <TableCell className="text-center">{item?._id}</TableCell>
                   <TableCell className="text-center">
-                    {item.customer._id}
+                    {item?.customer || "N/A"}
                   </TableCell>
                   <TableCell className="text-center">
-                    {item.listing?.lenderId}
-                  </TableCell>
-                  <TableCell className="text-center">{item.dressId}</TableCell>
-                  <TableCell className="text-center">
-                    {new Date(item.createdAt).toLocaleDateString()}
+                    {item?.listing || "N/A"}{" "}
                   </TableCell>
                   <TableCell className="text-center">
-                    {`$ ${item.totalAmount}`}
+                    {item?.masterdressId}
+                  </TableCell>
+                  <TableCell className="text-center">
+                    {new Date(item?.createdAt).toLocaleDateString()}
+                  </TableCell>
+                  <TableCell className="text-center">
+                    {`$ ${item?.totalAmount}`}
                   </TableCell>
                   <TableCell className="text-center space-x-1">
-                    {item.statusHistory.map((status) => (
+                    {item?.statusHistory?.map((status) => (
                       <span
-                        key={status._id}
+                        key={status?._id}
                         className={`px-2 rounded-3xl font-semibold text-xs py-1 ${
-                          status.status === 'Pending' &&
-                          'text-orange-600 bg-orange-200'
+                          status?.status === "Delivered" &&
+                          "text-green-600 bg-green-200"
+                        } ${
+                          status?.status === "Pending" &&
+                          "text-orange-600 bg-orange-200"
                         }`}
                       >
-                        {status.status}
+                        {status?.status}
                       </span>
                     ))}
                   </TableCell>
-                  <TableCell className="text-center space-x-5">
-                    <BookingsModal id={item.id} token={token} />
-                    <Button variant="outline">Escalate</Button>
+                  <TableCell className="text-center">
+                    <Button onClick={() => handleBookings(item?._id)}>
+                      View
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))
@@ -120,12 +150,19 @@ const BookingsTable = ({ token }: Props) => {
             )}
           </TableBody>
         </Table>
+
+        <BookingsModal
+          isOpen={isOpen}
+          setIsOpen={() => setIsOpen(false)}
+          id={id as string}
+          token={token as string}
+        />
       </div>
 
       {paginationInfo && (
         <div className="flex justify-between items-center mt-4 text-base font-sans text-slate-600 px-8 ">
           <span>
-            Page {paginationInfo.currentPage} of {paginationInfo.totalPages} •{' '}
+            Page {paginationInfo.currentPage} of {paginationInfo.totalPages} •{" "}
             {paginationInfo.totalData} records
           </span>
           <div className="space-x-2">
@@ -133,7 +170,7 @@ const BookingsTable = ({ token }: Props) => {
               variant="outline"
               size="sm"
               disabled={!paginationInfo.hasPrevPage}
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              onClick={() => setPage((p: any) => Math.max(1, p - 1))}
             >
               Previous
             </Button>
@@ -141,7 +178,7 @@ const BookingsTable = ({ token }: Props) => {
               variant="outline"
               size="sm"
               disabled={!paginationInfo.hasNextPage}
-              onClick={() => setPage((p) => p + 1)}
+              onClick={() => setPage((p: any) => p + 1)}
             >
               Next
             </Button>
@@ -149,7 +186,7 @@ const BookingsTable = ({ token }: Props) => {
         </div>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default BookingsTable
+export default BookingsTable;

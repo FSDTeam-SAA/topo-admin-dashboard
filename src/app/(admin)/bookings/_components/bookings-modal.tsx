@@ -95,7 +95,7 @@ const BookingsModal = ({ isOpen, setIsOpen, id }: Props) => {
   ];
 
   const { data: bookingDetails = {} } = useQuery<Booking>({
-    queryKey: ["bookings-details"],
+    queryKey: ["bookings-details", id],
     queryFn: async () => {
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/admin/overview/dashboard/bookings/${id}`
@@ -149,7 +149,7 @@ const BookingsModal = ({ isOpen, setIsOpen, id }: Props) => {
               <BookingCustomer bookingDetails={bookingDetails as Booking} />
             )}
             {isBookingModalOpen === "Lender" && (
-              <BookingLender bookingDetails={bookingDetails} />
+              <BookingLender bookingDetails={bookingDetails as Booking} />
             )}
             {isBookingModalOpen === "Payment" && <BookingPayment />}
             {isBookingModalOpen === "Disputes" && <BookingDisputes />}

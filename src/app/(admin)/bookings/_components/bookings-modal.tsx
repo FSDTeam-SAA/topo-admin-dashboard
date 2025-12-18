@@ -12,15 +12,75 @@ import BookingPayment from "./modals/booking-payment";
 import BookingDisputes from "./modals/booking-disputes";
 import BookingNotes from "./modals/booking-notes";
 import BookingTimeline from "./modals/booking-timeline";
-import { BookingItem } from "./bookings-table";
+import { useQuery } from "@tanstack/react-query";
 
 interface Props {
   isOpen: boolean;
   setIsOpen: (value: boolean) => void;
-  bookingDetails: BookingItem;
+  id: string;
+  token: string;
 }
 
-const BookingsModal = ({ isOpen, setIsOpen, bookingDetails }: Props) => {
+export interface Booking {
+  _id: string;
+  customer: Customer;
+  allocatedLender: {
+    lenderId: Lender;
+  };
+  masterdressId: string;
+  dressName: string;
+  rentalStartDate: string;
+  rentalEndDate: string;
+  rentalDurationDays: number;
+  city: string;
+  state: string;
+  country: string;
+  postcode: string;
+  suburb: string;
+  address: string;
+  size: string;
+  deliveryMethod: "Shipping" | "Pickup";
+  lenderPrice: number;
+  rentalFee: number;
+  shippingFee: number;
+  insuranceFee: number;
+  totalAmount: number;
+  deliveryStatus: "Pending" | "Shipped" | "Delivered" | "Returned";
+  paymentStatus: "Pending" | "Paid" | "Failed";
+  payoutStatus: "pending" | "paid" | "failed";
+  tryOnRequested: boolean;
+  tryOnAllowedByLender: boolean;
+  tryOnOutcome: "ProceededWithRental" | "Cancelled";
+  isManualBooking: boolean;
+  customerNotes: string;
+  lenderNotes: string;
+  adminNotes: string;
+  statusHistory: StatusHistory[];
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+}
+
+interface Customer {
+  _id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+}
+
+interface Lender {
+  _id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+}
+
+interface StatusHistory {
+  _id: string;
+  status: string;
+}
+
+const BookingsModal = ({ isOpen, setIsOpen, id }: Props) => {
   const { isBookingModalOpen, setIsBookingModalOpen } = useModalStore();
 
   const levels = [
@@ -34,7 +94,17 @@ const BookingsModal = ({ isOpen, setIsOpen, bookingDetails }: Props) => {
     { label: "Timeline" },
   ];
 
-  console.log("bookingDetails: ", bookingDetails);
+  const { data: bookingDetails = {} } = useQuery<Booking>({
+    queryKey: ["bookings-details"],
+    queryFn: async () => {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/admin/overview/dashboard/bookings/${id}`
+      );
+      const json = await res.json();
+      return json.data;
+    },
+    enabled: !!id,
+  });
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>

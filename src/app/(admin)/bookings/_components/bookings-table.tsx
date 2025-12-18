@@ -58,13 +58,14 @@ const BookingsTable = ({
   isLoading,
   isFetching,
   setPage,
+  token,
 }: Props) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [bookingsDetails, setBookingsDetails] = useState<BookingItem>();
+  const [id, setId] = useState<string>();
 
-  const handleBookings = (booking: BookingItem) => {
+  const handleBookings = (id: string) => {
     setIsOpen(true);
-    setBookingsDetails(booking);
+    setId(id);
   };
 
   return (
@@ -100,10 +101,10 @@ const BookingsTable = ({
                 <TableRow key={item?._id}>
                   <TableCell className="text-center">{item?._id}</TableCell>
                   <TableCell className="text-center">
-                    {item?.customer}
+                    {item?.customer || "N/A"}
                   </TableCell>
                   <TableCell className="text-center">
-                    {item?.listing}{" "}
+                    {item?.listing || "N/A"}{" "}
                   </TableCell>
                   <TableCell className="text-center">
                     {item?.masterdressId}
@@ -131,7 +132,9 @@ const BookingsTable = ({
                     ))}
                   </TableCell>
                   <TableCell className="text-center">
-                    <Button onClick={() => handleBookings(item)}>View</Button>
+                    <Button onClick={() => handleBookings(item?._id)}>
+                      View
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))
@@ -151,7 +154,8 @@ const BookingsTable = ({
         <BookingsModal
           isOpen={isOpen}
           setIsOpen={() => setIsOpen(false)}
-          bookingDetails={bookingsDetails as BookingItem}
+          id={id as string}
+          token={token as string}
         />
       </div>
 

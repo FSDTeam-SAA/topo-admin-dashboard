@@ -140,13 +140,13 @@ const BookingsModal = ({ isOpen, setIsOpen, id }: Props) => {
 
           <div>
             {isBookingModalOpen === "Summary" && (
-              <BookingSummery bookingDetails={bookingDetails} />
+              <BookingSummery bookingDetails={bookingDetails as Booking} />
             )}
             {isBookingModalOpen === "Status" && (
-              <BookingStatus bookingDetails={bookingDetails} />
+              <BookingStatus bookingDetails={bookingDetails as Booking} />
             )}
             {isBookingModalOpen === "Customer" && (
-              <BookingCustomer bookingDetails={bookingDetails} />
+              <BookingCustomer bookingDetails={bookingDetails as Booking} />
             )}
             {isBookingModalOpen === "Lender" && (
               <BookingLender bookingDetails={bookingDetails} />

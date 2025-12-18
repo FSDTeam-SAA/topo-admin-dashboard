@@ -37,15 +37,6 @@ const BookingPayment = () => {
           </div>
         </div>
       </div>
-
-      <div className="border border-gray-200 p-5 rounded-lg shadow-sm mt-10">
-        <h1 className="text-xl font-semibold mb-4">Actions</h1>
-
-        <div className="text-sm flex items-center gap-5">
-          <Button>Save Changes</Button>
-          <Button variant="outline">Download Report</Button>
-        </div>
-      </div>
     </div>
   );
 };

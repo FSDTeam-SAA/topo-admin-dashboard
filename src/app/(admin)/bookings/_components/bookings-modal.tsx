@@ -10,7 +10,6 @@ import BookingCustomer from "./modals/booking-customer";
 import BookingLender from "./modals/booking-lender";
 import BookingPayment from "./modals/booking-payment";
 import BookingDisputes from "./modals/booking-disputes";
-import BookingNotes from "./modals/booking-notes";
 import BookingTimeline from "./modals/booking-timeline";
 import { useQuery } from "@tanstack/react-query";
 
@@ -90,7 +89,7 @@ const BookingsModal = ({ isOpen, setIsOpen, id }: Props) => {
     { label: "Lender" },
     { label: "Payment" },
     { label: "Disputes" },
-    { label: "Notes" },
+    // { label: "Notes" },
     { label: "Timeline" },
   ];
 
@@ -153,7 +152,7 @@ const BookingsModal = ({ isOpen, setIsOpen, id }: Props) => {
             )}
             {isBookingModalOpen === "Payment" && <BookingPayment />}
             {isBookingModalOpen === "Disputes" && <BookingDisputes />}
-            {isBookingModalOpen === "Notes" && <BookingNotes />}
+            {/* {isBookingModalOpen === "Notes" && <BookingNotes />} */}
             {isBookingModalOpen === "Timeline" && <BookingTimeline />}
           </div>
         </div>

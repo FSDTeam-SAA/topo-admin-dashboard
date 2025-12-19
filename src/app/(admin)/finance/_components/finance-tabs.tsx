@@ -1,6 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import React, { useState } from "react";
+import BookingRevenue from "./booking-revenue";
 
 const tabs = [
   {
@@ -33,7 +34,7 @@ const FinanceTabs = () => {
   const [isActive, setIsActive] = useState("Revenue Breakdown");
 
   return (
-    <div>
+    <div className="space-y-8">
       <div className="bg-white shadow-[0px_4px_10px_0px_#0000001A] p-5 rounded-md space-x-8">
         {tabs.map((tab) => (
           <Button
@@ -49,6 +50,8 @@ const FinanceTabs = () => {
           </Button>
         ))}
       </div>
+
+      <div>{isActive === "Booking Revenue" && <BookingRevenue />}</div>
     </div>
   );
 };

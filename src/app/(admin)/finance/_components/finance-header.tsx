@@ -1,5 +1,6 @@
 import React from "react";
 import FinanceCard from "./finance-card";
+import FinanceTabs from "./finance-tabs";
 
 const FinanceHeader = () => {
   return (
@@ -17,6 +18,10 @@ const FinanceHeader = () => {
         <FinanceCard title="Resolution Rate" value={"0"} />
         <FinanceCard title="Avg. Resolution Time" value={"0"} />
         <FinanceCard title="Avg. Resolution Time" value={"0"} />
+      </div>
+
+      <div>
+        <FinanceTabs />
       </div>
     </div>
   );

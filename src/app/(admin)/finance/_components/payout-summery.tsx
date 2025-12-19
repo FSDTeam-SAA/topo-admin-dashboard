@@ -11,8 +11,31 @@ import {
 } from "@/components/ui/table";
 import { useQuery } from "@tanstack/react-query";
 
+interface PerLender {
+  _id: string;
+  name: string;
+  email: string;
+  totalRevenue: string;
+  totalPaid: string;
+  pendingPayout: string;
+  avgPayout: string;
+  totalRequests: string;
+}
+
+interface Global {
+  totalRevenue?: string;
+  totalPaid?: string;
+  totalPending?: string;
+  avgPayout?: string;
+}
+
+interface LendersPayout {
+  perLender: PerLender[];
+  global?: Global;
+}
+
 const PayoutSummery = ({ token }: { token: string }) => {
-  const { data: lendersPayout = {} } = useQuery({
+  const { data: lendersPayout } = useQuery<LendersPayout>({
     queryKey: ["payout"],
     queryFn: async () => {
       const res = await fetch(
@@ -35,9 +58,18 @@ const PayoutSummery = ({ token }: { token: string }) => {
   return (
     <div className="space-y-8">
       <div className="grid grid-cols-3 gap-8">
-        <FinanceCard title="Total Paid" value={lendersPayout?.global?.totalPaid} />
-        <FinanceCard title="Pending Payouts" value={lendersPayout?.global?.totalPending} />
-        <FinanceCard title="Average Payout" value={lendersPayout?.global?.avgPayout} />
+        <FinanceCard
+          title="Total Paid"
+          value={lendersPayout?.global?.totalPaid as string}
+        />
+        <FinanceCard
+          title="Pending Payouts"
+          value={lendersPayout?.global?.totalPending as string}
+        />
+        <FinanceCard
+          title="Average Payout"
+          value={lendersPayout?.global?.avgPayout as string}
+        />
       </div>
 
       {/* lenders payout */}
@@ -48,24 +80,26 @@ const PayoutSummery = ({ token }: { token: string }) => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="text-center">Lender ID</TableHead>
-                <TableHead className="text-center">Lender Name</TableHead>
-                <TableHead className="text-center">Total Paid</TableHead>
+                <TableHead className="text-center">Name</TableHead>
+                <TableHead className="text-center">Email</TableHead>
+                <TableHead className="text-center">Total Revenue</TableHead>
                 <TableHead className="text-center">Pending Payout</TableHead>
                 <TableHead className="text-center">Avg Payout</TableHead>
-                <TableHead className="text-center">Revenue Generated</TableHead>
+                <TableHead className="text-center">Total Requests</TableHead>
               </TableRow>
             </TableHeader>
 
             <TableBody>
-              <TableRow className="text-center">
-                <TableCell>Example</TableCell>
-                <TableCell>Example</TableCell>
-                <TableCell>Example</TableCell>
-                <TableCell>Example</TableCell>
-                <TableCell>Example</TableCell>
-                <TableCell>Example</TableCell>
-              </TableRow>
+              {lendersPayout?.perLender?.map((item) => (
+                <TableRow key={item?._id} className="text-center">
+                  <TableCell>{item?.name}</TableCell>
+                  <TableCell>{item?.email}</TableCell>
+                  <TableCell>$ {item?.totalRevenue || "0"}</TableCell>
+                  <TableCell>$ {item?.pendingPayout}</TableCell>
+                  <TableCell>$ {item?.avgPayout}</TableCell>
+                  <TableCell>{item?.totalRequests}</TableCell>
+                </TableRow>
+              ))}
             </TableBody>
           </Table>
         </div>

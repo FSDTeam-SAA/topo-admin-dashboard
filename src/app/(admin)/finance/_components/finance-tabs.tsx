@@ -2,6 +2,7 @@
 import { Button } from "@/components/ui/button";
 import React, { useState } from "react";
 import BookingRevenue from "./booking-revenue";
+import PayoutSummery from "./payout-summery";
 
 const tabs = [
   {
@@ -30,7 +31,7 @@ const tabs = [
   },
 ];
 
-const FinanceTabs = () => {
+const FinanceTabs = ({ token }: { token: string }) => {
   const [isActive, setIsActive] = useState("Revenue Breakdown");
 
   return (
@@ -51,7 +52,12 @@ const FinanceTabs = () => {
         ))}
       </div>
 
-      <div>{isActive === "Booking Revenue" && <BookingRevenue />}</div>
+      <div>
+        {isActive === "Booking Revenue" && <BookingRevenue />}{" "}
+        {isActive === "Payout Summary" && (
+          <PayoutSummery token={token as string} />
+        )}
+      </div>
     </div>
   );
 };

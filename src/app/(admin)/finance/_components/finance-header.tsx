@@ -1,8 +1,9 @@
+"use client";
 import React from "react";
 import FinanceCard from "./finance-card";
 import FinanceTabs from "./finance-tabs";
 
-const FinanceHeader = () => {
+const FinanceHeader = ({ token }: { token: string }) => {
   return (
     <div className="space-y-8">
       <div>
@@ -21,7 +22,7 @@ const FinanceHeader = () => {
       </div>
 
       <div>
-        <FinanceTabs />
+        <FinanceTabs token={token as string} />
       </div>
     </div>
   );

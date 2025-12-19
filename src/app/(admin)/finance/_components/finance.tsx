@@ -1,10 +1,14 @@
 import React from "react";
 import FinanceHeader from "./finance-header";
+import { auth } from "@/auth";
 
-const Finance = () => {
+const Finance = async () => {
+  const cu = await auth();
+  const token = cu?.user?.accessToken;
+
   return (
     <div>
-      <FinanceHeader />
+      <FinanceHeader token={token as string} />
     </div>
   );
 };

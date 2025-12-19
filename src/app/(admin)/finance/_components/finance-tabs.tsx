@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import React, { useState } from "react";
 import BookingRevenue from "./booking-revenue";
 import PayoutSummery from "./payout-summery";
+import MRR from "./MRR";
 
 const tabs = [
   {
@@ -57,6 +58,7 @@ const FinanceTabs = ({ token }: { token: string }) => {
         {isActive === "Payout Summary" && (
           <PayoutSummery token={token as string} />
         )}
+        {isActive === "MRR" && <MRR />}
       </div>
     </div>
   );

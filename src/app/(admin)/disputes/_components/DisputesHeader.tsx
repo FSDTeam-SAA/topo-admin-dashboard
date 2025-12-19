@@ -1,7 +1,5 @@
-'use client'
+"use client";
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Button } from "@/components/ui/button";
-import { Download } from "lucide-react";
 import React from "react";
 import DisputesCard from "./disputes-card";
 import { useQuery } from "@tanstack/react-query";
@@ -27,19 +25,19 @@ const DisputesHeader = ({ token }: { token: string }) => {
 
   return (
     <div>
-      <div className="flex justify-between items-center">
+      <div>
         <h1 className="text-[25px] tracking-[0.5rem] uppercase font-medium">
           Manage Disputes
         </h1>
-        <Button>
-          Download Report <Download className="ml-2 h-4 w-4" />
-        </Button>
       </div>
 
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mt-8">
           {[...Array(5)].map((_, i) => (
-            <div key={i} className="flex flex-col items-center space-y-3 p-6 border rounded-lg">
+            <div
+              key={i}
+              className="flex flex-col items-center space-y-3 p-6 border rounded-lg"
+            >
               <Skeleton className="h-6 w-32" />
               <Skeleton className="h-8 w-20" />
             </div>
@@ -48,10 +46,19 @@ const DisputesHeader = ({ token }: { token: string }) => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mt-8">
           <DisputesCard title="Total Disputes" value={data?.totalDisputes} />
-          <DisputesCard title="Pending Disputes" value={data?.pendingDisputes} />
-          <DisputesCard title="Resolved Disputes" value={data?.resolvedDisputes} />
+          <DisputesCard
+            title="Pending Disputes"
+            value={data?.pendingDisputes}
+          />
+          <DisputesCard
+            title="Resolved Disputes"
+            value={data?.resolvedDisputes}
+          />
           <DisputesCard title="Resolution Rate" value={data?.resolutionRate} />
-          <DisputesCard title="Avg. Resolution Time" value={data?.avgResolutionTime} />
+          <DisputesCard
+            title="Avg. Resolution Time"
+            value={data?.avgResolutionTime}
+          />
         </div>
       )}
     </div>

@@ -34,12 +34,48 @@ interface LendersPayout {
   global?: Global;
 }
 
+interface Payouts {
+  _id: string;
+  lenderId: string;
+  bookingId: string;
+  bookingAmount: string;
+  lenderPrice: string;
+  requestedAmount: string;
+  commission: string;
+  status: string;
+  requestedAt: string;
+}
+
+interface PendingLenders {
+  data: { payouts: Payouts[] };
+}
+
 const PayoutSummery = ({ token }: { token: string }) => {
   const { data: lendersPayout } = useQuery<LendersPayout>({
-    queryKey: ["payout"],
+    queryKey: ["lenders-payout"],
     queryFn: async () => {
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/admin/overview/dashboard/finance/payout/stats`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `bearer ${token}`,
+          },
+        }
+      );
+
+      const data = await res.json();
+      return data;
+    },
+    enabled: !!token,
+  });
+
+  const { data: pendingPayouts } = useQuery<PendingLenders>({
+    queryKey: ["pending-payouts"],
+    queryFn: async () => {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/payout/all-payouts`,
         {
           method: "GET",
           headers: {
@@ -114,23 +150,45 @@ const PayoutSummery = ({ token }: { token: string }) => {
             <TableHeader>
               <TableRow>
                 <TableHead className="text-center">Lender ID</TableHead>
-                <TableHead className="text-center">Lender Name</TableHead>
-                <TableHead className="text-center">Total Paid</TableHead>
-                <TableHead className="text-center">Pending Payout</TableHead>
-                <TableHead className="text-center">Avg Payout</TableHead>
-                <TableHead className="text-center">Revenue Generated</TableHead>
+                <TableHead className="text-center">Booking ID</TableHead>
+                <TableHead className="text-center">Booking Amount</TableHead>
+                <TableHead className="text-center">Requested Amount</TableHead>
+                <TableHead className="text-center">Lender Price</TableHead>
+                <TableHead className="text-center">Commission</TableHead>
+                <TableHead className="text-center">Status</TableHead>
               </TableRow>
             </TableHeader>
 
             <TableBody>
-              <TableRow className="text-center">
-                <TableCell>Example</TableCell>
-                <TableCell>Example</TableCell>
-                <TableCell>Example</TableCell>
-                <TableCell>Example</TableCell>
-                <TableCell>Example</TableCell>
-                <TableCell>Example</TableCell>
-              </TableRow>
+              {pendingPayouts?.data?.payouts?.map((item) => (
+                <TableRow key={item?._id} className="text-center">
+                  <TableCell>{item?.lenderId}</TableCell>
+                  <TableCell>{item?.bookingId}</TableCell>
+                  <TableCell>$ {item?.bookingAmount || "0"}</TableCell>
+                  <TableCell>$ {item?.requestedAmount || "0"}</TableCell>
+                  <TableCell>$ {item?.lenderPrice || "0"}</TableCell>
+                  <TableCell>$ {item?.commission || "0"}</TableCell>
+                  <TableCell>
+                    <button
+                      className={`py-1 px-2 font-medium rounded-md text-xs ${
+                        item?.status === "pending" &&
+                        "bg-orange-200 text-orange-800"
+                      } ${
+                        item?.status === "approved" &&
+                        "bg-blue-200 text-blue-800"
+                      } ${
+                        item?.status === "rejected" &&
+                        "bg-red-200 text-red-800"
+                      } ${
+                        item?.status === "paid" &&
+                        "bg-green-200 text-green-800"
+                      } `}
+                    >
+                      {item?.status}
+                    </button>
+                  </TableCell>
+                </TableRow>
+              ))}
             </TableBody>
           </Table>
         </div>

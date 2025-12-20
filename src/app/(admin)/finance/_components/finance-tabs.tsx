@@ -58,7 +58,7 @@ const FinanceTabs = ({ token }: { token: string }) => {
         {isActive === "Payout Summary" && (
           <PayoutSummery token={token as string} />
         )}
-        {isActive === "MRR" && <MRR />}
+        {isActive === "MRR" && <MRR token={token as string} />}
       </div>
     </div>
   );

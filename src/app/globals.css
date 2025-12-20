@@ -88,3 +88,25 @@ input[type='file']::-moz-file-upload-button {
   font-weight: 400;
   cursor: pointer;
 }
+
+@layer utilities {
+  .scrollbar::-webkit-scrollbar {
+    width: 15px;
+    height: 20px;
+  }
+
+  .scrollbar::-webkit-scrollbar-track {
+    border-radius: 100vh;
+    background: rgba(128, 128, 128, 0.192);
+  }
+
+  .scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(128, 128, 128, 0.459);
+    border-radius: 100vh;
+    border: 3px solid #f6f7ed;
+  }
+
+  .scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(128, 128, 128, 0.719);
+  }
+}

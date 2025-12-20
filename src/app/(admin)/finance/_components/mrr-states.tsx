@@ -2,25 +2,7 @@ import React, { useState } from "react";
 import TotalMrrPopup from "./total-mrr-popup";
 import NewSignupPopup from "./new-signup-popup";
 import ChurnedUsersPopup from "./churned-users-popup";
-
-interface CommonTypes {
-  _id: string;
-  customerId: string;
-  name: string;
-  subscriptionStart: string;
-  subscriptionEnd: string;
-  amount: string;
-  status: string;
-}
-
-export interface MrrData {
-  totalMRR: string;
-  totalNewSignUps: string;
-  totalCancelledSubscribers: string;
-  activeSubscribers: CommonTypes[];
-  newSignUps: CommonTypes[];
-  churnedUsers: CommonTypes[];
-}
+import { MrrData } from "./MRR";
 
 const MrrStates = ({ mrrData }: { mrrData: MrrData }) => {
   const [totalMrrOpen, setTotalMrrOpen] = useState(false);

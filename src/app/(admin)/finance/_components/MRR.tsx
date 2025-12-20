@@ -3,6 +3,25 @@ import React from "react";
 import MrrStates from "./mrr-states";
 import { useQuery } from "@tanstack/react-query";
 
+interface CommonTypes {
+  _id: string;
+  customerId: string;
+  name: string;
+  subscriptionStart: string;
+  subscriptionEnd: string;
+  amount: string;
+  status: string;
+}
+
+export interface MrrData {
+  totalMRR: string;
+  totalNewSignUps: string;
+  totalCancelledSubscribers: string;
+  activeSubscribers: CommonTypes[];
+  newSignUps: CommonTypes[];
+  churnedUsers: CommonTypes[];
+}
+
 const MRR = ({ token }: { token: string }) => {
   const { data: mrrData } = useQuery({
     queryKey: ["mrr"],

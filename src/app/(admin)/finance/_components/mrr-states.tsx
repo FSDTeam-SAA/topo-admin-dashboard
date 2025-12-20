@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import TotalMrrPopup from "./total-mrr-popup";
+import NewSignupPopup from "./new-signup-popup";
 
-
-interface ActiveSubscribers {
+interface CommonTypes {
   _id: string;
   customerId: string;
   name: string;
@@ -16,11 +16,13 @@ export interface MrrData {
   totalMRR: string;
   totalNewSignUps: string;
   totalCancelledSubscribers: string;
-  activeSubscribers: ActiveSubscribers[]
+  activeSubscribers: CommonTypes[];
+  newSignUps: CommonTypes[];
 }
 
 const MrrStates = ({ mrrData }: { mrrData: MrrData }) => {
   const [totalMrrOpen, setTotalMrrOpen] = useState(false);
+  const [newSignUpOpen, setNewSignUp] = useState(false);
 
   return (
     <div className="grid grid-cols-3 gap-8">
@@ -34,7 +36,9 @@ const MrrStates = ({ mrrData }: { mrrData: MrrData }) => {
       </div>
 
       <div className="bg-white shadow-[0px_4px_10px_0px_#0000001A] h-[150px] p-5  rounded-lg hover:bg-black hover:text-white delay-100 transition-all">
-        <button className="underline">New Sign-ups</button>
+        <button onClick={() => setNewSignUp(true)} className="underline">
+          New Sign-ups
+        </button>
         <p className="font-medium text-2xl mt-5 font-serif">
           $ {mrrData?.totalNewSignUps}
         </p>
@@ -52,6 +56,14 @@ const MrrStates = ({ mrrData }: { mrrData: MrrData }) => {
           <TotalMrrPopup
             open={totalMrrOpen}
             onOpenChange={() => setTotalMrrOpen(false)}
+            mrrData={mrrData}
+          />
+        )}
+
+        {newSignUpOpen && (
+          <NewSignupPopup
+            open={newSignUpOpen}
+            onOpenChange={() => setNewSignUp(false)}
             mrrData={mrrData}
           />
         )}

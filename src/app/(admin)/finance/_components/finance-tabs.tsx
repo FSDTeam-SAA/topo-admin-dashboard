@@ -55,12 +55,16 @@ const FinanceTabs = ({ token }: { token: string }) => {
       </div>
 
       <div>
-        {isActive === "Booking Revenue" && <BookingRevenue />}{" "}
+        {isActive === "Booking Revenue" && (
+          <BookingRevenue token={token as string} />
+        )}{" "}
         {isActive === "Payout Summary" && (
           <PayoutSummery token={token as string} />
         )}
         {isActive === "MRR" && <MRR token={token as string} />}
-        {isActive === "Credit and Promotions" && <CreditPromotions token={token as string} />}
+        {isActive === "Credit and Promotions" && (
+          <CreditPromotions token={token as string} />
+        )}
       </div>
     </div>
   );

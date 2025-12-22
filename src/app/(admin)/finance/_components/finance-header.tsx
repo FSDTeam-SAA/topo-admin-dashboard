@@ -6,7 +6,20 @@ import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSession } from "next-auth/react";
 
-interface RevenueBreakdown {
+interface Monthly {
+  year: string;
+  month: string;
+  subscriptionRevenue: string;
+  totalLenderPayout: string;
+  pendingPayout: string;
+  commissionEarned: string;
+  totalCreditIssued: string;
+  insuranceCollected: string;
+  shippingFeeCollected: string;
+  platformRevenue: string;
+}
+
+export interface RevenueBreakdownType {
   data: {
     overall: {
       platformRevenue: string;
@@ -18,6 +31,7 @@ interface RevenueBreakdown {
       insuranceCollected: string;
       shippingFeeCollected: string;
     };
+    monthly: Monthly[];
   };
 }
 
@@ -25,7 +39,7 @@ const FinanceHeader = ({ token }: { token: string }) => {
   const session = useSession();
   const status = session?.status;
 
-  const { data: revenueBreakdown, isLoading } = useQuery<RevenueBreakdown>({
+  const { data: revenueBreakdown, isLoading } = useQuery<RevenueBreakdownType>({
     queryKey: ["revenue-breakdown"],
     queryFn: async () => {
       const res = await fetch(
@@ -115,7 +129,11 @@ const FinanceHeader = ({ token }: { token: string }) => {
       </div>
 
       <div>
-        <FinanceTabs token={token as string} />
+        <FinanceTabs
+          token={token as string}
+          revenueBreakdown={revenueBreakdown as RevenueBreakdownType}
+          isLoading={isInitialLoading}
+        />
       </div>
     </div>
   );

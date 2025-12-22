@@ -5,6 +5,8 @@ import BookingRevenue from "./booking-revenue";
 import PayoutSummery from "./payout-summery";
 import MRR from "./MRR";
 import CreditPromotions from "./credit-promotions";
+import RevenueBreakdown from "./revenue-breakdown";
+import { RevenueBreakdownType } from "./finance-header";
 
 const tabs = [
   {
@@ -33,7 +35,15 @@ const tabs = [
   },
 ];
 
-const FinanceTabs = ({ token }: { token: string }) => {
+const FinanceTabs = ({
+  token,
+  revenueBreakdown,
+  isLoading,
+}: {
+  token: string;
+  revenueBreakdown: RevenueBreakdownType;
+  isLoading: boolean;
+}) => {
   const [isActive, setIsActive] = useState("Revenue Breakdown");
 
   return (
@@ -64,6 +74,12 @@ const FinanceTabs = ({ token }: { token: string }) => {
         {isActive === "MRR" && <MRR token={token as string} />}
         {isActive === "Credit and Promotions" && (
           <CreditPromotions token={token as string} />
+        )}
+        {isActive === "Revenue Breakdown" && (
+          <RevenueBreakdown
+            revenueBreakdown={revenueBreakdown}
+            isLoading={isLoading}
+          />
         )}
       </div>
     </div>

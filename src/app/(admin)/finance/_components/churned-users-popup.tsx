@@ -8,7 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { MrrData } from "./mrr-states";
+import { MrrData } from "./MRR";
 
 interface Props {
   open: boolean;

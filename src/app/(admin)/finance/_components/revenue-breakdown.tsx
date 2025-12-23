@@ -9,6 +9,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
+import RevenueBreakdownChart from "./revenue-breakdown-chart";
 
 const RevenueBreakdown = ({
   revenueBreakdown,
@@ -33,7 +34,11 @@ const RevenueBreakdown = ({
   ];
 
   return (
-    <div>
+    <div className="space-y-8">
+      <div>
+        <RevenueBreakdownChart revenueBreakdown={revenueBreakdown} />
+      </div>
+
       <div className="bg-white shadow-[0px_4px_10px_0px_#0000001A] p-5 rounded-lg">
         <h1 className="text-2xl font-medium mb-8">Revenue Breakdown</h1>
 

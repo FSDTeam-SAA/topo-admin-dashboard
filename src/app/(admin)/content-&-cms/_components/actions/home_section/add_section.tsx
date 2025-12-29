@@ -24,6 +24,7 @@ import { useSession } from 'next-auth/react'
 import Image from 'next/image'
 import React, { useState, useEffect } from 'react'
 import { toast } from 'sonner'
+import { X } from 'lucide-react'
 
 // Types
 type HomepageSection = {
@@ -51,7 +52,7 @@ function useAddSection() {
             Authorization: `Bearer ${accessToken}`,
           },
           body: formData,
-        }
+        },
       )
 
       if (!res.ok) {
@@ -78,7 +79,7 @@ function useEditSection(sectionId: string) {
             Authorization: `Bearer ${accessToken}`,
           },
           body: formData,
-        }
+        },
       )
 
       if (!res.ok) {
@@ -105,7 +106,7 @@ function useGetSection(sectionId: string, enabled: boolean) {
           headers: {
             Authorization: `Bearer ${accessToken}`,
           },
-        }
+        },
       )
 
       if (!res.ok) {
@@ -123,12 +124,41 @@ function useGetSection(sectionId: string, enabled: boolean) {
 export const HomepageSectionAdd = () => {
   const [status, setStatus] = useState('active')
   const [open, setOpen] = useState(false)
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([])
+  const [previewUrls, setPreviewUrls] = useState<string[]>([])
   const addSection = useAddSection()
   const queryClient = useQueryClient()
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || [])
+    setSelectedFiles(files)
+
+    // Create preview URLs
+    const urls = files.map(file => URL.createObjectURL(file))
+    setPreviewUrls(urls)
+  }
+
+  const removeFile = (index: number) => {
+    const newFiles = selectedFiles.filter((_, i) => i !== index)
+    const newUrls = previewUrls.filter((_, i) => i !== index)
+
+    // Revoke the removed URL
+    URL.revokeObjectURL(previewUrls[index])
+
+    setSelectedFiles(newFiles)
+    setPreviewUrls(newUrls)
+  }
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const formData = new FormData(e.currentTarget)
+
+    // Remove the default file input and add multiple files
+    formData.delete('filename')
+    selectedFiles.forEach(file => {
+      formData.append('filename', file)
+    })
+
     formData.set('status', status)
 
     addSection.mutate(formData, {
@@ -137,6 +167,8 @@ export const HomepageSectionAdd = () => {
         queryClient.invalidateQueries({ queryKey: ['homepageSections'] })
         setOpen(false)
         setStatus('active')
+        setSelectedFiles([])
+        setPreviewUrls([])
         ;(e.target as HTMLFormElement).reset()
       },
       onError: () => {
@@ -145,13 +177,20 @@ export const HomepageSectionAdd = () => {
     })
   }
 
+  // Cleanup preview URLs on unmount
+  useEffect(() => {
+    return () => {
+      previewUrls.forEach(url => URL.revokeObjectURL(url))
+    }
+  }, [previewUrls])
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="default">Add Section</Button>
       </DialogTrigger>
 
-      <DialogContent className="p-8 max-w-2xl font-sans">
+      <DialogContent className="p-8 max-w-2xl font-sans overflow-y-auto max-h-[90vh]">
         <DialogHeader>
           <div className="flex justify-center my-8">
             <Image
@@ -198,16 +237,47 @@ export const HomepageSectionAdd = () => {
           {/* Image Upload */}
           <div className="space-y-2">
             <Label htmlFor="image" className="tracking-wide font-light">
-              Section Image (JPEG/PNG, Max 20MB)
+              Section Images (Multiple files allowed)
             </Label>
             <Input
               id="image"
               name="filename"
               type="file"
               accept="image/*"
+              multiple
+              onChange={handleFileChange}
               required
             />
           </div>
+
+          {/* Image Previews */}
+          {previewUrls.length > 0 && (
+            <div className="space-y-2">
+              <Label className="tracking-wide font-light">
+                Selected Images ({previewUrls.length})
+              </Label>
+              <div className="grid grid-cols-2 gap-4">
+                {previewUrls.map((url, index) => (
+                  <div key={index} className="relative group">
+                    <Image
+                      src={url}
+                      alt={`Preview ${index + 1}`}
+                      width={300}
+                      height={200}
+                      className="rounded-md object-cover border w-full h-48"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeFile(index)}
+                      className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Status Dropdown */}
           <div className="space-y-2">
@@ -249,6 +319,8 @@ export const HomepageSectionEdit = ({
   const [open, setOpen] = useState(false)
   const [status, setStatus] = useState('active')
   const [isInitialized, setIsInitialized] = useState(false)
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([])
+  const [previewUrls, setPreviewUrls] = useState<string[]>([])
 
   const editSection = useEditSection(sectionId)
   const queryClient = useQueryClient()
@@ -267,12 +339,50 @@ export const HomepageSectionEdit = ({
   useEffect(() => {
     if (!open) {
       setIsInitialized(false)
+      setSelectedFiles([])
+      setPreviewUrls([])
     }
   }, [open])
+
+  // Cleanup preview URLs
+  useEffect(() => {
+    return () => {
+      previewUrls.forEach(url => URL.revokeObjectURL(url))
+    }
+  }, [previewUrls])
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || [])
+    setSelectedFiles(files)
+
+    // Create preview URLs
+    const urls = files.map(file => URL.createObjectURL(file))
+    setPreviewUrls(urls)
+  }
+
+  const removeFile = (index: number) => {
+    const newFiles = selectedFiles.filter((_, i) => i !== index)
+    const newUrls = previewUrls.filter((_, i) => i !== index)
+
+    // Revoke the removed URL
+    URL.revokeObjectURL(previewUrls[index])
+
+    setSelectedFiles(newFiles)
+    setPreviewUrls(newUrls)
+  }
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const formData = new FormData(e.currentTarget)
+
+    // Remove the default file input and add multiple files if any selected
+    formData.delete('filename')
+    if (selectedFiles.length > 0) {
+      selectedFiles.forEach(file => {
+        formData.append('filename', file)
+      })
+    }
+
     formData.set('status', status)
 
     editSection.mutate(formData, {
@@ -344,20 +454,24 @@ export const HomepageSectionEdit = ({
               />
             </div>
 
-            {/* Current Image Preview */}
+            {/* Current Images Preview */}
             {sectionData.image && sectionData.image.length > 0 && (
               <div className="space-y-2">
                 <Label className="tracking-wide font-light">
-                  Current Image
+                  Current Images ({sectionData.image.length})
                 </Label>
-                <div className="flex justify-start">
-                  <Image
-                    src={sectionData.image[0].url}
-                    alt={sectionData.sectionName}
-                    width={600}
-                    height={460}
-                    className="rounded-md object-cover border"
-                  />
+                <div className="grid grid-cols-2 gap-4">
+                  {sectionData.image.map((img, index) => (
+                    <div key={index} className="relative">
+                      <Image
+                        src={img.url}
+                        alt={`${sectionData.sectionName} - ${index + 1}`}
+                        width={300}
+                        height={200}
+                        className="rounded-md object-cover border w-full h-48"
+                      />
+                    </div>
+                  ))}
                 </div>
               </div>
             )}
@@ -365,10 +479,46 @@ export const HomepageSectionEdit = ({
             {/* Image Upload */}
             <div className="space-y-2">
               <Label htmlFor="image" className="tracking-wide font-light">
-                Replace Image (JPEG/PNG, Max 20MB) - Optional
+                Replace Images (Multiple files allowed) - Optional
               </Label>
-              <Input id="image" name="filename" type="file" accept="image/*" />
+              <Input
+                id="image"
+                name="filename"
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={handleFileChange}
+              />
             </div>
+
+            {/* New Image Previews */}
+            {previewUrls.length > 0 && (
+              <div className="space-y-2">
+                <Label className="tracking-wide font-light">
+                  New Images ({previewUrls.length})
+                </Label>
+                <div className="grid grid-cols-2 gap-4">
+                  {previewUrls.map((url, index) => (
+                    <div key={index} className="relative group">
+                      <Image
+                        src={url}
+                        alt={`New Preview ${index + 1}`}
+                        width={300}
+                        height={200}
+                        className="rounded-md object-cover border w-full h-48"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeFile(index)}
+                        className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <X size={16} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Status Dropdown */}
             <div className="space-y-2">

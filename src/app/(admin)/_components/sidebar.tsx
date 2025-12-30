@@ -30,7 +30,7 @@ const routes = [
   { id: 6, label: 'Disputes', href: '/disputes' },
   { id: 7, label: 'Finance', href: '/finance' },
   { id: 8, label: 'Chats', href: '/chats' },
-  { id: 9, label: 'Analytics', href: '/analytics' },
+  // { id: 9, label: 'Analytics', href: '/analytics' },
   { id: 10, label: 'Content & CMS', href: '/content-&-cms' },
   { id: 11, label: 'Support', href: '/support' },
   { id: 12, label: 'Team', href: '/team' },

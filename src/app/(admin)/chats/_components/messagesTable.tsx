@@ -28,7 +28,7 @@ import SkeletonLoader from '@/components/loader/SkeletonLoader'
 // ✅ Type Definition
 export type Conversation = {
   _id: string
-  bookingId: string
+  bookingId: any
   customerId: string
   lenderId: string
   customerName: string
@@ -106,7 +106,7 @@ export default function MessageTable() {
         lenderId: lender._id || null,
         lastMessage: room.lastMessage || 'N/A',
         date: room.lastMessageAt || room.updatedAt || room.createdAt,
-        bookingId: room.bookingId || 'N/A',
+        bookingId: room.bookingId?._id || 'N/A',
         status: room.status, // or derive dynamically if needed
         flagged: room.flagged.status || false,
       }

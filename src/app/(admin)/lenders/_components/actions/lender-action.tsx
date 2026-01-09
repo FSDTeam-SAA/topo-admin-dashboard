@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { AnimatedTabs } from '@/components/ui/animated-tabs'
 import { Button } from '@/components/ui/button'
 import {
@@ -8,32 +9,107 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import { LenderProfile } from '@/types/lender'
-import DisputesTab from './disputs-tab'
-import DocumentsTab from '../../../customers/_components/actions/document-tab'
-import ListingTab from './listing-tab'
-import MatricsTab from './matrics-tab'
-import NotesTab from './notes-tab'
+import { useQuery } from '@tanstack/react-query'
+
+// import NotesTab from './notes-tab'
 import ProfileTab from './profile-tab'
 import StatusTab from './status-tab'
-// import Image from 'next/image'
+import MetricsTab from './matrics-tab'
+import ListingTab from './listing-tab'
+import DisputesTab from './disputs-tab'
+import DocumentsTab from './documents-tab'
+import TimelineTab from './timeline-tab'
 
 interface Props {
   data: LenderProfile
 }
 
+interface LenderDetailResponse {
+  success: boolean
+  data: {
+    lender: LenderProfile
+    bookings: {
+      count: number
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      data: any[]
+    }
+    listings: {
+      approvedCount: number
+      data: any[]
+    }
+    disputes: {
+      count: number
+      data: any[]
+    }
+    payouts: {
+      totalPaidAmount: number
+    }
+  }
+}
+
 const LenderAction = ({ data }: Props) => {
+  // Fetch detailed lender data with all related information
+  const { data: lenderDetails, isLoading } = useQuery<LenderDetailResponse>({
+    queryKey: ['lender-details', data._id],
+    queryFn: () =>
+      fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/lender/account/admin/${data._id}?booking=true`,
+      ).then(res => res.json()),
+    enabled: !!data._id, // Only fetch when we have an ID
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes to avoid repeated calls
+  })
+
   const tabs = [
-    { id: 'profile', label: 'Profile', content: <ProfileTab data={data} /> },
-    { id: 'status', label: 'Status', content: <StatusTab data={data} /> },
-    { id: 'matrics', label: 'Matrics', content: <MatricsTab data={data} /> },
-    { id: 'listing', label: 'Listing', content: <ListingTab data={data} /> },
-    { id: 'disputes', label: 'Disputes', content: <DisputesTab data={data} /> },
+    {
+      id: 'profile',
+      label: 'Profile',
+      content: <ProfileTab data={lenderDetails?.data?.lender || data} />,
+    },
+    {
+      id: 'status',
+      label: 'Status',
+      content: <StatusTab data={lenderDetails?.data?.lender || data} />,
+    },
+    {
+      id: 'metrics',
+      label: 'Metrics',
+      content: <MetricsTab data={lenderDetails?.data} isLoading={isLoading} />,
+    },
+    {
+      id: 'listings',
+      label: 'Listings',
+      content: (
+        <ListingTab
+          data={lenderDetails?.data?.listings}
+          isLoading={isLoading}
+        />
+      ),
+    },
+    {
+      id: 'disputes',
+      label: 'Disputes',
+      content: (
+        <DisputesTab
+          data={lenderDetails?.data?.disputes}
+          isLoading={isLoading}
+        />
+      ),
+    },
     {
       id: 'documents',
       label: 'Documents',
-      content: <DocumentsTab data={data} />,
+      content: <DocumentsTab data={lenderDetails?.data?.lender || data} />,
     },
-    { id: 'notes', label: 'Notes', content: <NotesTab data={data} /> },
+    // {
+    //   id: 'notes',
+    //   label: 'Notes',
+    //   content: <NotesTab lenderId={data._id} />,
+    // },
+    {
+      id: 'timeline',
+      label: 'Timeline',
+      content: <TimelineTab data={lenderDetails?.data?.lender || data} />,
+    },
   ]
 
   return (
@@ -48,9 +124,9 @@ const LenderAction = ({ data }: Props) => {
         <DialogContent
           className="
             w-full 
-            !max-w-[95vw]    /* override shadcn default */
-            md:!max-w-[80vw] /* desktop এ 80% */
-            lg:!max-w-[70vw] /* বড়ো স্ক্রিনে 70% */
+            !max-w-[95vw]
+            md:!max-w-[80vw]
+            lg:!max-w-[70vw]
             h-auto 
             px-4 
             py-2 
@@ -60,15 +136,6 @@ const LenderAction = ({ data }: Props) => {
         >
           <DialogHeader>
             <DialogTitle>
-              {/* <div className="flex justify-center py-4">
-                <Image
-                  src={'/logo.png'}
-                  alt={data.fullName || 'Lender Profile Image'}
-                  width={90}
-                  height={90}
-                  className="rounded-full object-cover"
-                />
-              </div> */}
               Lender Details: {data.fullName} (ID: {data._id})
             </DialogTitle>
           </DialogHeader>

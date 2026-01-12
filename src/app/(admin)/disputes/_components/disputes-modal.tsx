@@ -7,6 +7,7 @@ import BookingSnapShot from "./modals/booking-snapshot";
 import DisputesDetails from "./modals/disputes-details";
 import PlatformPolicyFlags from "./modals/platform-policy-flags";
 import { useQuery } from "@tanstack/react-query";
+import Refund from "./modals/refund";
 
 interface DisputesModalProps {
   id: string | null;
@@ -43,6 +44,7 @@ const DisputesModal = ({ id, token, isOpen, onClose }: DisputesModalProps) => {
     { label: "Dispute Details" },
     { label: "Platform Policy Flags" },
     { label: "Resolution Panel" },
+    { label: "Refund" },
   ];
 
   // Close modal on Escape key press
@@ -75,11 +77,11 @@ const DisputesModal = ({ id, token, isOpen, onClose }: DisputesModalProps) => {
   return (
     <>
       {/* Backdrop */}
-      <div 
+      <div
         className="fixed inset-0 bg-black/50 z-50 backdrop-blur-sm transition-opacity duration-300"
         onClick={onClose}
       />
-      
+
       {/* Modal */}
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
         <div className="bg-white rounded-lg w-full max-w-5xl max-h-[90vh] overflow-hidden shadow-2xl transform transition-all duration-300 scale-100">
@@ -134,8 +136,18 @@ const DisputesModal = ({ id, token, isOpen, onClose }: DisputesModalProps) => {
 
           {/* Content */}
           <div className="h-[600px] overflow-auto p-6">
-            {activeTab === "Booking Snapshot" && <BookingSnapShot disputesDetails={disputesDetails} isLoading={isLoading} />}
-            {activeTab === "Dispute Details" && <DisputesDetails disputesDetails={disputesDetails} isLoading={isLoading} />}
+            {activeTab === "Booking Snapshot" && (
+              <BookingSnapShot
+                disputesDetails={disputesDetails}
+                isLoading={isLoading}
+              />
+            )}
+            {activeTab === "Dispute Details" && (
+              <DisputesDetails
+                disputesDetails={disputesDetails}
+                isLoading={isLoading}
+              />
+            )}
             {activeTab === "Platform Policy Flags" && <PlatformPolicyFlags />}
             {activeTab === "Resolution Panel" && (
               <div className="text-center py-12">
@@ -147,24 +159,7 @@ const DisputesModal = ({ id, token, isOpen, onClose }: DisputesModalProps) => {
                 </p>
               </div>
             )}
-          </div>
-
-          {/* Footer */}
-          <div className="flex items-center justify-between p-6 border-t border-gray-200 bg-gray-50">
-            <div className="text-sm text-gray-500">
-              Dispute ID: {id || "N/A"}
-            </div>
-            <div className="flex space-x-3">
-              <button
-                onClick={onClose}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors duration-200"
-              >
-                Close
-              </button>
-              <button className="px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-md hover:bg-gray-800 transition-colors duration-200">
-                Save Changes
-              </button>
-            </div>
+            {activeTab === "Refund" && <Refund />}
           </div>
         </div>
       </div>

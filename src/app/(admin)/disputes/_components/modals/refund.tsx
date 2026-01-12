@@ -132,8 +132,8 @@ const Refund = () => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-6">
-      <h1 className="text-2xl font-medium mb-8">Refund Dispute</h1>
+    <div>
+      <h1 className="text-2xl font-medium mb-8">Refund</h1>
 
       {formError && (
         <div className="mb-4 p-3 bg-red-100 text-red-800 rounded-md">

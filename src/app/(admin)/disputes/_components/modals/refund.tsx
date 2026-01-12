@@ -69,7 +69,7 @@ const Refund = () => {
     }
 
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/disputes/refund`,
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/admin/disputes/refund`,
       {
         method: "POST",
         headers: {

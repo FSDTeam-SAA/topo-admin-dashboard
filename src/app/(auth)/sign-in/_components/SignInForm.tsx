@@ -11,12 +11,14 @@ import {
 import { Input } from '@/components/ui/input'
 import { loginformSchema, LoginFormValues } from '@/schemas/auth'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Eye, EyeOff, Lock, Mail } from 'lucide-react'
+import { ArrowRight, Eye, EyeOff, Lock, Mail } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useState, useTransition } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import AuthHeader from './AUthHeader'
+import { Checkbox } from '@/components/ui/checkbox'
+import Link from 'next/link'
 
 export default function SignInForm() {
   const router = useRouter()
@@ -49,43 +51,34 @@ export default function SignInForm() {
 
   return (
     <div className="w-full max-w-md mx-auto flex flex-col items-center font-sans">
-      <AuthHeader
-        title1="Welcome"
-        title2="Back"
-        desc="Please enter your credentials to continue"
-      />
+      <AuthHeader />
 
       {/* Form */}
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="w-full py-6 md:py-7 lg:py-8 px-4 md:px-5 lg:px-6"
+          className="w-full py-6 md:py-7 lg:py-8 px-4 md:px-5 lg:px-6 flex flex-col items-center"
         >
           {/* Email Field */}
           <FormField
             control={form.control}
             name="email"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="w-full md:w-[400px]">
                 <FormControl>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-                      <Mail className="w-4 h-4 text-[#999999]" />
-                    </div>
-                    <Input
-                      placeholder="Enter your email"
-                      className="font-poppins w-full md:w-[400px] h-[40px] bg-white border border-black text-base placeholder:text-base placeholder:text-[#999999] placeholder:leading-[120%] placeholder:font-normal pl-[42px] pr-4 py-[15px] rounded-[8px]"
-                      {...field}
-                    />
-                  </div>
+                  <Input
+                    placeholder="ENTER EMAIL"
+                    className="font-avenir w-full h-[40px] bg-transparent border-0 border-b-2 border-black text-[12px] lowercase placeholder:text-[12px] placeholder:text-black/50 placeholder:font-normal px-0 rounded-none focus-visible:ring-0 focus-visible:border-b-black transition-none shadow-none"
+                    {...field}
+                  />
                 </FormControl>
-                <FormMessage className="text-xs mt-1" />
+                <FormMessage className="text-[10px] mt-1" />
               </FormItem>
             )}
           />
 
           {/* Password Field */}
-          <div className="mt-6 mb-4">
+          <div className="mt-8 mb-8 w-full md:w-[400px]">
             <FormField
               control={form.control}
               name="password"
@@ -93,55 +86,57 @@ export default function SignInForm() {
                 <FormItem>
                   <FormControl>
                     <div className="relative">
-                      <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-                        <Lock className="h-4 w-4 text-gray-400" />
-                      </div>
                       <Input
                         type={showPassword ? 'text' : 'password'}
-                        placeholder="Enter your Password"
-                        className="font-poppins w-full md:w-[400px] h-[40px] bg-white border border-black text-base placeholder:text-base placeholder:text-[#999999] placeholder:leading-[120%] placeholder:font-normal pl-[42px] pr-4 py-[15px] rounded-[8px]"
+                        placeholder="ENTER PASSWORD"
+                        className="font-avenir w-full h-[40px] bg-transparent border-0 border-b-2 border-black text-[12px] uppercase placeholder:text-[12px] placeholder:text-black/50 placeholder:font-normal px-0 rounded-none focus-visible:ring-0 focus-visible:border-b-black transition-none shadow-none"
                         {...field}
                       />
                       <button
                         type="button"
-                        className="absolute inset-y-0 right-3 flex items-center"
+                        className="absolute inset-y-0 right-0 flex items-center"
                         onClick={() => setShowPassword(!showPassword)}
                       >
                         {showPassword ? (
-                          <EyeOff className="h-5 w-5 text-gray-400" />
+                          <EyeOff className="h-4 w-4 text-black" />
                         ) : (
-                          <Eye className="h-5 w-5 text-gray-400" />
+                          <Eye className="h-4 w-4 text-black" />
                         )}
                       </button>
                     </div>
                   </FormControl>
-                  <FormMessage className="text-xs mt-1" />
+                  <FormMessage className="text-[10px] mt-1" />
                 </FormItem>
               )}
             />
           </div>
 
-          {/* Sign In Button */}
-          <Button
-            type="submit"
-            className="font-poppins h-[40px] w-full bg-black text-lg font-semibold leading-[120%] tracking-[0%] rounded-[8px] text-[#F4F4F4] py-[15px]"
-            disabled={isPending}
-          >
-            {isPending ? 'Signing In...' : 'Sign In'}
-          </Button>
+          {/* Remember Me */}
+          <div className="w-full md:w-[400px] flex items-center mb-8">
+            <div className="flex items-center gap-2">
+              <Checkbox id="remember" className="border-black data-[state=checked]:bg-black" />
+              <label
+                htmlFor="remember"
+                className="font-avenir text-[12px] text-black cursor-pointer uppercase"
+              >
+                REMEMBER ME
+              </label>
+            </div>
+          </div>
 
-          {/* Sign Up Link */}
-          {/* <div className="text-center text-sm mt-4 md:mt-5 lg:mt-6">
-            <span className="font-poppins text-[#891D33] text-xs font-normal leading-[120%] tracking-[0%]">
-              New To our Platform?
-            </span>{" "}
-            <Link
-              href="/signup"
-              className="font-poppins text-black text-xs leading-[120%] font-medium hover:underline"
+          {/* Sign In Button / Arrow Sign */}
+          <div className="w-full flex justify-center mt-4">
+            <button
+              type="submit"
+              className="group flex items-center gap-4 disabled:opacity-50"
+              disabled={isPending}
             >
-              Sign Up Here
-            </Link>
-          </div> */}
+              <span className="font-avenir text-[14px] uppercase tracking-10 text-black">
+                {isPending ? 'SIGNING IN...' : 'SIGN IN'}
+              </span>
+              <ArrowRight className="w-5 h-5 text-black group-hover:translate-x-1 transition-transform" />
+            </button>
+          </div>
         </form>
       </Form>
     </div>

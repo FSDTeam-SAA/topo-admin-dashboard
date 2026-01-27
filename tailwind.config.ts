@@ -56,6 +56,16 @@ const config: Config = {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      fontFamily: {
+        avenir: ["Avenir", "sans-serif"],
+        "avenir-arabic": ["Avenir Arabic", "sans-serif"],
+      },
+      letterSpacing: {
+        "10": "0.1em",
+        "20": "0.2em",
+        "plus-10": "0.01em", // Tracking +10 usually means 10/1000 em or similar depending on tool (Figma?)
+        "plus-20": "0.02em",
+      },
     },
   },
   plugins: [require("tailwindcss-animate"), require("tailwind-scrollbar-hide")],

@@ -1,12 +1,6 @@
 import Image from "next/image";
 
-interface Props {
-  title1: string;
-  title2: string;
-  desc: string;
-}
-
-const AuthHeader = ({ title1, title2, desc }: Props) => {
+const AuthHeader = () => {
   return (
     <div className="w-full flex flex-col items-center justify-center">
       {/* Logo */}
@@ -16,16 +10,17 @@ const AuthHeader = ({ title1, title2, desc }: Props) => {
           alt="Logo"
           width={94}
           height={80}
+          unoptimized
         />
       </div>
 
       {/* Heading */}
       <div className="text-center pb-[12px] md:pb-[15px]">
-        <h1 className="font-avenir text-2xl md:text-3xl lg:text-[32px] font-extrabold text-black leading-[130%] tracking-[1.08px] mb-2">
-          {title1} <span className="text-[#9b2c3e]">{title2}</span>
+        <h1 className="font-avenir-arabic font-light text-[24px] uppercase text-black leading-none tracking-20 mb-[23.5px]">
+          MUSE GALA
         </h1>
-        <p className="font-avenirNormal text-base font-normal text-black leading-[150%] tracking-[0%] ">
-          {desc}
+        <p className="font-avenir font-normal text-[16px] uppercase text-black leading-none tracking-10">
+          THE ADMIN SUITE
         </p>
       </div>
     </div>

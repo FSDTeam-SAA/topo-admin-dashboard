@@ -1,6 +1,5 @@
 'use client'
 import { loginAction } from '@/actions/auth/login'
-import { Button } from '@/components/ui/button'
 import {
   Form,
   FormControl,
@@ -11,14 +10,13 @@ import {
 import { Input } from '@/components/ui/input'
 import { loginformSchema, LoginFormValues } from '@/schemas/auth'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { ArrowRight, Eye, EyeOff, Lock, Mail } from 'lucide-react'
+import { ArrowRight, Eye, EyeOff } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useState, useTransition } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import AuthHeader from './AUthHeader'
 import { Checkbox } from '@/components/ui/checkbox'
-import Link from 'next/link'
 
 export default function SignInForm() {
   const router = useRouter()
